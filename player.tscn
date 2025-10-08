@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbqb4bugioblo"]
+
+[ext_resource type="Script" uid="uid://calpgqajp03lj" path="res://Player.cs" id="1_4flbx"]
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_4flbx")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.73, 0)
+
+[node name="View" type="Camera3D" parent="Head"]
