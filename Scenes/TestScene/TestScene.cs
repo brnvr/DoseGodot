@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class Node3d : Node3D
+public partial class TestScene : Node3D
 {
 	public override void _Ready()
 	{
