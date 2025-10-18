@@ -40,6 +40,16 @@ namespace Dose.Library.LevelMapping
             return map;
         }
 
+        void GenerateIntersection(Map map, Vector2I point)
+        {
+            var baseCell = BuildCellWalls(new MapCell(), GetAllDirections());
+
+            map.Set(point, baseCell);
+            RemoveIntersectingWalls(map, point, GetAllDirections());
+
+            Bifurcate(map, point, GetAllDirections());
+        }
+
         void GenerateCorridor(Map map, Vector2I point, CardinalDirection direction)
         {
             var buildDoorsDecider = new RandomDecider(ProbabilityToBuildDoors);
@@ -64,11 +74,11 @@ namespace Dose.Library.LevelMapping
                 return;
             }
 
-            var shouldContinueGenerating = (iteration % CORRIDOR_CHUNK_LENGTH_CELLS != 0) || new RandomDecider(ProbabilityToContinueGenerating).Roll();
+            var shouldContinueGenerating = ((iteration+1) % CORRIDOR_CHUNK_LENGTH_CELLS != 0) || new RandomDecider(ProbabilityToContinueGenerating).Roll();
 
             if (!shouldContinueGenerating)
             {
-                Bifurcate(map, nextPoint, GetAllDirections().Except([direction]));
+                GenerateIntersection(map, nextPoint);
                 return;
             }
 
@@ -124,6 +134,22 @@ namespace Dose.Library.LevelMapping
             return ChooseNextDirection(map, point, avaliableDirections.Except([selectedDirection]));
         }
 
+        static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
+        {
+            var wallDirection = wallDirections.First();
+            var wall = new MapCellWall(null, false);
+            var newCell = cell.WithWall(wallDirection, wall);
+
+            var remainingWallDirections = wallDirections.Except([wallDirection]);
+
+            if (!remainingWallDirections.Any())
+            {
+                return newCell;
+            }
+
+            return BuildCellWalls(newCell, remainingWallDirections);
+        } 
+
         MapCell BuildCellWalls(MapCell cell, CardinalDirection direction, bool hasDoors0, bool hasDoors1, int iteration, IEnumerable<CardinalDirection> wallDirections)
         {
             var wallDirection = wallDirections.First();
@@ -170,6 +196,7 @@ namespace Dose.Library.LevelMapping
         static void RemoveIntersectingWalls(Map map, Vector2I point, CardinalDirection direction)
         {
             var cell = map.Get(point) ?? throw new Exception($"Cell not found at position: ({point.X}, {point.Y})");
+
             var oppositeDirection = CardinalOpposite(direction);
             var neighborPoint = MoveToDirection(point, direction);
             var isNeighborCellInBounds = map.TryGet(neighborPoint, out MapCell neighborCell);

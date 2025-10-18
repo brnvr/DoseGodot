@@ -39,6 +39,16 @@ namespace Dose.Library
                 Orientation.Vertical
             ];
         }
+
+        public static Orientation OrtogonalOrientation(Orientation orientation)
+        {
+            return orientation switch
+            {
+                Orientation.Horizontal => Orientation.Vertical,
+                Orientation.Vertical => Orientation.Horizontal,
+                _ => throw new Exception("Invalid orientation."),
+            };
+        }
         
         public static Orientation GetOrientationFromDirection(CardinalDirection direction)
         {
