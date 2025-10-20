@@ -1,8 +1,22 @@
-[gd_scene load_steps=4 format=3 uid="uid://uikj2e5802ap"]
+[gd_scene load_steps=7 format=3 uid="uid://uikj2e5802ap"]
 
 [ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Library/Scenes/TestScene.cs" id="1_cguwc"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Scenes/Player.tscn" id="2_wicfy"]
 [ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Scenes/Location.tscn" id="3_bsxja"]
+[ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Characters/Agnes/Idle_000.png" id="4_iufkg"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("4_iufkg")
+texture_filter = 0
+texture_repeat = false
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_iufkg"]
+material = SubResource("StandardMaterial3D_iufkg")
+size = Vector2(1, 2)
+center_offset = Vector3(0, 1, 0)
 
 [node name="TestScene" type="Node3D"]
 script = ExtResource("1_cguwc")
@@ -10,3 +24,6 @@ script = ExtResource("1_cguwc")
 [node name="Player" parent="." instance=ExtResource("2_wicfy")]
 
 [node name="Location" parent="." instance=ExtResource("3_bsxja")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_iufkg")
