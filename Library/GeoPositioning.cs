@@ -21,7 +21,13 @@ namespace Dose.Library
             Vertical
         }
 
-        public static ICollection<CardinalDirection> GetAllDirections()
+        public enum ClockDirection
+        {
+            Clockwise,
+            Counterclockwise
+        }
+
+        public static ICollection<CardinalDirection> AllDirections()
         {
             return
             [
@@ -32,7 +38,7 @@ namespace Dose.Library
             ];
         }
 
-        public static ICollection<Orientation> GetAllOrientation()
+        public static ICollection<Orientation> AllOrientations()
         {
             return [
                 Orientation.Horizontal,
@@ -50,7 +56,7 @@ namespace Dose.Library
             };
         }
         
-        public static Orientation GetOrientationFromDirection(CardinalDirection direction)
+        public static Orientation OrientationFromDirection(CardinalDirection direction)
         {
             return direction switch
             {
@@ -62,7 +68,7 @@ namespace Dose.Library
             };
         }
 
-        public static Vector2I MoveToDirection(Vector2I point, CardinalDirection direction, int distance = 1)
+        public static Vector2I MoveTo(Vector2I point, CardinalDirection direction, int distance = 1)
         {
             return direction switch
             {
@@ -74,7 +80,7 @@ namespace Dose.Library
             };
         }
 
-        public static Vector2 MoveToDirection(Vector2 point, CardinalDirection direction, float distance)
+        public static Vector2 MoveTo(Vector2 point, CardinalDirection direction, float distance)
         {
             return direction switch
             {
@@ -94,6 +100,18 @@ namespace Dose.Library
                 CardinalDirection.South => CardinalDirection.North,
                 CardinalDirection.East => CardinalDirection.West,
                 CardinalDirection.West => CardinalDirection.East,
+                _ => throw new Exception("Invalid direction."),
+            };
+        }
+
+        public static CardinalDirection NextDirection(CardinalDirection cardinalDirection, ClockDirection clockDirection)
+        {
+            return cardinalDirection switch
+            {
+                CardinalDirection.North => clockDirection == ClockDirection.Clockwise ? CardinalDirection.East : CardinalDirection.West,
+                CardinalDirection.South => clockDirection == ClockDirection.Clockwise ? CardinalDirection.West : CardinalDirection.East,
+                CardinalDirection.East => clockDirection == ClockDirection.Clockwise ? CardinalDirection.South : CardinalDirection.North,
+                CardinalDirection.West => clockDirection == ClockDirection.Clockwise ? CardinalDirection.North : CardinalDirection.South,
                 _ => throw new Exception("Invalid direction."),
             };
         }

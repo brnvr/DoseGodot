@@ -3,15 +3,15 @@ using Godot;
 using System;
 using Dose.Library.Math;
 
-public partial class Wall : MeshInstance3D
+public partial class Location : MeshInstance3D
 {
     public override void _Ready()
     {
         var mapGenerator = new CorridorMapGenerator(
-            horizontalCells: 50,
-            verticalCells: 50,
-            probabilityToContinueGenerating: new Probability(0.75),
-            probabilityToBifurcate: new Probability(0.75),
+            horizontalCells: 500,
+            verticalCells: 500,
+            probabilityToExtendCorridor: new Probability(0.7),
+            probabilityToBifurcate: new Probability(0.25),
             probabilityToBuildDoors: new Probability(0.5)
         );
 

@@ -14,7 +14,7 @@ namespace Dose.Library.LevelMapping
     (
         int horizontalCells,
         int verticalCells,
-        Probability probabilityToContinueGenerating,
+        Probability probabilityToExtendCorridor,
         Probability probabilityToBifurcate,
         Probability probabilityToBuildDoors
     ) : IMapGenerator
@@ -26,7 +26,7 @@ namespace Dose.Library.LevelMapping
 
         public int HorizontalCells { get; } = horizontalCells;
         public int VerticalCells { get; } = verticalCells;
-        public Probability ProbabilityToContinueGenerating { get; } = probabilityToContinueGenerating;
+        public Probability ProbabilityToExtendCorridor { get; } = probabilityToExtendCorridor;
         public Probability ProbabilityToBifurcate { get; } = probabilityToBifurcate;
         public Probability ProbabilityToBuildDoors { get; } = probabilityToBuildDoors;
 
@@ -34,20 +34,18 @@ namespace Dose.Library.LevelMapping
         {
             var map = new Map(HorizontalCells, VerticalCells);
             var startingPoint = GetCenter();
-            var selectedDirection = new RandomSelector<CardinalDirection>(GetAllDirections()).Pick();
+            var selectedDirection = new RandomSelector<CardinalDirection>(AllDirections()).Pick();
             GenerateCorridor(map, startingPoint, selectedDirection);
 
             return map;
         }
 
-        void GenerateIntersection(Map map, Vector2I point)
+        static void GenerateIntersection(Map map, Vector2I point)
         {
-            var baseCell = BuildCellWalls(new MapCell(), GetAllDirections());
+            var baseCell = BuildCellWalls(new MapCell(), AllDirections());
 
             map.Set(point, baseCell);
-            RemoveIntersectingWalls(map, point, GetAllDirections());
-
-            Bifurcate(map, point, GetAllDirections());
+            RemoveIntersectingWalls(map, point, AllDirections());
         }
 
         void GenerateCorridor(Map map, Vector2I point, CardinalDirection direction)
@@ -61,12 +59,12 @@ namespace Dose.Library.LevelMapping
 
         void GenerateCorridor(Map map, Vector2I point, CardinalDirection direction, bool hasDoors0, bool hasDoors1, int iteration = 0)
         {
-            var baseCell = BuildCellWalls(new MapCell(), direction, hasDoors0, hasDoors1, iteration, GetAllDirections());
+            var baseCell = BuildCellWalls(new MapCell(), direction, hasDoors0, hasDoors1, iteration, AllDirections());
 
             map.Set(point, baseCell);
-            RemoveIntersectingWalls(map, point, GetAllDirections());
+            RemoveIntersectingWalls(map, point, AllDirections());
             
-            var nextPoint = MoveToDirection(point, direction);
+            var nextPoint = MoveTo(point, direction);
             var isCellInBounds = map.InBounds(nextPoint);
 
             if (!isCellInBounds)
@@ -74,11 +72,31 @@ namespace Dose.Library.LevelMapping
                 return;
             }
 
-            var shouldContinueGenerating = ((iteration+1) % CORRIDOR_CHUNK_LENGTH_CELLS != 0) || new RandomDecider(ProbabilityToContinueGenerating).Roll();
+            var isEndOfChunk = iteration == CORRIDOR_CHUNK_LENGTH_CELLS-1;
 
-            if (!shouldContinueGenerating)
+            if (isEndOfChunk)
             {
-                GenerateIntersection(map, nextPoint);
+                var shouldExtendCorridor = new RandomDecider(ProbabilityToExtendCorridor).Roll();
+
+                if (shouldExtendCorridor)
+                {
+
+                    if (Bifurcate(map, nextPoint, [direction]))
+                    {
+                        GenerateIntersection(map, nextPoint);
+                    }
+                }
+
+                var shouldBifurcate = new RandomDecider(ProbabilityToBifurcate).Roll();
+
+                if (shouldBifurcate)
+                {
+                    if (Bifurcate(map, nextPoint, AllDirections().Except([direction])))
+                    {
+                        GenerateIntersection(map, nextPoint);
+                    }
+                }
+
                 return;
             }
 
@@ -86,31 +104,35 @@ namespace Dose.Library.LevelMapping
         }
 
 
-        void Bifurcate(Map map, Vector2I point, IEnumerable<CardinalDirection> avaliableDirections)
+        bool Bifurcate(Map map, Vector2I point, IEnumerable<CardinalDirection> avaliableDirections)
         {
-            var shouldBifurcate = new RandomDecider(ProbabilityToBifurcate).Roll();
-
-            if (!shouldBifurcate)
-            {
-                return;
-            }
-
             var nextDirection = ChooseNextDirection(map, point, avaliableDirections);
 
             if (nextDirection == null)
             {
-                return;
+                return false;
             }
 
-            var nextPoint = MoveToDirection(point, (CardinalDirection)nextDirection);
+            var nextPoint = MoveTo(point, (CardinalDirection)nextDirection);
             var isCellInBounds = map.TryGet(nextPoint, out MapCell nextCell);
 
-            if (isCellInBounds && nextCell == null)
+            var canBifurcate = isCellInBounds && nextCell == null;
+
+            if (canBifurcate)
             {
-                GenerateCorridor(map, point, (CardinalDirection)nextDirection);
+                GenerateCorridor(map, nextPoint, (CardinalDirection)nextDirection);
             }
 
-            Bifurcate(map, point, avaliableDirections.Except([(CardinalDirection)nextDirection]));
+            var shouldBifurcate = new RandomDecider(ProbabilityToBifurcate).Roll();
+
+            if (shouldBifurcate)
+            {
+                var successful = Bifurcate(map, point, avaliableDirections.Except([(CardinalDirection)nextDirection]));
+
+                return canBifurcate || successful;
+            }
+
+            return canBifurcate;
         }
 
         static CardinalDirection? ChooseNextDirection(Map map, Vector2I point, IEnumerable<CardinalDirection> avaliableDirections)
@@ -122,7 +144,7 @@ namespace Dose.Library.LevelMapping
 
             var selectedDirection = new RandomSelector<CardinalDirection>(avaliableDirections).Pick();
 
-            var nextPoint = MoveToDirection(point, selectedDirection);
+            var nextPoint = MoveTo(point, selectedDirection);
 
             var isCellInBounds = map.TryGet(nextPoint, out MapCell nextCell);
 
@@ -156,8 +178,8 @@ namespace Dose.Library.LevelMapping
             var isBuildDoorsIteration = iteration == CORRIDOR_CHUNK_LENGTH_CELLS / 2;
             var shouldBuildDoors0 = hasDoors0 && isBuildDoorsIteration;
             var shouldBuildDoors1 = hasDoors1 && isBuildDoorsIteration;
-            var buildOrientation = GetOrientationFromDirection(direction);
-            var wallOrientation = GetOrientationFromDirection(wallDirection);
+            var buildOrientation = OrientationFromDirection(direction);
+            var wallOrientation = OrientationFromDirection(wallDirection);
             var hasDoor = (buildOrientation != wallOrientation) && ((shouldBuildDoors0 && _directions0.Contains(wallDirection)) || (shouldBuildDoors1 && _directions1.Contains(wallDirection)));
             var wall = new MapCellWall(null, hasDoor);
             var newCell = cell.WithWall(wallDirection, wall);
@@ -198,7 +220,7 @@ namespace Dose.Library.LevelMapping
             var cell = map.Get(point) ?? throw new Exception($"Cell not found at position: ({point.X}, {point.Y})");
 
             var oppositeDirection = CardinalOpposite(direction);
-            var neighborPoint = MoveToDirection(point, direction);
+            var neighborPoint = MoveTo(point, direction);
             var isNeighborCellInBounds = map.TryGet(neighborPoint, out MapCell neighborCell);
             
             if (isNeighborCellInBounds && neighborCell != null)
