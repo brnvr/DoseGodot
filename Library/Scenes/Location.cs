@@ -1,9 +1,8 @@
 using Dose.Library.LevelMapping;
 using Godot;
-using System;
 using Dose.Library.Math;
 
-public partial class Location : MeshInstance3D
+public partial class Location : Node3D
 {
     public override void _Ready()
     {
@@ -17,8 +16,16 @@ public partial class Location : MeshInstance3D
 
         var map = mapGenerator.GenerateMap();
 
-        var meshBuilder = new MapMeshBuilder(map, 4);
+        var meshBuilder = new MapMeshBuilder(this, map, 4);
+        var mesh = meshBuilder.Build();
 
-        Mesh = meshBuilder.Build();
+        var staticBody = new StaticBody3D();
+        AddChild(staticBody);
+
+        var meshInstance = new MeshInstance3D();
+        meshInstance.Mesh = mesh;
+        staticBody.AddChild(meshInstance);
+
+        meshInstance.CreateTrimeshCollision();
     }
 }

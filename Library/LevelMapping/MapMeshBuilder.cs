@@ -7,14 +7,16 @@ using static Dose.Library.GeoPositioning;
 
 namespace Dose.Library.LevelMapping
 {
-    public class MapMeshBuilder(Map map, int blockSize)
+    public class MapMeshBuilder(Location location, Map map, int blockSize)
     {
         readonly static Mesh _wallMesh = LoadMeshFromScene("res://Scenes/Models/Wall.glb");
         readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Scenes/Models/WallWithOpening.glb");
+        readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Scenes/Door.tscn");
 
+        public Location Location { get; } = location;
         public Map Map { get; } = map;
         public int BlockSize { get; } = blockSize;
-        
+
         public ArrayMesh Build()
         {
             var st = new SurfaceTool();
@@ -22,28 +24,41 @@ namespace Dose.Library.LevelMapping
 
             foreach (var point in Map.GetFilledPositions())
             {
-                AppendCellGeometry(st, point, AllDirections());
+                AppendCell(st, point, AllDirections());
             }
 
             st.Index();
             return st.Commit();
         }
+        
+        void AddDoor(Vector2I point, CardinalDirection direction)
+        {
+            var nextDirection = NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
+            var pointDir = MoveTo(MoveTo(point, direction, 0.5f), nextDirection, -0.11275f);
+    
+            var door = (Node3D)_doorScene.Instantiate();
 
-        void AppendCellGeometry(SurfaceTool st, Vector2I point, IEnumerable<CardinalDirection> directions)
+            door.Position = new Vector3(pointDir.X - Map.HorizontalCells / 2, 0, pointDir.Y - Map.VerticalCells / 2) * BlockSize;
+            door.RotateY(DirectionToRadians(nextDirection));
+
+            Location.AddChild(door);
+        }
+
+        void AppendCell(SurfaceTool st, Vector2I point, IEnumerable<CardinalDirection> directions)
         {
             var direction = directions.First();
 
-            AppendWallGeometry(st, point, direction);
+            AppendWall(st, point, direction);
 
             var remainingDirections = directions.Except([direction]);
 
             if (remainingDirections.Any())
             {
-                AppendCellGeometry(st, point, remainingDirections);
+                AppendCell(st, point, remainingDirections);
             }
         }
 
-        void AppendWallGeometry(SurfaceTool st, Vector2I point, CardinalDirection direction)
+        void AppendWall(SurfaceTool st, Vector2I point, CardinalDirection direction)
         {
             var cell = Map.Get(point) ?? throw new Exception($"Cell not defined at position: ({point.X}, {point.Y})");
             var wall = cell.GetWall(direction);
@@ -54,6 +69,11 @@ namespace Dose.Library.LevelMapping
             }
 
             var mesh = wall.HasDoor ? _wallWithOpeningMesh : _wallMesh;
+
+            if (wall.HasDoor)
+            {
+                AddDoor(point, direction);
+            }
 
             var centerPosition = MoveTo(point, direction, 0.5f);
             var wallPosition = new Vector3((centerPosition.X - Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Map.VerticalCells / 2) * BlockSize);
