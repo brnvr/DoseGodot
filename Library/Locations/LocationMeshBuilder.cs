@@ -5,13 +5,12 @@ using Godot;
 using static Dose.Library.Utils;
 using static Dose.Library.GeoPositioning;
 
-namespace Dose.Library.LevelMapping
+namespace Dose.Library.Locations
 {
-    public class MapMeshBuilder(Location location, Map map, int blockSize)
+    public class LocationMeshBuilder(Location location, Map map, int blockSize)
     {
         readonly static Mesh _wallMesh = LoadMeshFromScene("res://Scenes/Models/Wall.glb");
         readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Scenes/Models/WallWithOpening.glb");
-        readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Scenes/Door.tscn");
 
         public Location Location { get; } = location;
         public Map Map { get; } = map;
@@ -31,18 +30,6 @@ namespace Dose.Library.LevelMapping
             return st.Commit();
         }
         
-        void AddDoor(Vector2I point, CardinalDirection direction)
-        {
-            var nextDirection = NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
-            var pointDir = MoveTo(MoveTo(point, direction, 0.5f), nextDirection, -0.11275f);
-    
-            var door = (Node3D)_doorScene.Instantiate();
-
-            door.Position = new Vector3(pointDir.X - Map.HorizontalCells / 2, 0, pointDir.Y - Map.VerticalCells / 2) * BlockSize;
-            door.RotateY(DirectionToRadians(nextDirection));
-
-            Location.AddChild(door);
-        }
 
         void AppendCell(SurfaceTool st, Vector2I point, IEnumerable<CardinalDirection> directions)
         {
@@ -69,11 +56,6 @@ namespace Dose.Library.LevelMapping
             }
 
             var mesh = wall.HasDoor ? _wallWithOpeningMesh : _wallMesh;
-
-            if (wall.HasDoor)
-            {
-                AddDoor(point, direction);
-            }
 
             var centerPosition = MoveTo(point, direction, 0.5f);
             var wallPosition = new Vector3((centerPosition.X - Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Map.VerticalCells / 2) * BlockSize);

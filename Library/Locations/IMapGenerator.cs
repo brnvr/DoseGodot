@@ -1,4 +1,4 @@
-namespace Dose.Library.LevelMapping
+namespace Dose.Library.Locations
 {
     public interface IMapGenerator
     {

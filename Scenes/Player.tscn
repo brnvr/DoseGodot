@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://cbqb4bugioblo"]
+[gd_scene load_steps=3 format=3 uid="uid://cbqb4bugioblo"]
 
 [ext_resource type="Script" uid="uid://calpgqajp03lj" path="res://Library/Scenes/Player.cs" id="1_4flbx"]
-[ext_resource type="Script" uid="uid://dkhyc8t6r0uq4" path="res://Library/Scenes/Raycaster.cs" id="2_kyqiw"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kyqiw"]
 
@@ -13,8 +12,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.73, 0)
 
 [node name="View" type="Camera3D" parent="Head"]
 
-[node name="Raycaster" type="Node3D" parent="Head/View"]
-script = ExtResource("2_kyqiw")
+[node name="RayCast3D" type="RayCast3D" parent="Head"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)

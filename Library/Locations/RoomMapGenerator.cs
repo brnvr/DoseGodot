@@ -4,7 +4,7 @@ using Dose.Library.Randomness;
 using Godot;
 using static Dose.Library.GeoPositioning;
 
-namespace Dose.Library.LevelMapping
+namespace Dose.Library.Locations
 {
     public class RoomMapGenerator(int minSize, int maxSize, Probability probabilityToBuildDoor) : IMapGenerator
     {

@@ -1,7 +1,7 @@
 using System;
 using static Dose.Library.GeoPositioning;
 
-namespace Dose.Library.LevelMapping
+namespace Dose.Library.Locations
 {
     public record MapCell
     {
