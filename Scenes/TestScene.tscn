@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Library/Scenes/TestScene.cs" id="1_cguwc"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Scenes/Player.tscn" id="2_wicfy"]
-[ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Scenes/Location.tscn" id="3_bsxja"]
+[ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Scenes/LocationManager.tscn" id="3_bsxja"]
 [ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Characters/Agnes/Idle_000.png" id="4_iufkg"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
@@ -23,7 +23,7 @@ script = ExtResource("1_cguwc")
 
 [node name="Player" parent="." instance=ExtResource("2_wicfy")]
 
-[node name="Location" parent="." instance=ExtResource("3_bsxja")]
+[node name="LocationManager" parent="." instance=ExtResource("3_bsxja")]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_iufkg")

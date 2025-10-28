@@ -7,12 +7,11 @@ using static Dose.Library.GeoPositioning;
 
 namespace Dose.Library.Locations
 {
-    public class LocationMeshBuilder(Location location, Map map, int blockSize)
+    public class LocationMeshBuilder(Map map, int blockSize)
     {
         readonly static Mesh _wallMesh = LoadMeshFromScene("res://Scenes/Models/Wall.glb");
         readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Scenes/Models/WallWithOpening.glb");
 
-        public Location Location { get; } = location;
         public Map Map { get; } = map;
         public int BlockSize { get; } = blockSize;
 

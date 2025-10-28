@@ -1,38 +1,28 @@
 using Dose.Library.Locations;
 using Godot;
-using Dose.Library.Math;
+using System;
 
-public partial class Location : Node3D
+public partial class Location() : MeshInstance3D
 {
-    const int BLOCK_SIZE = 4;
+    public Map Map { get; private set; }
+    public int BlockSize { get; private set; }
+    public IMapGenerator MapGenerator { get; private set; }
 
-    public override void _Ready()
+    public Location Init(IMapGenerator mapGenerator, int blockSize)
     {
-        var mapGenerator = new CorridorMapGenerator(
-            horizontalCells: 500,
-            verticalCells: 500,
-            probabilityToExtendCorridor: new Probability(0.7),
-            probabilityToBifurcate: new Probability(0.25),
-            probabilityToBuildDoors: new Probability(0.5)
-        );
-
-        var map = mapGenerator.GenerateMap();
-        var meshBuilder = new LocationMeshBuilder(this, map, BLOCK_SIZE);
-        var staticBody = new StaticBody3D();
-
-        var doorsProviderProcessor = new MapProcessor(map, new LocationDoorsProvider(this, BLOCK_SIZE));
-
-        AddChild(staticBody);
-
-        var meshInstance = new MeshInstance3D
+        MapGenerator = mapGenerator;
+        BlockSize = blockSize;
+        
+        if (Map != null)
         {
-            Mesh = meshBuilder.Build()
-        };
+            throw new Exception("Location has already been initiated");
+        }
 
-        staticBody.AddChild(meshInstance);
+        Map = MapGenerator.GenerateMap();
+        Mesh = new LocationMeshBuilder(Map, BlockSize).Build();
 
-        meshInstance.CreateTrimeshCollision();
+        CreateTrimeshCollision();
 
-        doorsProviderProcessor.Process();
+        return this;
     }
 }

@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://bcg5l5tvuje77"]
+[gd_scene load_steps=2 format=3 uid="uid://dto6tmjvuxlqi"]
 
-[ext_resource type="Script" uid="uid://bmdwv7uww2xxt" path="res://Library/Scenes/Location.cs" id="1_xp40h"]
+[ext_resource type="Script" uid="uid://dm5yrfn00alym" path="res://Library/Scenes/Location.cs" id="1_xp40h"]
 
 [node name="Location" type="MeshInstance3D"]
 script = ExtResource("1_xp40h")
