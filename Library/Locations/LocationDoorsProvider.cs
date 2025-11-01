@@ -9,7 +9,7 @@ namespace Dose.Library.Locations
         public int BlockSize { get; } = blockSize;
         public PackedScene DoorScene { get; } = doorScene;
         
-        protected override void BuildCell(Vector2I position)
+        protected override void OnBuildCell(Vector2I position)
         {
             var cell = Location.Map.Get(position);
     

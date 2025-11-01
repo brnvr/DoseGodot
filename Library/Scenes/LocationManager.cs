@@ -2,6 +2,7 @@ using Dose.Library.Locations;
 using Godot;
 using System.Collections.Generic;
 using Dose.Library.Numbers;
+using static Dose.Library.GodotUtils;
 
 namespace Dose.Library.Scenes
 {
@@ -11,6 +12,8 @@ namespace Dose.Library.Scenes
 
         readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Scenes/Door.tscn");
         readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Scenes/Location.tscn");
+        readonly static Mesh _wallMesh = LoadMeshFromScene("res://Scenes/Models/Wall.glb");
+        readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Scenes/Models/WallWithOpening.glb");
 
         public override void _Ready()
         {
@@ -28,7 +31,8 @@ namespace Dose.Library.Scenes
 
             var builders = new List<LocationBuilder>
             {
-                new LocationDoorsProvider(location, _doorScene, BLOCK_SIZE) 
+                new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE),
+                new LocationDoorsProvider(location, _doorScene, BLOCK_SIZE)
             };
 
             foreach (var builder in builders)

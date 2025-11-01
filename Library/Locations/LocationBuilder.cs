@@ -8,12 +8,20 @@ namespace Dose.Library.Locations
 
         public void Build()
         {
+            OnStart();
+
             foreach (var position in Location.Map.GetFilledPositions())
             {
-                BuildCell(position);
+                OnBuildCell(position);
             }
+
+            OnFinish();
         }
 
-        protected abstract void BuildCell(Vector2I position);
+        protected virtual void OnStart() { }
+        
+        protected virtual void OnFinish() { }
+
+        protected abstract void OnBuildCell(Vector2I position);
     }
 }

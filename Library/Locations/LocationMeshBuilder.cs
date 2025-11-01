@@ -2,51 +2,56 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using static Dose.Library.GodotUtils;
 using static Dose.Library.GeoPositioning;
 
 namespace Dose.Library.Locations
 {
-    public class LocationMeshBuilder(Map map, int blockSize)
+    public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh wallWithOpeningMesh, int blockSize) : LocationBuilder(location)
     {
-        readonly static Mesh _wallMesh = LoadMeshFromScene("res://Scenes/Models/Wall.glb");
-        readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Scenes/Models/WallWithOpening.glb");
+        SurfaceTool _surfaceTool;
 
-        public Map Map { get; } = map;
         public int BlockSize { get; } = blockSize;
+        public Mesh WallMesh { get; } = wallMesh;
+        public Mesh WallWithOpeningMesh { get; } = wallWithOpeningMesh;
 
-        public ArrayMesh Build()
-        {
-            var st = new SurfaceTool();
-            st.Begin(Mesh.PrimitiveType.Triangles);
-
-            foreach (var point in Map.GetFilledPositions())
-            {
-                AppendCell(st, point, AllDirections());
-            }
-
-            st.Index();
-            return st.Commit();
+        protected override void OnStart() {
+            _surfaceTool = new SurfaceTool();
+            _surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
         }
-        
 
-        void AppendCell(SurfaceTool st, Vector2I point, IEnumerable<CardinalDirection> directions)
+        protected override void OnBuildCell(Vector2I position)
+        {
+            AppendCell(position, AllDirections());
+        }
+
+        protected override void OnFinish()
+        {
+            var meshInstance = new MeshInstance3D();
+
+            _surfaceTool.Index();
+            meshInstance.Mesh = _surfaceTool.Commit();
+            meshInstance.CreateTrimeshCollision();
+
+            Location.HandleBuild(meshInstance);
+        }
+
+        void AppendCell(Vector2I point, IEnumerable<CardinalDirection> directions)
         {
             var direction = directions.First();
 
-            AppendWall(st, point, direction);
+            AppendWall(point, direction);
 
             var remainingDirections = directions.Except([direction]);
 
             if (remainingDirections.Any())
             {
-                AppendCell(st, point, remainingDirections);
+                AppendCell(point, remainingDirections);
             }
         }
 
-        void AppendWall(SurfaceTool st, Vector2I point, CardinalDirection direction)
+        void AppendWall(Vector2I point, CardinalDirection direction)
         {
-            var cell = Map.Get(point) ?? throw new Exception($"Cell not defined at position: ({point.X}, {point.Y})");
+            var cell = Location.Map.Get(point) ?? throw new Exception($"Cell not defined at position: ({point.X}, {point.Y})");
             var wall = cell.GetWall(direction);
 
             if (wall == null)
@@ -54,10 +59,10 @@ namespace Dose.Library.Locations
                 return;
             }
 
-            var mesh = wall.HasDoor ? _wallWithOpeningMesh : _wallMesh;
+            var mesh = wall.HasDoor ? WallWithOpeningMesh : WallMesh;
 
             var centerPosition = MoveTo(point, direction, 0.5f);
-            var wallPosition = new Vector3((centerPosition.X - Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Map.VerticalCells / 2) * BlockSize);
+            var wallPosition = new Vector3((centerPosition.X - Location.Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Location.Map.VerticalCells / 2) * BlockSize);
 
             var scale = new Vector3(BlockSize, BlockSize, BlockSize);
 
@@ -71,7 +76,7 @@ namespace Dose.Library.Locations
 
             var transform = new Transform3D(rotation, wallPosition);
 
-            st.AppendFrom(mesh, 0, transform);
+            _surfaceTool.AppendFrom(mesh, 0, transform);
         }
     }
 }

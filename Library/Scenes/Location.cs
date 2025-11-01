@@ -5,7 +5,7 @@ using System;
 
 namespace Dose.Library.Scenes
 {
-    public partial class Location : MeshInstance3D, IBuildableLocation
+    public partial class Location : Node3D, IBuildableLocation
     {
         public Map Map { get; private set; }
         public int BlockSize { get; private set; }
@@ -27,9 +27,6 @@ namespace Dose.Library.Scenes
             }
 
             Map = MapGenerator.GenerateMap();
-            Mesh = new LocationMeshBuilder(Map, BlockSize).Build();
-
-            CreateTrimeshCollision();
 
             return this;
         }
