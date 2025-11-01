@@ -120,10 +120,10 @@ namespace Dose.Library
         {
             return direction switch
             {
-                CardinalDirection.North => (float)System.Math.PI / 2,
-                CardinalDirection.South => (float)System.Math.PI * 3 / 2,
+                CardinalDirection.North => (float)Math.PI / 2,
+                CardinalDirection.South => (float)Math.PI * 3 / 2,
                 CardinalDirection.East => 0,
-                CardinalDirection.West => (float)System.Math.PI,
+                CardinalDirection.West => (float)Math.PI,
                 _ => throw new Exception("Invalid direction."),
             };
         }

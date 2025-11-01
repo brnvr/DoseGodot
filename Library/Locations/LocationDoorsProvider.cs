@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Godot;
 using static Dose.Library.GeoPositioning;
@@ -11,6 +12,11 @@ namespace Dose.Library.Locations
         
         protected override void OnBuildCell(Vector2I position)
         {
+            if (Location.Map == null)
+            {
+                throw new Exception("Location doesn't have a defined Map.");
+            }
+
             var cell = Location.Map.Get(position);
     
             foreach (var direction in AllDirections().Where(direction => cell.GetWall(direction)?.HasDoor == true))
@@ -21,6 +27,11 @@ namespace Dose.Library.Locations
 
         void AddDoor(Vector2I point, CardinalDirection direction)
         {
+            if (Location.Map == null)
+            {
+                throw new Exception("Location doesn't have a defined Map.");
+            }
+
             var nextDirection = NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
             var pointDir = MoveTo(MoveTo(point, direction, 0.5f), nextDirection, -0.11275f);
 

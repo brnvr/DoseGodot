@@ -18,7 +18,7 @@ namespace Dose.Library
             return mesh;
         }
 
-        public static bool TryGetParentNode(Node node, Func<Node, bool> predicate, out Node parentNode)
+        public static bool TryGetParentNode(Node node, Func<Node, bool> predicate, out Node? parentNode)
         {
             while (node != null && !predicate(node))
             {
@@ -35,7 +35,7 @@ namespace Dose.Library
             return true;
         }
 
-        public static bool TryGetParentNode<T>(Node node, out T parentNode) where T : Node
+        public static bool TryGetParentNode<T>(Node node, out T? parentNode) where T : Node
         {
             while (node != null && node is not T)
             {

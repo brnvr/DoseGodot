@@ -24,8 +24,10 @@ namespace Dose.Library.Numbers
 
         public override string ToString() => $"{_value:P}";
         public override int GetHashCode() => _value.GetHashCode();
-        public override bool Equals(object obj) =>
-            obj is Probability p && _value.Equals(p._value);
+        public override bool Equals(object? obj)
+        {
+            return obj is Probability p && _value.Equals(p._value);
+        }
 
         public static bool operator ==(Probability a, Probability b) => a._value == b._value;
         public static bool operator !=(Probability a, Probability b) => a._value != b._value;

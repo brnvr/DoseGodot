@@ -8,14 +8,13 @@ namespace Dose.Library.Locations
 {
     public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh wallWithOpeningMesh, int blockSize) : LocationBuilder(location)
     {
-        SurfaceTool _surfaceTool;
+        readonly SurfaceTool _surfaceTool = new();
 
         public int BlockSize { get; } = blockSize;
         public Mesh WallMesh { get; } = wallMesh;
         public Mesh WallWithOpeningMesh { get; } = wallWithOpeningMesh;
 
         protected override void OnStart() {
-            _surfaceTool = new SurfaceTool();
             _surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
         }
 
@@ -51,7 +50,7 @@ namespace Dose.Library.Locations
 
         void AppendWall(Vector2I point, CardinalDirection direction)
         {
-            var cell = Location.Map.Get(point) ?? throw new Exception($"Cell not defined at position: ({point.X}, {point.Y})");
+            var cell = Location.Map?.Get(point) ?? throw new Exception($"Cell not defined at position: ({point.X}, {point.Y})");
             var wall = cell.GetWall(direction);
 
             if (wall == null)

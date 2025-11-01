@@ -8,10 +8,10 @@ namespace Dose.Library.Scenes
     {
         const float RAY_LENGTH = 2.3f;
 
-        private Node3D _head;
-        private Camera3D _view;
-        private RayCast3D _rayCast;
-        private IInteractable<Player> _currentTarget;
+        private Node3D? _head;
+        private Camera3D? _view;
+        private RayCast3D? _rayCast;
+        private IInteractable<Player>? _currentTarget;
 
         private float _cameraAngle = 0f;
         private float _mouseSensitivity = 0.1f;
@@ -40,6 +40,9 @@ namespace Dose.Library.Scenes
 
         public override void _Input(InputEvent @event)
         {
+            if (_head == null) return;
+            if (_view == null) return;
+
             // Camera rotation
             if (@event is InputEventMouseMotion motion)
             {
@@ -67,6 +70,7 @@ namespace Dose.Library.Scenes
         private void Seek()
         {
             _currentTarget = null; // reset each frame
+            if (_rayCast == null) return;
 
             if (_rayCast.IsColliding())
             {
@@ -83,6 +87,8 @@ namespace Dose.Library.Scenes
 
         private void Walk()
         {
+            if (_view == null) return;
+            
             Vector3 direction = Vector3.Zero;
             Vector3 forward = -_view.GlobalTransform.Basis.Z;
             Vector3 right = _view.GlobalTransform.Basis.X;

@@ -113,7 +113,7 @@ namespace Dose.Library.Locations
             }
 
             var nextPoint = MoveTo(point, (CardinalDirection)nextDirection);
-            var isCellInBounds = map.TryGet(nextPoint, out MapCell nextCell);
+            var isCellInBounds = map.TryGet(nextPoint, out MapCell? nextCell);
 
             var canBifurcate = isCellInBounds && nextCell == null;
 
@@ -145,7 +145,7 @@ namespace Dose.Library.Locations
 
             var nextPoint = MoveTo(point, selectedDirection);
 
-            var isCellInBounds = map.TryGet(nextPoint, out MapCell nextCell);
+            var isCellInBounds = map.TryGet(nextPoint, out MapCell? nextCell);
 
             if (isCellInBounds && nextCell == null)
             {
@@ -220,7 +220,7 @@ namespace Dose.Library.Locations
 
             var oppositeDirection = CardinalOpposite(direction);
             var neighborPoint = MoveTo(point, direction);
-            var isNeighborCellInBounds = map.TryGet(neighborPoint, out MapCell neighborCell);
+            var isNeighborCellInBounds = map.TryGet(neighborPoint, out MapCell? neighborCell);
             
             if (isNeighborCellInBounds && neighborCell != null)
             {

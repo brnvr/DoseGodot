@@ -33,7 +33,7 @@ namespace Dose.Library.Locations
             map.Set(point, cell);
 
             var nextPoint = MoveTo(point, direction);
-            var isNextPointInBounds = map.TryGet(nextPoint, out MapCell nextCell);
+            var isNextPointInBounds = map.TryGet(nextPoint, out MapCell? nextCell);
 
             if (nextCell != null)
             {

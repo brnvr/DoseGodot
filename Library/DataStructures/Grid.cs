@@ -52,7 +52,7 @@ namespace Dose.Library.DataStructures
             return _cells[position.X, position.Y];
         }
 
-        public bool TryGet(Vector2I position, out T value)
+        public bool TryGet(Vector2I position, out T? value)
         {
             if (InBounds(position))
             {

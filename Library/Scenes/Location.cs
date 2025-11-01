@@ -7,9 +7,9 @@ namespace Dose.Library.Scenes
 {
     public partial class Location : Node3D, IBuildableLocation
     {
-        public Map Map { get; private set; }
+        public Map? Map { get; private set; }
         public int BlockSize { get; private set; }
-        public IMapGenerator MapGenerator { get; private set; }
+        public IMapGenerator? MapGenerator { get; private set; }
 
         public void HandleBuild(Node node)
         {

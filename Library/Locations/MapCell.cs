@@ -5,10 +5,10 @@ namespace Dose.Library.Locations
 {
     public record MapCell
     {
-        public MapCellWall EastWall { get; private set; }
-        public MapCellWall WestWall { get; private set; }
-        public MapCellWall NorthWall { get; private set; }
-        public MapCellWall SouthWall { get; private set; }
+        public MapCellWall? EastWall { get; private set; }
+        public MapCellWall? WestWall { get; private set; }
+        public MapCellWall? NorthWall { get; private set; }
+        public MapCellWall? SouthWall { get; private set; }
 
         public MapCell() { }
         
@@ -20,7 +20,7 @@ namespace Dose.Library.Locations
             SouthWall = southWall;
         }
 
-        public MapCellWall GetWall(CardinalDirection direction)
+        public MapCellWall? GetWall(CardinalDirection direction)
         {
             return direction switch
             {
@@ -32,7 +32,7 @@ namespace Dose.Library.Locations
             };
         }
 
-        public MapCell WithWall(CardinalDirection direction, MapCellWall wall) =>
+        public MapCell WithWall(CardinalDirection direction, MapCellWall? wall) =>
             direction switch
             {
                 CardinalDirection.North => this with { NorthWall = wall },
