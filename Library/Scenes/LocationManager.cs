@@ -1,36 +1,40 @@
 using Dose.Library.Locations;
 using Godot;
-using Dose.Library.Math;
 using System.Collections.Generic;
+using Dose.Library.Numbers;
 
-public partial class LocationManager : Node3D
+namespace Dose.Library.Scenes
 {
-    const int BLOCK_SIZE = 4;
-
-    readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Scenes/Location.tscn");
-
-    public override void _Ready()
+    public partial class LocationManager : Node3D
     {
-        var mapGenerator = new CorridorMapGenerator(
-            horizontalCells: 500,
-            verticalCells: 500,
-            probabilityToExtendCorridor: new Probability(0.7),
-            probabilityToBifurcate: new Probability(0.25),
-            probabilityToBuildDoors: new Probability(0.5)
-        );
+        const int BLOCK_SIZE = 4;
 
-        var location = _locationScene.Instantiate<Location>().Init(mapGenerator, BLOCK_SIZE);
+        readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Scenes/Door.tscn");
+        readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Scenes/Location.tscn");
 
-        AddChild(location);
-
-        var processors = new List<LocationMapProcessor>
+        public override void _Ready()
         {
-            new LocationDoorsProvider(location, BLOCK_SIZE) 
-        };
+            var mapGenerator = new CorridorMapGenerator(
+                horizontalCells: 500,
+                verticalCells: 500,
+                probabilityToExtendCorridor: new Probability(0.7),
+                probabilityToBifurcate: new Probability(0.25),
+                probabilityToBuildDoors: new Probability(0.5)
+            );
 
-        foreach (var processor in processors)
-        {
-            processor.Process();
+            var location = _locationScene.Instantiate<Location>().Init(mapGenerator, BLOCK_SIZE);
+
+            AddChild(location);
+
+            var builders = new List<LocationBuilder>
+            {
+                new LocationDoorsProvider(location, _doorScene, BLOCK_SIZE) 
+            };
+
+            foreach (var builder in builders)
+            {
+                builder.Build();
+            }
         }
     }
 }

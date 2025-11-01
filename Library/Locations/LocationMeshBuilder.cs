@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
-using static Dose.Library.Utils;
+using static Dose.Library.GodotUtils;
 using static Dose.Library.GeoPositioning;
 
 namespace Dose.Library.Locations

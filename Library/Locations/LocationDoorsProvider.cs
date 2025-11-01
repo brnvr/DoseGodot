@@ -4,13 +4,12 @@ using static Dose.Library.GeoPositioning;
 
 namespace Dose.Library.Locations
 {
-    public class LocationDoorsProvider(Location location, int blockSize) : LocationMapProcessor(location)
+    public class LocationDoorsProvider(IBuildableLocation location, PackedScene doorScene, int blockSize) : LocationBuilder(location)
     {
-        readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Scenes/Door.tscn");
-
         public int BlockSize { get; } = blockSize;
+        public PackedScene DoorScene { get; } = doorScene;
         
-        protected override void ProcessCell(Vector2I position)
+        protected override void BuildCell(Vector2I position)
         {
             var cell = Location.Map.Get(position);
     
@@ -24,13 +23,16 @@ namespace Dose.Library.Locations
         {
             var nextDirection = NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
             var pointDir = MoveTo(MoveTo(point, direction, 0.5f), nextDirection, -0.11275f);
-    
-            var door = (Node3D)_doorScene.Instantiate();
 
-            door.Position = new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
-            door.RotateY(DirectionToRadians(nextDirection));
+            var position = new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
+            var rotation = DirectionToRadians(nextDirection);
 
-            Location.AddChild(door);
+            var door = (Node3D)DoorScene.Instantiate();
+
+            Location.HandleBuild(door);
+
+            door.Position = position;
+            door.RotateY(rotation);
         }
     }
 }

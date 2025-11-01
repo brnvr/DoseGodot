@@ -1,5 +1,5 @@
 using System;
-using Dose.Library.Math;
+using Dose.Library.Numbers;
 using Dose.Library.Randomness;
 using Godot;
 using static Dose.Library.GeoPositioning;

@@ -1,5 +1,5 @@
 using System;
-using Dose.Library.Math;
+using Dose.Library.Numbers;
 
 namespace Dose.Library.Randomness
 {

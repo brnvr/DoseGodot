@@ -1,28 +1,38 @@
+using Dose.Library.Doors;
 using Dose.Library.Locations;
 using Godot;
 using System;
 
-public partial class Location() : MeshInstance3D
+namespace Dose.Library.Scenes
 {
-    public Map Map { get; private set; }
-    public int BlockSize { get; private set; }
-    public IMapGenerator MapGenerator { get; private set; }
-
-    public Location Init(IMapGenerator mapGenerator, int blockSize)
+    public partial class Location : MeshInstance3D, IBuildableLocation
     {
-        MapGenerator = mapGenerator;
-        BlockSize = blockSize;
-        
-        if (Map != null)
+        public Map Map { get; private set; }
+        public int BlockSize { get; private set; }
+        public IMapGenerator MapGenerator { get; private set; }
+
+        public void HandleBuild(Node node)
         {
-            throw new Exception("Location has already been initiated");
+            AddChild(node);
         }
 
-        Map = MapGenerator.GenerateMap();
-        Mesh = new LocationMeshBuilder(Map, BlockSize).Build();
+        public Location Init(IMapGenerator mapGenerator, int blockSize)
+        {
+            MapGenerator = mapGenerator;
+            BlockSize = blockSize;
+            
+            if (Map != null)
+            {
+                throw new Exception("Location has already been initiated");
+            }
 
-        CreateTrimeshCollision();
+            Map = MapGenerator.GenerateMap();
+            Mesh = new LocationMeshBuilder(Map, BlockSize).Build();
 
-        return this;
+            CreateTrimeshCollision();
+
+            return this;
+        }
     }
+
 }

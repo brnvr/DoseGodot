@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://uikj2e5802ap"]
+[gd_scene load_steps=8 format=3 uid="uid://uikj2e5802ap"]
 
 [ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Library/Scenes/TestScene.cs" id="1_cguwc"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Scenes/Player.tscn" id="2_wicfy"]
 [ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Scenes/LocationManager.tscn" id="3_bsxja"]
 [ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Characters/Agnes/Idle_000.png" id="4_iufkg"]
+[ext_resource type="PackedScene" uid="uid://bm0d2mvnxfs2i" path="res://Scenes/CanvasLayer.tscn" id="5_0f5h7"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
 transparency = 1
@@ -30,3 +31,5 @@ mesh = SubResource("QuadMesh_iufkg")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.70710677, 0.49999997, 0.49999997, 0, 0.70710677, -0.70710677, -0.70710677, 0.49999997, 0.49999997, 0, 0, 0)
+
+[node name="CanvasLayer" parent="." instance=ExtResource("5_0f5h7")]

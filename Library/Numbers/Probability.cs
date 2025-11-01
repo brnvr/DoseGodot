@@ -1,6 +1,6 @@
 using System;
 
-namespace Dose.Library.Math
+namespace Dose.Library.Numbers
 {
     public readonly struct Probability
     {
