@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=4 uid="uid://dnho7pjdlaykl"]
 
-[ext_resource type="Script" uid="uid://cpwffvy6lvbjt" path="res://Library/Scenes/Door.cs" id="1_mw28t"]
+[ext_resource type="Script" uid="uid://cpwffvy6lvbjt" path="res://SceneScripts/Door.cs" id="1_mw28t"]
 [ext_resource type="Texture2D" uid="uid://djnk6nwqg1sw1" path="res://Scenes/Models/Door_Door_Apartment_01_red.png" id="2_mw28t"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_348lp"]

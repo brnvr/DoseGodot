@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bcg5l5tvuje77"]
 
-[ext_resource type="Script" uid="uid://bmdwv7uww2xxt" path="res://Library/Scenes/LocationManager.cs" id="1_xp40h"]
+[ext_resource type="Script" uid="uid://bmdwv7uww2xxt" path="res://SceneScripts/LocationManager.cs" id="1_xp40h"]
 
 [node name="LocationManager" type="Node3D"]
 script = ExtResource("1_xp40h")

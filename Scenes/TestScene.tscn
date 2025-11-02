@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://uikj2e5802ap"]
 
-[ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Library/Scenes/TestScene.cs" id="1_cguwc"]
+[ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://SceneScripts/TestScene.cs" id="1_cguwc"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Scenes/Player.tscn" id="2_wicfy"]
 [ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Scenes/LocationManager.tscn" id="3_bsxja"]
 [ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Characters/Agnes/Idle_000.png" id="4_iufkg"]
