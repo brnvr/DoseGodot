@@ -1,4 +1,4 @@
-using Dose.Library.Scenes;
+using Dose.SceneScripts;
 using Godot;
 
 namespace Dose.Library.Interactivity
