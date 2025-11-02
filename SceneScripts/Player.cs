@@ -1,17 +1,19 @@
-using Dose.Library.Interactivity;
+using System.Linq;
+using Dose.Library.Actors;
+using Dose.Library.DataStructures;
 using Godot;
 using static Dose.Library.GodotUtils;
 
 namespace Dose.SceneScripts
 {
-    public partial class Player : CharacterBody3D
+    public partial class Player : BasePlayer
     {
         const float RAY_LENGTH = 2.3f;
 
         private Node3D? _head;
         private Camera3D? _view;
         private RayCast3D? _rayCast;
-        private IInteractable<Player>? _currentTarget;
+        private IActor<Player>? _currentTarget;
 
         private float _cameraAngle = 0f;
         private float _mouseSensitivity = 0.1f;
@@ -19,6 +21,8 @@ namespace Dose.SceneScripts
 
         public override void _Ready()
         {
+
+            //Inventory = new Inventory();
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
             _view = GetNode<Camera3D>("Head/View");
@@ -66,26 +70,33 @@ namespace Dose.SceneScripts
             }
         }
 
-        
-        private void Seek()
+        void Seek()
         {
-            _currentTarget = null; // reset each frame
+            var previousTarget = _currentTarget;
+            _currentTarget = null;
+
             if (_rayCast == null) return;
 
             if (_rayCast.IsColliding())
             {
                 var collider = _rayCast.GetCollider();
+
                 if (collider is Node node)
                 {
-                    if (TryGetParentNode(node, n => n is IInteractable<Player>, out Node? _interactable))
+                    if (TryGetParentNode(node, n => n is IActor<Player>, out Node? _interactable))
                     {
-                        _currentTarget = (IInteractable<Player>?)_interactable;
+                        _currentTarget = (IActor<Player>?)_interactable;
                     }
                 }
             }
+
+            if (_currentTarget != previousTarget)
+            {
+                _controlPlane?.OnTargetChange(_currentTarget);
+            }
         }
 
-        private void Walk()
+        void Walk()
         {
             if (_view == null) return;
             

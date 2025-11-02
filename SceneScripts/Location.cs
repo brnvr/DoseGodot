@@ -1,4 +1,3 @@
-using Dose.Library.Doors;
 using Dose.Library.Locations;
 using Godot;
 using System;
@@ -16,7 +15,7 @@ namespace Dose.SceneScripts
             AddChild(node);
         }
 
-        public Location Init(IMapGenerator mapGenerator, int blockSize)
+        public Location Initialize(IMapGenerator mapGenerator, int blockSize)
         {
             MapGenerator = mapGenerator;
             BlockSize = blockSize;

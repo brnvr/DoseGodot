@@ -1,0 +1,38 @@
+[gd_scene load_steps=9 format=3 uid="uid://uikj2e5802ap"]
+
+[ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://SceneScripts/Main.cs" id="1_v1gob"]
+[ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Scenes/Player.tscn" id="2_jw32o"]
+[ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Scenes/LocationManager.tscn" id="3_50glp"]
+[ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Characters/Agnes/Idle_000.png" id="4_vy5pj"]
+[ext_resource type="PackedScene" uid="uid://bm0d2mvnxfs2i" path="res://Scenes/UI.tscn" id="5_bmxlf"]
+[ext_resource type="PackedScene" uid="uid://dbv25pethrcnn" path="res://Scenes/ControlPlane.tscn" id="6_4kpch"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("4_vy5pj")
+texture_filter = 0
+texture_repeat = false
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_iufkg"]
+material = SubResource("StandardMaterial3D_iufkg")
+size = Vector2(1, 2)
+center_offset = Vector3(0, 1, 0)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_v1gob")
+
+[node name="Player" parent="." instance=ExtResource("2_jw32o")]
+
+[node name="LocationManager" parent="." instance=ExtResource("3_50glp")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_iufkg")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.70710677, 0.49999997, 0.49999997, 0, 0.70710677, -0.70710677, -0.70710677, 0.49999997, 0.49999997, 0, 0, 0)
+
+[node name="UI" parent="." instance=ExtResource("5_bmxlf")]
+
+[node name="ControlPlane" parent="." instance=ExtResource("6_4kpch")]

@@ -1,12 +1,32 @@
-using System.Numerics;
+using System;
 
 namespace Dose.Library.Numbers
 {
-    public class LinearInterpolator<T> : IInterpolator<T> where T : INumber<T>
+    public class LinearInterpolator : IInterpolator<double>
     {
-        public T Interpolate()
+        public double Value { get; }
+        public double Target { get; }
+        public double Delta { get; }
+
+        public LinearInterpolator(double value, double target, double delta)
         {
-            throw new System.NotImplementedException();
+            if (delta < 0)
+            {
+                throw new Exception($"{nameof(delta)} must be greater than 0.");
+            }
+
+            Value = value;
+            Target = target;
+            Delta = delta;
+        }
+
+        public double Interpolate()
+        {
+            return Math.Clamp(
+                Value + Math.Sign(Target - Value) * Delta,
+                Math.Min(Value, Target),
+                Math.Max(Value, Target)
+            );
         }
     }
 }

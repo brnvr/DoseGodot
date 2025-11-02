@@ -3,7 +3,7 @@ using System;
 
 namespace Dose.SceneScripts
 {
-    public partial class TestScene : Node3D
+    public partial class Main : Node3D
 	{
 		public override void _Ready()
 		{
@@ -31,6 +31,21 @@ namespace Dose.SceneScripts
 			var light = new DirectionalLight3D();
 			light.RotationDegrees = new Vector3(-45, 0, 0);
 			AddChild(light);
+
+
+
+
+
+
+
+
+
+
+			var ui = GetNode<UI>("UI");
+			var player = GetNode<Player>("Player");
+			var controlPlane = GetNode<ControlPlane>("ControlPlane");
+
+			player.Initialize(controlPlane.Initialize(ui));
 		}
 	}
 

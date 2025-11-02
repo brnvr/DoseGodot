@@ -25,7 +25,7 @@ namespace Dose.SceneScripts
                 probabilityToBuildDoors: new Probability(0.5)
             );
 
-            var location = _locationScene.Instantiate<Location>().Init(mapGenerator, BLOCK_SIZE);
+            var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE);
 
             AddChild(location);
 

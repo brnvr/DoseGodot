@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Dose.Library.Actors;
 using Godot;
 using static Dose.Library.GeoPositioning;
 
@@ -44,6 +45,11 @@ namespace Dose.Library.Locations
 
             door.Position = position;
             door.RotateY(rotation);
+
+            if (door is IInitializable initializableDoor)
+            {
+                initializableDoor.Initialize();
+            }
         }
     }
 }
