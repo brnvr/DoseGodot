@@ -18,6 +18,7 @@ namespace Dose.SceneScripts
             ActorRegistry = new ActorRegistry();
 
             ActorRegistry.Register<Door>("door");
+            ActorRegistry.Register<Npc>("NPC");
 
             return this;
         }

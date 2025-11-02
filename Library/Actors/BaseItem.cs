@@ -6,7 +6,7 @@ namespace Dose.Library.Actors
     {
         public void HandleInteraction(BasePlayer player)
         {
-            player.Inventory.AddAndDestroy(this);
+            player.Inventory?.AddAndDestroy(this);
         }
 
         public abstract void Destroy();
