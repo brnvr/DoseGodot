@@ -1,11 +1,16 @@
+using System;
+using Dose.Library.Common;
 using Godot;
 
 namespace Dose.Library.Actors
 {
-    public interface IActor { }
-
-    public interface IActor<T> : IActor
+    public interface IActor
     {
-        void HandleInteraction(T other);
+        IActorController? Controller { get; }
+    }
+
+    public interface IActor<TInteractor> : IActor
+    {
+        void HandleInteraction(TInteractor other);
     }
 }

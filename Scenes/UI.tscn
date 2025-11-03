@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bm0d2mvnxfs2i"]
 
-[ext_resource type="Script" uid="uid://c2bv560c4mugm" path="res://SceneScripts/Cursor.cs" id="1_1qbbr"]
-[ext_resource type="Script" uid="uid://cuinoaxdj4aet" path="res://SceneScripts/UI.cs" id="1_nxvpl"]
+[ext_resource type="Script" uid="uid://c2bv560c4mugm" path="res://Scripts/Cursor.cs" id="1_1qbbr"]
+[ext_resource type="Script" uid="uid://cuinoaxdj4aet" path="res://Scripts/UI.cs" id="1_nxvpl"]
 
 [node name="UI" type="CanvasLayer"]
 script = ExtResource("1_nxvpl")

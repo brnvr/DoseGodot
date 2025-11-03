@@ -1,9 +1,10 @@
 using Dose.Library.Actors;
+using Dose.Library.Common;
 using Dose.Library.Numbers;
 using Godot;
 using System;
 
-namespace Dose.SceneScripts
+namespace Dose.Scripts
 {
     public partial class Door : Node3D, IActor<Player>, IInitializable
     {
@@ -15,6 +16,8 @@ namespace Dose.SceneScripts
         readonly float _rotateSpeed = Mathf.DegToRad(5);
 
         [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
+
+        public IActorController Controller => new TestDoorController();
 
         enum State
         {

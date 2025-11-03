@@ -1,6 +1,6 @@
 using Dose.Library.Control;
 using Dose.Library.DataStructures;
-using Dose.SceneScripts;
+using Dose.Scripts;
 using Godot;
 
 namespace Dose.Library.Actors
@@ -9,20 +9,22 @@ namespace Dose.Library.Actors
     {
         protected IControlPlane? _controlPlane;
 
-        public Inventory? Inventory { get; protected set; }
+        //public Inventory? Inventory { get; protected set; }
 
-        public void Initialize(IControlPlane controlPlane)
+        public BasePlayer Initialize(IControlPlane controlPlane)
         {
             _controlPlane = controlPlane;
 
-            if (controlPlane.ActorRegistry == null)
-            {
-                GD.PushError($"{nameof(ControlPlane)}.{nameof(ActorRegistry)} is null.");
+            // if (controlPlane.ActorRegistry == null)
+            // {
+            //     GD.PushError($"{nameof(ControlPlane)}.{nameof(ActorRegistry)} is null.");
 
-                return;
-            }
+            //     return this;
+            // }
 
-            Inventory = new Inventory(controlPlane.ActorRegistry);
+            // Inventory = new Inventory(controlPlane.ActorRegistry);
+
+            return this;
         }
     }
 }

@@ -2,7 +2,7 @@ using Dose.Library.Locations;
 using Godot;
 using System;
 
-namespace Dose.SceneScripts
+namespace Dose.Scripts
 {
     public partial class Location : Node3D, IBuildableLocation
     {

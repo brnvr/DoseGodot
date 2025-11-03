@@ -1,7 +1,8 @@
+using Dose.Actors.Npcs;
 using Godot;
 using System;
 
-namespace Dose.SceneScripts
+namespace Dose.Scripts
 {
     public partial class Main : Node3D
 	{
@@ -42,10 +43,12 @@ namespace Dose.SceneScripts
 
 
 			var ui = GetNode<UI>("UI");
+			var npc = GetNode<Npc>("Npc");
 			var player = GetNode<Player>("Player");
-			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 
-			player.Initialize(controlPlane.Initialize(ui));
+			var controlPlane = GetNode<ControlPlane>("ControlPlane").Initialize(ui, player, npc);
+			
+
 		}
 	}
 

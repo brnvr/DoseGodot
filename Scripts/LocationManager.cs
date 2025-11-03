@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Dose.Library.Numbers;
 using static Dose.Library.GodotUtils;
 
-namespace Dose.SceneScripts
+namespace Dose.Scripts
 {
 	public partial class LocationManager : Node
 	{

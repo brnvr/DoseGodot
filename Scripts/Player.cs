@@ -4,7 +4,7 @@ using Dose.Library.DataStructures;
 using Godot;
 using static Dose.Library.GodotUtils;
 
-namespace Dose.SceneScripts
+namespace Dose.Scripts
 {
     public partial class Player : BasePlayer
     {

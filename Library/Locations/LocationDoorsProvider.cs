@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Dose.Library.Actors;
+using Dose.Library.Common;
 using Godot;
 using static Dose.Library.GeoPositioning;
 

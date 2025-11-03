@@ -1,4 +1,4 @@
-namespace Dose.Library.Actors
+namespace Dose.Library.Common
 {
     public interface IInitializable
     {

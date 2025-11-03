@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace Dose.SceneScripts
+namespace Dose.Scripts
 {
     public partial class Cursor : Control
     {
