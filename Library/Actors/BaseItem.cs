@@ -5,13 +5,18 @@ namespace Dose.Library.Actors
 {
     public abstract partial class BaseItem : Node3D, IActor<BasePlayer>
     {
-        public IActorController? Controller { get; private set; }
+        public IActorContext? Context { get; private set; }
 
-        public void HandleInteraction(BasePlayer player)
+        public abstract void Destroy();
+
+        public IInteraction<BasePlayer> GetDefaultInteraction(BasePlayer interactor)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void HandleInteraction(IInteraction<BasePlayer> interaction)
         {
             //player.Inventory?.AddAndDestroy(this);
         }
-
-        public abstract void Destroy();
     }
 }

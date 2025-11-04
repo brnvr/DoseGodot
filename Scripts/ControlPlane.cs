@@ -10,14 +10,14 @@ namespace Dose.Scripts
     public partial class ControlPlane : Node, IControlPlane
     {
         UI? _ui;
-        readonly AgnesController _agnesController = new();
+        readonly AgnesContext _agnesContext = new();
 
 
         public ControlPlane Initialize(UI ui, Player player, Npc npc)
         {
             _ui = ui;
             
-            npc.Initialize(_agnesController);
+            npc.Initialize(_agnesContext);
             player.Initialize(this);
 
             return this;
@@ -27,7 +27,7 @@ namespace Dose.Scripts
         {
             if (_ui == null) return;
 
-            _ui.SetActorName(target?.Controller?.DisplayName ?? "");
+            _ui.SetActorName(target?.Context?.DisplayName ?? "");
         }
     }
 }

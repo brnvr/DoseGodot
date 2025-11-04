@@ -1,4 +1,5 @@
 using System.Linq;
+using Dose.Interactions;
 using Dose.Library.Actors;
 using Dose.Library.DataStructures;
 using Godot;
@@ -65,7 +66,10 @@ namespace Dose.Scripts
             {
                 if (mouseButtonEvent.ButtonIndex == MouseButton.Left && mouseButtonEvent.Pressed)
                 {
-                    _currentTarget?.HandleInteraction(this);
+                    if (_currentTarget != null)
+                    {
+                        _currentTarget.HandleInteraction(_currentTarget.GetDefaultInteraction(this));
+                    }
                 }
             }
         }

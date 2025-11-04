@@ -1,16 +1,18 @@
 using System;
 using Dose.Library.Common;
 using Godot;
+using Microsoft.VisualBasic;
 
 namespace Dose.Library.Actors
 {
     public interface IActor
     {
-        IActorController? Controller { get; }
+        IActorContext? Context { get; }
     }
 
     public interface IActor<TInteractor> : IActor
     {
-        void HandleInteraction(TInteractor other);
+        void HandleInteraction(IInteraction<TInteractor> interaction);
+        IInteraction<TInteractor> GetDefaultInteraction(TInteractor interactor);
     }
 }

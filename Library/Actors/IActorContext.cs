@@ -3,8 +3,5 @@ using Dose.Library.Common;
 
 namespace Dose.Library.Actors
 {
-    public interface IActorController : INameable
-    {
-        
-    }
+    public interface IActorContext : INameable { }
 }

@@ -1,3 +1,4 @@
+using Dose.Interactions;
 using Dose.Library.Actors;
 using Dose.Library.Common;
 using Dose.Library.Numbers;
@@ -6,7 +7,7 @@ using System;
 
 namespace Dose.Scripts
 {
-    public partial class Door : Node3D, IActor<Player>, IInitializable
+    public partial class Door : Node3D, IActor<Player>, IInitializable, IToggleable
     {
         const double MAX_OPENING = Math.PI / 2;
 
@@ -17,7 +18,7 @@ namespace Dose.Scripts
 
         [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
 
-        public IActorController Controller => new TestDoorController();
+        public IActorContext Context => new TestDoorContext();
 
         enum State
         {
@@ -32,6 +33,26 @@ namespace Dose.Scripts
             _opening = 0;
             _state = State.Closed;
             _yRotationStart = Rotation.Y;
+        }
+
+        public IInteraction<Player> GetDefaultInteraction(Player interactor)
+        {
+            return new ToggleInteraction<Player>(interactor);
+        }
+
+        public void HandleInteraction(IInteraction<Player> interaction)
+        {
+            interaction.Perform(this);
+        }
+
+        public void Toggle()
+        {
+            var couldOpen = TryOpen();
+
+            if (!couldOpen)
+            {
+                TryClose();
+            }
         }
 
         public override void _Process(double delta)
@@ -67,16 +88,6 @@ namespace Dose.Scripts
 
 
             base._Process(delta);
-        }
-
-        public void HandleInteraction(Player player)
-        {
-            var couldOpen = TryOpen();
-
-            if (!couldOpen)
-            {
-                TryClose();
-            }
         }
 
         void UpdateRotation()

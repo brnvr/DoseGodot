@@ -1,4 +1,5 @@
 using System;
+using Dose.Interactions;
 using Dose.Library.Actors;
 using Dose.Library.Common;
 using Godot;
@@ -7,18 +8,23 @@ namespace Dose.Scripts
 {
     public partial class Npc : Node3D, IActor<Player>
     {
-        public IActorController? Controller { get; private set; }
+        public IActorContext? Context { get; private set; }
 
-        public Npc Initialize(NpcController controller)
+        public Npc Initialize(NpcContext context)
         {
-            Controller = controller;
+            Context = context;
 
             return this;
         }
 
-        public void HandleInteraction(Player player)
+        public void HandleInteraction(IInteraction<Player> interaction)
         {
             GD.Print("lololo");
+        }
+
+        public IInteraction<Player> GetDefaultInteraction(Player interactor)
+        {
+            return new ToggleInteraction<Player>(interactor);
         }
 
     }
