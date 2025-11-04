@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://djnk6nwqg1sw1"
-path.s3tc="res://.godot/imported/Door_Door_Apartment_01_red.png-0c8e12fa66ea13467e29c942022b1251.s3tc.ctex"
+uid="uid://c6vlq6y51vty8"
+path.s3tc="res://.godot/imported/Door_Door_Apartment_01_red.png-58c18c6141cd72fe4cb9ffb87cc6d03d.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -14,8 +14,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Textures/3DAssets/Door/Door_Door_Apartment_01_red.png"
-dest_files=["res://.godot/imported/Door_Door_Apartment_01_red.png-0c8e12fa66ea13467e29c942022b1251.s3tc.ctex"]
+source_file="res://Textures/Environment/Door/Door_Door_Apartment_01_red.png"
+dest_files=["res://.godot/imported/Door_Door_Apartment_01_red.png-58c18c6141cd72fe4cb9ffb87cc6d03d.s3tc.ctex"]
 
 [params]
 
