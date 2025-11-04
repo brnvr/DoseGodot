@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dehhobwl7sbsn"
-path.s3tc="res://.godot/imported/Idle_000.png-c0252a08db05473a3ccfee8863505195.s3tc.ctex"
+path.s3tc="res://.godot/imported/Idle_000.png-93421a97a69eefd97c65d680c5c3f285.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Textures/Characters/Agnes/Idle_000.png"
-dest_files=["res://.godot/imported/Idle_000.png-c0252a08db05473a3ccfee8863505195.s3tc.ctex"]
+source_file="res://Textures/Npcs/Agnes/Idle_000.png"
+dest_files=["res://.godot/imported/Idle_000.png-93421a97a69eefd97c65d680c5c3f285.s3tc.ctex"]
 
 [params]
 

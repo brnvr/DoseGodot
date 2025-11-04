@@ -12,8 +12,8 @@ namespace Dose.Scripts
 
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Scenes/Door.tscn");
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Scenes/Location.tscn");
-		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Scenes/Models/Wall.glb");
-		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Scenes/Models/WallWithOpening.glb");
+		readonly static Mesh _wallMesh = LoadMeshFromScene("res://3DAssets/Wall.glb");
+		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://3DAssets/WallWithOpening.glb");
 
 		public override void _Ready()
 		{

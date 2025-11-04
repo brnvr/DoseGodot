@@ -1,8 +1,6 @@
 using Dose.Actors.Npcs;
 using Dose.Library.Actors;
-using Dose.Library.Common;
 using Dose.Library.Control;
-using Dose.Library.DataStructures;
 using Godot;
 
 namespace Dose.Scripts
@@ -10,14 +8,14 @@ namespace Dose.Scripts
     public partial class ControlPlane : Node, IControlPlane
     {
         UI? _ui;
-        readonly AgnesContext _agnesContext = new();
+        readonly Agnes _agnes = new();
 
 
         public ControlPlane Initialize(UI ui, Player player, Npc npc)
         {
             _ui = ui;
             
-            npc.Initialize(_agnesContext);
+            npc.Initialize(_agnes);
             player.Initialize(this);
 
             return this;

@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://b38on8s8482bk"]
 
-[ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Characters/Agnes/Idle_000.png" id="1_b5x2e"]
+[ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Textures/Npcs/Agnes/Idle_000.png" id="1_b5x2e"]
 [ext_resource type="Script" uid="uid://me0yeud2rsb2" path="res://Scripts/Npc.cs" id="1_c8tqv"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
