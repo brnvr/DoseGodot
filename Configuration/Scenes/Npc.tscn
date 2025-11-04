@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://b38on8s8482bk"]
+
+[ext_resource type="Texture2D" uid="uid://dehhobwl7sbsn" path="res://Media/Textures/Npcs/Agnes/Idle_000.png" id="1_b5x2e"]
+[ext_resource type="Script" uid="uid://me0yeud2rsb2" path="res://Core/Scenes/Npc.cs" id="1_c8tqv"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("1_b5x2e")
+texture_filter = 0
+texture_repeat = false
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_iufkg"]
+material = SubResource("StandardMaterial3D_iufkg")
+size = Vector2(1, 2)
+center_offset = Vector3(0, 1, 0)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_b5x2e"]
+
+[node name="Npc" type="Node3D"]
+script = ExtResource("1_c8tqv")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_iufkg")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_b5x2e")

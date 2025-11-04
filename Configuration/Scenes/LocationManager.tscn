@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcg5l5tvuje77"]
+
+[ext_resource type="Script" uid="uid://bmdwv7uww2xxt" path="res://Core/Scenes/LocationManager.cs" id="1_xp40h"]
+
+[node name="LocationManager" type="Node"]
+script = ExtResource("1_xp40h")

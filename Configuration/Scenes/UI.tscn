@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3 uid="uid://bm0d2mvnxfs2i"]
+
+[ext_resource type="Script" uid="uid://c2bv560c4mugm" path="res://Core/Scenes/Cursor.cs" id="1_1qbbr"]
+[ext_resource type="Script" uid="uid://cuinoaxdj4aet" path="res://Core/Scenes/UI.cs" id="1_nxvpl"]
+
+[node name="UI" type="CanvasLayer"]
+script = ExtResource("1_nxvpl")
+
+[node name="Cursor" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_1qbbr")
+
+[node name="ActorName" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+text = "abcd"
+horizontal_alignment = 1
+vertical_alignment = 1
