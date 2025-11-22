@@ -10,11 +10,9 @@ namespace Dose.Core.Scenes
     public partial class Player : BasePlayer
     {
         const float RAY_LENGTH = 2.3f;
-
-        private Node3D? _head;
-        private Camera3D? _view;
+        
         private RayCast3D? _rayCast;
-        private IActor<Player>? _currentTarget;
+        
 
         private float _cameraAngle = 0f;
         private float _mouseSensitivity = 0.1f;
@@ -22,7 +20,7 @@ namespace Dose.Core.Scenes
 
         public override void _Ready()
         {
-
+            _moveState = MoveState.Free;
             //Inventory = new Inventory();
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
@@ -34,47 +32,34 @@ namespace Dose.Core.Scenes
         public override void _Process(double delta)
         {
             if (Input.IsActionPressed("ui_cancel"))
+            {
                 Input.MouseMode = Input.MouseModeEnum.Visible;
+            }
         }
 
         public override void _PhysicsProcess(double delta)
         {
-            Seek();
-            Walk();
+            ProcessSeek();
+            ProcessWalk();
+            ProcessFocus();
         }
 
         public override void _Input(InputEvent @event)
         {
-            if (_head == null) return;
-            if (_view == null) return;
-
-            // Camera rotation
             if (@event is InputEventMouseMotion motion)
             {
-                _head.RotateY(Mathf.DegToRad(-motion.Relative.X * _mouseSensitivity));
-                float change = -motion.Relative.Y * _mouseSensitivity;
-
-                if ((change + _cameraAngle) < 90f && (change + _cameraAngle) > -90f)
-                {
-                    _view.RotateX(Mathf.DegToRad(change));
-                    _cameraAngle += change;
-                }
+                ProcessLook(motion);
             }
 
-            // Interact on left click
-            if (@event is InputEventMouseButton mouseButtonEvent)
+            var shouldInteract = @event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.ButtonIndex == MouseButton.Left && mouseButtonEvent.Pressed;
+
+            if (shouldInteract)
             {
-                if (mouseButtonEvent.ButtonIndex == MouseButton.Left && mouseButtonEvent.Pressed)
-                {
-                    if (_currentTarget != null)
-                    {
-                        _currentTarget.HandleInteraction(_currentTarget.GetDefaultInteraction(this));
-                    }
-                }
+                Interact();
             }
         }
 
-        void Seek()
+        void ProcessSeek()
         {
             var previousTarget = _currentTarget;
             _currentTarget = null;
@@ -96,12 +81,29 @@ namespace Dose.Core.Scenes
 
             if (_currentTarget != previousTarget)
             {
-                _controlPlane?.OnTargetChange(_currentTarget);
+                UpdateTarget();
             }
         }
 
-        void Walk()
+        void ProcessLook(InputEventMouseMotion motion)
         {
+            if (!CanLook()) return;
+            if (_head == null) return;
+            if (_view == null) return;
+
+            _head.RotateY(Mathf.DegToRad(-motion.Relative.X * _mouseSensitivity));
+                float change = -motion.Relative.Y * _mouseSensitivity;
+
+                if ((change + _cameraAngle) < 90f && (change + _cameraAngle) > -90f)
+                {
+                    _view.RotateX(Mathf.DegToRad(change));
+                    _cameraAngle += change;
+                }
+        }
+
+        void ProcessWalk()
+        {
+            if (!CanMove()) return;
             if (_view == null) return;
             
             Vector3 direction = Vector3.Zero;
@@ -124,6 +126,45 @@ namespace Dose.Core.Scenes
 
             Velocity = direction.Normalized() * _moveSpeed;
             MoveAndSlide();
+        }
+
+        void ProcessFocus()
+        {
+            if (_moveState != MoveState.Focused) return;
+
+            if (_currentTarget == null)
+            {
+                GD.PushWarning("_currentTarget is null. Setting MoveState to Free.");
+
+                _moveState = MoveState.Free;
+
+                return;
+            }
+
+            if (_currentTarget is not Node3D node)
+            {
+                GD.PushWarning("_currentTarget is not a Node3D");
+
+                _moveState = MoveState.Free;
+
+                return;
+            }
+
+            LookAt(node, 0.01);
+        }
+
+        void Interact()
+        {
+            switch (_interactionState)
+            {
+                case InteractionState.Curious:
+                    _currentTarget?.OnInteract(_currentTarget.GetDefaultInteraction(this));
+                    break;
+
+                case InteractionState.Talking:
+                    ProgressDialogue();
+                    break;
+            }          
         }
     }
 }

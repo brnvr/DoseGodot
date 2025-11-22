@@ -1,5 +1,3 @@
-using Godot;
-
 namespace Dose.Core.Library.Actors
 {
     public class DoorContext : IActorContext

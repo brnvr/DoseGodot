@@ -1,6 +1,6 @@
-using Dose.Core.Actors.Npcs;
+using Dose.Core.Library.ESpeak;
+
 using Godot;
-using System;
 
 namespace Dose.Core.Scenes
 {
@@ -8,48 +8,43 @@ namespace Dose.Core.Scenes
 	{
 		public override void _Ready()
 		{
-			// Create a MeshInstance3D node
-			var plane = new MeshInstance3D();
+            var light = new DirectionalLight3D
+            {
+                RotationDegrees = new Vector3(-45, 0, 0)
+            };
 
-			// Create a PlaneMesh
-			var mesh = new PlaneMesh();
-			mesh.Size = new Vector2(4, 4); // Width and height of the plane
-
-			// Assign mesh to the MeshInstance3D
-			plane.Mesh = mesh;
-
-			// Optionally create a material
-			var material = new StandardMaterial3D();
-			material.AlbedoColor = new Color(0.2f, 0.8f, 0.3f); // Green
-			plane.MaterialOverride = material;
-
-			// Rotate plane if you want it vertical
-			// plane.RotateX(Mathf.DegToRad(-90));
-
-			// Add the plane to the scene
-			AddChild(plane);
-
-			var light = new DirectionalLight3D();
-			light.RotationDegrees = new Vector3(-45, 0, 0);
-			AddChild(light);
-
-
-
-
-
-
-
-
-
+            AddChild(light);
 
 			var ui = GetNode<UI>("UI");
 			var npc = GetNode<Npc>("Npc");
 			var player = GetNode<Player>("Player");
 
-			var controlPlane = GetNode<ControlPlane>("ControlPlane").Initialize(ui, player, npc);
-			
+			AudioCollector.InitializeESpeak();
 
+            var speaker = new Speaker(new AudioCollector(ProcessESpeakAudio));
+			
+			var controlPlane = GetNode<ControlPlane>("ControlPlane").Initialize(ui, player, npc);
+
+			speaker.Synth("test testing some test something.");
+		}
+		
+		void ProcessESpeakAudio(byte[] data)
+		{
+			var stream = new AudioStreamWav
+			{
+				MixRate = 22050,
+				Data = data,
+				Format = AudioStreamWav.FormatEnum.Format16Bits
+			};
+
+			var player = new AudioStreamPlayer
+			{
+				Stream = stream
+			};
+
+			AddChild(player);
+
+			player.Play();
 		}
 	}
-
 }

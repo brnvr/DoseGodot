@@ -31,7 +31,7 @@ namespace Dose.Core.Library.Locations
             meshInstance.Mesh = _surfaceTool.Commit();
             meshInstance.CreateTrimeshCollision();
 
-            Location.HandleBuild(meshInstance);
+            Location.OnBuild(meshInstance);
         }
 
         void AppendCell(Vector2I point, IEnumerable<CardinalDirection> directions)

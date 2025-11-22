@@ -41,7 +41,7 @@ namespace Dose.Core.Library.Locations
 
             var door = (Node3D)DoorScene.Instantiate();
 
-            Location.HandleBuild(door);
+            Location.OnBuild(door);
 
             door.Position = position;
             door.RotateY(rotation);

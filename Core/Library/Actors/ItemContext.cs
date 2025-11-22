@@ -1,5 +1,3 @@
-using Dose.Core.Library.Common;
-using Godot;
 
 namespace Dose.Core.Library.Actors
 {

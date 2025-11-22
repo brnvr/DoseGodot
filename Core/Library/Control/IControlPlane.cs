@@ -7,5 +7,6 @@ namespace Dose.Core.Library.Control
     public interface IControlPlane
     {
         void OnTargetChange(IActor? target);
+        void OnDialogueChange(IDialogueNode node);
     }
 }

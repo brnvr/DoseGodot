@@ -13,7 +13,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_1qbbr")
 
-[node name="ActorName" type="Label" parent="."]
+[node name="Caption" type="Label" parent="."]
 offset_right = 40.0
 offset_bottom = 40.0
 text = "abcd"

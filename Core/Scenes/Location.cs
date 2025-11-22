@@ -10,7 +10,7 @@ namespace Dose.Core.Scenes
         public int BlockSize { get; private set; }
         public IMapGenerator? MapGenerator { get; private set; }
 
-        public void HandleBuild(Node node)
+        public void OnBuild(Node node)
         {
             AddChild(node);
         }

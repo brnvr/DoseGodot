@@ -1,6 +1,5 @@
 using Dose.Core.Library.Actors;
-using Dose.Core.Library.Common;
-using Godot;
+using Dose.Core.Library.Interactivity;
 
 namespace Dose.Core.Interactions
 {

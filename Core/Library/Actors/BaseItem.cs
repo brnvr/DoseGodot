@@ -14,7 +14,7 @@ namespace Dose.Core.Library.Actors
             throw new NotImplementedException();
         }
 
-        public void HandleInteraction(IInteraction<BasePlayer> interaction)
+        public void OnInteract(IInteraction<BasePlayer> interaction)
         {
             //player.Inventory?.AddAndDestroy(this);
         }

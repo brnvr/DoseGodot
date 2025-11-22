@@ -1,27 +1,28 @@
+using Dose.Core.Library.UI;
 using Godot;
 using System;
 
 namespace Dose.Core.Scenes
 {
-    public partial class UI : CanvasLayer
+    public partial class UI : CanvasLayer, IUI
     {
-        Label? _actorName;
+        Label? _caption;
 
         public override void _Ready()
         {
-            _actorName = GetNode<Label>("ActorName");
+            _caption = GetNode<Label>("Caption");
         }
 
-        public void SetActorName(string? name)
+        public void SetCaption(string? text)
         {
-            if (_actorName == null)
+            if (_caption == null)
             {
-                GD.PushWarning($"Calling {nameof(SetActorName)} before {nameof(_actorName)} is initialized.");
+                GD.PushWarning($"Calling {nameof(SetCaption)} before {nameof(_caption)} is initialized.");
 
                 return;
             }
 
-            _actorName.Text = name ?? "";
+            _caption.Text = text ?? "";
         }   
     }
 }

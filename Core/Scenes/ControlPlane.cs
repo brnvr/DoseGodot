@@ -1,6 +1,8 @@
 using Dose.Core.Actors.Npcs;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
+using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.UI;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -8,11 +10,11 @@ namespace Dose.Core.Scenes
     public partial class ControlPlane : Node, IControlPlane
     {
         UI? _ui;
-        readonly Agnes _agnes = new();
-
+        Agnes? _agnes;
 
         public ControlPlane Initialize(UI ui, Player player, Npc npc)
         {
+            _agnes = new(player);
             _ui = ui;
             
             npc.Initialize(_agnes);
@@ -23,9 +25,20 @@ namespace Dose.Core.Scenes
 
         public void OnTargetChange(IActor? target)
         {
-            if (_ui == null) return;
+            _ui?.SetCaption(target?.Context?.DisplayName ?? "");
+        }
 
-            _ui.SetActorName(target?.Context?.DisplayName ?? "");
+        public void OnDialogueChange(IDialogueNode node)
+        {
+            if (_ui == null)
+            {
+                return;
+            }
+
+            if (node is IUIComponent uiComponent)
+            {
+                uiComponent.OnUIEvent(_ui);
+            }
         }
     }
 }

@@ -1,11 +1,35 @@
-// namespace Dose.Core.Library.DataStructures
-// {
-//     public class Dialogue<TInterlocutor0, TInterlocutor1>
-//     {
+using System.Collections.Generic;
+using System.Linq;
 
-//         public Dialogue<TInterlocutor0, TInterlocutor1> WithSpeech(string speech)
-//         {
-            
-//         }
-//     }
-// }
+namespace Dose.Core.Library.DataStructures
+{
+    public class Dialogue
+    {
+        readonly List<IDialogueNode> _nodes = [];
+
+        public static Dialogue Start()
+        {
+            return new Dialogue([]);
+        }
+
+        Dialogue(IEnumerable<IDialogueNode> nodes)
+        {
+            _nodes = [.. nodes];
+        }
+
+        public Dialogue WithNode(IDialogueNode node)
+        {
+            return new Dialogue(_nodes.Concat([node]));
+        }
+
+        public IDialogueNode GetNode(int index)
+        {
+            return _nodes[index];
+        }
+
+        public int GetNodeCount()
+        {
+            return _nodes.Count;
+        }
+    }
+}

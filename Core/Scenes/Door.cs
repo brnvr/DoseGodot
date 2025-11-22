@@ -1,6 +1,7 @@
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
+using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Numbers;
 using Godot;
 using System;
@@ -40,7 +41,7 @@ namespace Dose.Core.Scenes
             return new ToggleInteraction<Player>(interactor);
         }
 
-        public void HandleInteraction(IInteraction<Player> interaction)
+        public void OnInteract(IInteraction<Player> interaction)
         {
             interaction.Perform(this);
         }

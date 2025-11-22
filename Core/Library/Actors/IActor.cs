@@ -1,8 +1,3 @@
-using System;
-using Dose.Core.Library.Common;
-using Godot;
-using Microsoft.VisualBasic;
-
 namespace Dose.Core.Library.Actors
 {
     public interface IActor
@@ -12,7 +7,7 @@ namespace Dose.Core.Library.Actors
 
     public interface IActor<TInteractor> : IActor
     {
-        void HandleInteraction(IInteraction<TInteractor> interaction);
+        void OnInteract(IInteraction<TInteractor> interaction);
         IInteraction<TInteractor> GetDefaultInteraction(TInteractor interactor);
     }
 }
