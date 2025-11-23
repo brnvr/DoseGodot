@@ -3,20 +3,25 @@ using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.Interactivity;
 using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Node3D, ITalkable, IActor<Player>
+    public partial class Npc : Node3D, ITalkable, ISpeakable, IActor<Player>
     {
         MeshInstance3D? _mesh;
 
         public IActorContext? Context { get; private set; }
+        public ISpeaker? Speaker { get; private set; }
 
-        public Npc Initialize(NpcContext context)
+        public Npc Initialize(NpcContext context, Player player)
         {
             Context = context;
+            Speaker = new ESpeaker(player.ProgressDialogue);
+
+            AddChild((Node)Speaker);
 
             _mesh = GetNode<MeshInstance3D>("Mesh");
 

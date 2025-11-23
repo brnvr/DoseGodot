@@ -1,19 +1,33 @@
+using System;
 using Dose.Core.Library.DataStructures;
 using Godot;
 
 namespace Dose.Core.Library.Control
 {
-    public class DialogueTravesser(Dialogue dialogue)
+    public class DialogueTravesser
     {
-        Dialogue _currentDialogue = dialogue;
+        Dialogue _currentDialogue;
         int _currentNodeIndex;
 
-        public Dialogue Dialogue { get; } = dialogue;
+        public Dialogue Dialogue { get; }
+        public Action<IDialogueNode>? OnNodeSet { get; }
+
+        public DialogueTravesser(Dialogue dialogue, Action<IDialogueNode>? onNodeSet)
+        {
+            _currentDialogue = dialogue;
+
+            Dialogue = dialogue;
+            OnNodeSet = onNodeSet;
+
+            OnNodeSet?.Invoke(GetCurrentNode());
+        }
 
         public void Reset()
         {
             _currentDialogue = Dialogue;
             _currentNodeIndex = 0;
+
+            OnNodeSet?.Invoke(GetCurrentNode());
         }
 
         public IDialogueNode GetCurrentNode()
@@ -29,15 +43,12 @@ namespace Dose.Core.Library.Control
 
             if (nextNode == null)
             {
-                Reset();
-
                 return false;
             }
 
             if (nextDialogue == null)
             {
                 GD.PushError("Next dialogue not defined.");
-                Reset();
 
                 return false;
             }
@@ -45,7 +56,13 @@ namespace Dose.Core.Library.Control
             _currentDialogue = nextDialogue;
             _currentNodeIndex = nextNodeIndex;
 
+            OnNodeSet?.Invoke(nextNode);
+
             return true;
         }
+    }
+
+    public class DialogueNode
+    {
     }
 }

@@ -2,6 +2,7 @@ using Dose.Core.Actors.Npcs;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.UI;
 using Godot;
 
@@ -11,13 +12,15 @@ namespace Dose.Core.Scenes
     {
         UI? _ui;
         Agnes? _agnes;
+        Player? _player;
 
         public ControlPlane Initialize(UI ui, Player player, Npc npc)
         {
             _agnes = new(player);
             _ui = ui;
+            _player = player;
             
-            npc.Initialize(_agnes);
+            npc.Initialize(_agnes, player);
             player.Initialize(this);
 
             return this;
@@ -39,6 +42,6 @@ namespace Dose.Core.Scenes
             {
                 uiComponent.OnUIEvent(_ui);
             }
-        }
+        } 
     }
 }

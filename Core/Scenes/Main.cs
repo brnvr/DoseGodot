@@ -20,31 +20,10 @@ namespace Dose.Core.Scenes
 			var player = GetNode<Player>("Player");
 
 			AudioCollector.InitializeESpeak();
-
-            var speaker = new Speaker(new AudioCollector(ProcessESpeakAudio));
 			
 			var controlPlane = GetNode<ControlPlane>("ControlPlane").Initialize(ui, player, npc);
-
-			speaker.Synth("test testing some test something.");
 		}
 		
-		void ProcessESpeakAudio(byte[] data)
-		{
-			var stream = new AudioStreamWav
-			{
-				MixRate = 22050,
-				Data = data,
-				Format = AudioStreamWav.FormatEnum.Format16Bits
-			};
-
-			var player = new AudioStreamPlayer
-			{
-				Stream = stream
-			};
-
-			AddChild(player);
-
-			player.Play();
-		}
+		
 	}
 }
