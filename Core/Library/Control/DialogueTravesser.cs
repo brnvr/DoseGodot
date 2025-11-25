@@ -6,13 +6,13 @@ namespace Dose.Core.Library.Control
 {
     public class DialogueTravesser
     {
-        Dialogue _currentDialogue;
+        IDialogue _currentDialogue;
         int _currentNodeIndex;
 
-        public Dialogue Dialogue { get; }
+        public IDialogue Dialogue { get; }
         public Action<IDialogueNode>? OnNodeSet { get; }
 
-        public DialogueTravesser(Dialogue dialogue, Action<IDialogueNode>? onNodeSet)
+        public DialogueTravesser(IDialogue dialogue, Action<IDialogueNode>? onNodeSet)
         {
             _currentDialogue = dialogue;
 

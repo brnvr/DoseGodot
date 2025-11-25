@@ -19,9 +19,17 @@ namespace Dose.Core.Scenes
         public Npc Initialize(NpcContext context, Player player)
         {
             Context = context;
-            Speaker = new ESpeaker(player.ProgressDialogue);
+            
+            if (context.Voice == null)
+            {
+                GD.PushWarning("Voice not defined for NpcContext. Speaker won't be constructed.");
+            }
+            else
+            {
+                Speaker = new ESpeaker(context.Voice, player.ProgressDialogue);
 
-            AddChild((Node)Speaker);
+                AddChild((Node)Speaker);
+            }
 
             _mesh = GetNode<MeshInstance3D>("Mesh");
 
@@ -30,7 +38,7 @@ namespace Dose.Core.Scenes
             return this;
         }
 
-        public Dialogue? GetDialogue()
+        public IDialogue? GetDialogue()
         {
             return ((NpcContext?)Context)?.Dialogue;
         }

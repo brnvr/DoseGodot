@@ -7,7 +7,7 @@ namespace Dose.Core.Library.DataStructures
     {
         public string Text { get; } = text;
 
-        public IDialogueNode? GetNextNode(Dialogue currentDialogue, int currentNodeIndex, out Dialogue? nextDialogue, out int nextNodeIndex)
+        public IDialogueNode? GetNextNode(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue, out int nextNodeIndex)
         {
             nextDialogue = currentDialogue;
 

@@ -4,34 +4,48 @@ using System;
 
 namespace Dose.Core.Library.ESpeak
 {
-    public partial class ESpeaker : Node, ISpeaker
+    public partial class ESpeaker : Node3D, ISpeaker
     {
         readonly AudioCollector _audioCollector;
-        readonly AudioStreamPlayer _audioStreamPlayer;
+        readonly AudioStreamPlayer3D _audioStreamPlayer;
         
-        public Action OnFinished { get; }
+        public Voice Voice { get; }
+        public Action? OnFinished { get; }
+        public bool IsSpeaking { get; protected set; }
 
-        public ESpeaker(Action onFinished)
+        public ESpeaker(Voice voice, Action? onFinished)
         {
             OnFinished = onFinished;
+            Voice = voice;
 
-            _audioCollector = new AudioCollector(ProcessESpeakAudio);
-            _audioStreamPlayer = new AudioStreamPlayer();
-            _audioStreamPlayer.Finished += OnFinished;
+            _audioCollector = new AudioCollector(voice.SampleRate, ProcessESpeakAudio);
+            _audioStreamPlayer = new AudioStreamPlayer3D();
+            
+            if (OnFinished != null)
+            {
+                _audioStreamPlayer.Finished += OnFinished;
+            }
+
+            _audioStreamPlayer.Finished += () =>
+            {
+                IsSpeaking = false;
+            };
 
             AddChild(_audioStreamPlayer);
         }
 
         public void Speak(string text)
         {
+            IsSpeaking = true;
+            Dll.espeak_SetVoiceByName(Voice.Name);
             _audioCollector.Synth(text);
         }
 
-         void ProcessESpeakAudio(byte[] data)
+         void ProcessESpeakAudio(byte[] data, int sampleRate)
 		{
 			var stream = new AudioStreamWav
 			{
-				MixRate = 22050,
+				MixRate = sampleRate,
 				Data = data,
 				Format = AudioStreamWav.FormatEnum.Format16Bits
 			};

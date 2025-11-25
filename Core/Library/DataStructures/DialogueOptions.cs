@@ -9,7 +9,7 @@ namespace Dose.Core.Library.DataStructures
         public IEnumerable<DialogueOption> Options { get; } = options;
         public DialogueOption? Selected { get; set; }
 
-        public IDialogueNode? GetNextNode(Dialogue currentDialogue, int currentNodeIndex, out Dialogue? nextDialogue, out int nextNodeIndex)
+        public IDialogueNode? GetNextNode(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue, out int nextNodeIndex)
         {
             if (Selected == null)
             {

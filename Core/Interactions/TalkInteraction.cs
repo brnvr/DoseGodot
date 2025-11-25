@@ -19,6 +19,7 @@ namespace Dose.Core.Interactions
             {
                 if (subject is ITalkable talkable)
                 {
+                    var canTalk = true;
                     var dialogue = talkable.GetDialogue();
 
                     if (dialogue == null)
@@ -30,11 +31,22 @@ namespace Dose.Core.Interactions
                     {
                         if (subject is ISpeakable speakable && node is DialogueSpeech speech)
                         {
-                            speakable.Speaker?.Speak(speech.Text);
+                            if (speakable.Speaker?.IsSpeaking == true)
+                            {
+                                canTalk = false;
+                            }
+                            
+                            if (canTalk)
+                            {
+                                speakable.Speaker?.Speak(speech.Text);
+                            }
                         }
                     });
 
-                    talker.OnDialogueBegin(travesser);
+                    if (canTalk)
+                    {
+                        talker.OnDialogueBegin(travesser);
+                    }
                 }
 
                 return;

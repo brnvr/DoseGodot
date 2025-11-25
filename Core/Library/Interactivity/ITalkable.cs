@@ -4,6 +4,6 @@ namespace Dose.Core.Library.Interactivity
 {
     public interface ITalkable
     {
-        Dialogue? GetDialogue();
+        IDialogue? GetDialogue();
     }
 }

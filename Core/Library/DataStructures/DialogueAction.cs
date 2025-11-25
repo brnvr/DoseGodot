@@ -12,7 +12,7 @@ namespace Dose.Core.Library.DataStructures
             return Action(Other);
         }
 
-        public IDialogueNode? GetNextNode(Dialogue currentDialogue, int currentNodeIndex, out Dialogue? nextDialogue, out int nextNodeIndex)
+        public IDialogueNode? GetNextNode(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue, out int nextNodeIndex)
         {
             nextDialogue = currentDialogue;
             nextNodeIndex = currentNodeIndex + 1;

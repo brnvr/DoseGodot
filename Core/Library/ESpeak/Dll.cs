@@ -19,5 +19,13 @@ namespace Dose.Core.Library.ESpeak
         [LibraryImport("libespeak-ng.dll")]
         [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
         public static partial void espeak_SetSynthCallback(t_espeak_callback callback);
+
+        [LibraryImport("libespeak-ng.dll")]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        public static partial int espeak_SetParameter(int parameter, int value, int relative);
+
+        [LibraryImport("libespeak-ng.dll", StringMarshalling = StringMarshalling.Utf8)]
+        [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+        public static partial int espeak_SetVoiceByName(string name);
     }
 }

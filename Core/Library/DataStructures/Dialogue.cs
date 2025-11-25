@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Dose.Core.Library.DataStructures
 {
-    public class Dialogue
+    public class Dialogue : IDialogue
     {
         readonly List<IDialogueNode> _nodes = [];
 

@@ -52,8 +52,12 @@ namespace Dose.Core.Library.Actors
         public void OnDialogueBegin(DialogueTravesser dialogueTravesser)
         {
             DialogueTravesser = dialogueTravesser;
-            _moveState = MoveState.Focused;
-            _interactionState = InteractionState.Talking;
+            
+            if (dialogueTravesser.Dialogue is Dialogue)
+            {
+                _moveState = MoveState.Focused;
+                _interactionState = InteractionState.Talking;
+            }
             
             UpdateDialogue();
         }
