@@ -5,40 +5,50 @@ using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Numbers;
 using Godot;
 using System;
+using System.Collections.Generic;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Door : Node3D, IActor<Player>, IInitializable, IToggleable
+    public enum DoorState
+    {
+        Open,
+        Opening,
+        Closed,
+        Closing
+    }
+
+    public partial class Door : Node3D, IActor<Player>, IInitializable, IToggleable<DoorState>
     {
         const double MAX_OPENING = Math.PI / 2;
 
-        State _state;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
 
+
         [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
 
         public IActorContext Context => new TestDoorContext();
-
-        enum State
+        public DoorState State { get; private set; }
+        public IReadOnlyDictionary<DoorState, string> DisplayNameForState { get; } = new Dictionary<DoorState, string>
         {
-            Open,
-            Opening,
-            Closed,
-            Closing
-        }
+          { DoorState.Open, "close" },  
+          { DoorState.Opening, "close" },
+          { DoorState.Closed, "open" },
+          { DoorState.Closing, "open" },
+        };
+
 
         public void Initialize()
         {
             _opening = 0;
-            _state = State.Closed;
+            State = DoorState.Closed;
             _yRotationStart = Rotation.Y;
         }
 
         public IInteraction<Player> GetDefaultInteraction(Player interactor)
         {
-            return new ToggleInteraction<Player>(interactor);
+            return new ToggleInteraction<Player, DoorState>(interactor);
         }
 
         public void OnInteract(IInteraction<Player> interaction)
@@ -58,28 +68,28 @@ namespace Dose.Core.Scenes
 
         public override void _Process(double delta)
         {
-            switch (_state)
+            switch (State)
             {
-                case State.Opening:
+                case DoorState.Opening:
                     var target = OpenDirection == ClockDirection.Clockwise ? MAX_OPENING : -MAX_OPENING;
 
                     _opening = (float)new LinearInterpolator(_opening, target, _rotateSpeed).Interpolate();
 
                     if (_opening >= MAX_OPENING)
                     {
-                        _state = State.Open;
+                        State = DoorState.Open;
                     }
 
                     UpdateRotation();
 
                     break;
 
-                case State.Closing:
+                case DoorState.Closing:
                     _opening = (float)new LinearInterpolator(_opening, 0, _rotateSpeed).Interpolate();
 
                     if (_opening <= 0)
                     {
-                        _state = State.Closed;
+                        State = DoorState.Closed;
                     }
 
                     UpdateRotation();
@@ -98,23 +108,23 @@ namespace Dose.Core.Scenes
 
         bool TryOpen()
         {
-            if (_state == State.Open || _state == State.Opening)
+            if (State == DoorState.Open || State == DoorState.Opening)
             {
                 return false;
             }
 
-            _state = State.Opening;
+            State = DoorState.Opening;
             return true;
         }
         
         bool TryClose()
         {
-            if (_state == State.Closed || _state == State.Closing)
+            if (State == DoorState.Closed || State == DoorState.Closing)
             {
                 return false;
             }
 
-            _state = State.Closing;
+            State = DoorState.Closing;
             return true;
         }
     }

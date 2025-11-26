@@ -2,6 +2,7 @@ namespace Dose.Core.Library.UI
 {
     public interface IUI
     {
-        void SetCaption(string text);
+        void SetLabelValue(string labelName, string text);
+        void SetLabelVisible(string labelName, bool visible);
     }
 }

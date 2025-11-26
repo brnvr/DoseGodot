@@ -1,92 +1,87 @@
-// using System;
-// using System.Collections;
-// using System.Collections.Generic;
-// using System.Linq;
-// using Dose.Core.Library.Actors;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Dose.Core.Library.Actors;
 
-// namespace Dose.Core.Library.DataStructures
-// {
-//     public class Inventory(ActorRegistry registry) : IEnumerable
-//     {
-//         private readonly List<InventoryRecord> _registryRecords = [];
+namespace Dose.Core.Library.DataStructures
+{
+    public class Inventory : IEnumerable
+    {
+        private readonly List<InventoryRecord> _records = [];
+        
+        public void Add(IItem item)
+        {
+            if (item.Context is null) return;
+    
+            Add(item.Context);
+        }
 
-//         public ActorRegistry Registry { get; } = registry;
+        public void Add(ItemContext itemContext)
+        {
+            var inventoryRecord = Find(itemContext);
 
-//         public void Add<T>() where T : BaseItem
-//         {
-//             var inventoryRecord = Find<T>();
+            inventoryRecord?.Increment();
 
-//             inventoryRecord?.Increment();
+            if (inventoryRecord == null)
+            {
+                _records.Add(new InventoryRecord(itemContext));
+            }
+        }
 
-//             if (inventoryRecord == null)
-//             {
-//                 var registryRecord = Registry.Where(r => r.ActorType == typeof(T)).FirstOrDefault();
+        public void AddAndDestroy(IItem item)
+        {
+            Add(item);
 
-//                 if (registryRecord != null)
-//                 {
-//                     _registryRecords.Add(new InventoryRecord(registryRecord));
-//                 }
-//             }
-//         }
+            item.Destroy();
+        }
 
-//         public void AddAndDestroy<T>(T item) where T : BaseItem
-//         {
-//             Add<T>();
+        public void Drop(ItemContext itemContext)
+        {
+            var record = Find(itemContext);
 
-//             item.Destroy();
-//         }
+            if (record?.Decrement() == 0)
+            {
+                _records.Remove(record);
+            }
+        }
 
-//         public void Drop<T>() where T : BaseItem
-//         {
-//             var registryRecord = Find<T>();
+        public bool Exists(ItemContext itemContext)
+        {
+            return _records.Any(record => record.ItemContext == itemContext);
+        }
 
-//             if (registryRecord?.Decrement() == 0)
-//             {
-//                 _registryRecords.Remove(registryRecord);
-//             }
-//         }
+        InventoryRecord? Find(ItemContext itemContext)
+        {
+            return _records.Find(record => record.ItemContext == itemContext);
+        }
 
-//         public bool Exists<T>() where T : BaseItem
-//         {
-//             return _registryRecords.Any(item => item.RegistryRecord.ActorType == typeof(T));
-//         }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _records.Select(item => item.ItemContext).GetEnumerator();
+        }
 
-//         InventoryRecord? Find<T>() where T : BaseItem
-//         {
-//             return _registryRecords.Find(item => item.RegistryRecord.ActorType == typeof(T));
-//         }
+        record InventoryRecord
+        {
+            public ItemContext ItemContext { get; }
+            public int Quantity { get; private set; }
 
-//         IEnumerator IEnumerable.GetEnumerator()
-//         {
-//             return _registryRecords.Select(item => item.RegistryRecord.ActorType).GetEnumerator();
-//         }
+            public InventoryRecord(ItemContext itemContext)
+            {
+                ItemContext = itemContext;
 
-//         record InventoryRecord
-//         {
-//             public ActorRegistryRecord RegistryRecord { get; }
-//             public int Quantity { get; private set; }
+                Increment();
+            }
 
-//             public InventoryRecord(ActorRegistryRecord registryRecord)
-//             {
-//                 if (!registryRecord.ActorType.IsSubclassOf(typeof(BaseItem)))
-//                 {
-//                     throw new ArgumentException($"{nameof(registryRecord)} is not a subclass of {nameof(BaseItem)}");
-//                 }
+            public int Increment()
+            {
+                return Quantity++;
+            }
 
-//                 RegistryRecord = registryRecord;
-                
-//                 Increment();
-//             }
-
-//             public int Increment()
-//             {
-//                 return Quantity++;
-//             }
-
-//             public int Decrement()
-//             {
-//                 return Math.Min(0, Quantity--);
-//             }
-//         }
-//     }
-// }
+            public int Decrement()
+            {
+                return Math.Min(0, Quantity--);
+            }
+        }
+    }
+}

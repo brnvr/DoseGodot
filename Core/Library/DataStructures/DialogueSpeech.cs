@@ -25,7 +25,8 @@ namespace Dose.Core.Library.DataStructures
 
         public void OnUIEvent(IUI ui)
         {
-            ui.SetCaption(Text);
+            ui.SetLabelValue("DialogueCaption", Text);
+            ui.SetLabelVisible("NameCaption", false);
         }
 
         public bool Process()

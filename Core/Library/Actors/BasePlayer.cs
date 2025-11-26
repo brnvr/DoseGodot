@@ -6,7 +6,7 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public abstract partial class BasePlayer : CharacterBody3D, ITalker
+    public abstract partial class BasePlayer : CharacterBody3D, ITalker, IPicker
     {
         protected enum MoveState
         {
@@ -30,21 +30,12 @@ namespace Dose.Core.Library.Actors
         protected InteractionState _interactionState;
 
         public DialogueTravesser? DialogueTravesser { get; private set; }
-
-        //public Inventory? Inventory { get; protected set; }
+        public Inventory? Inventory { get; protected set; }
 
         public BasePlayer Initialize(IControlPlane controlPlane)
         {
             _controlPlane = controlPlane;
-
-            // if (controlPlane.ActorRegistry == null)
-            // {
-            //     GD.PushError($"{nameof(ControlPlane)}.{nameof(ActorRegistry)} is null.");
-
-            //     return this;
-            // }
-
-            // Inventory = new Inventory(controlPlane.ActorRegistry);
+            Inventory = [];
 
             return this;
         }
@@ -79,6 +70,7 @@ namespace Dose.Core.Library.Actors
                 GD.PushWarning("Dialogue Travesser is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
+                _controlPlane?.OnDialogueEnd();
 
                 return;
             }
@@ -88,6 +80,7 @@ namespace Dose.Core.Library.Actors
                 DialogueTravesser = null;
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
+                _controlPlane?.OnDialogueEnd();
 
                 UpdateTarget();
 

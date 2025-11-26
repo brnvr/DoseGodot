@@ -13,9 +13,14 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_1qbbr")
 
-[node name="Caption" type="Label" parent="."]
+[node name="DialogueCaption" type="Label" parent="."]
 offset_right = 40.0
 offset_bottom = 40.0
-text = "abcd"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameCaption" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
 horizontal_alignment = 1
 vertical_alignment = 1

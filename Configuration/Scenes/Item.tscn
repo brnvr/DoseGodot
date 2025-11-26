@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://bab2upmbmmoyh"]
+
+[ext_resource type="Script" uid="uid://bhpex71d701u6" path="res://Core/Scenes/Item.cs" id="1_kl7so"]
+[ext_resource type="Texture2D" uid="uid://dv7v0pr1nyo6l" path="res://Media/Textures/Placehoders/Npc.png" id="1_psx54"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("1_psx54")
+texture_filter = 0
+texture_repeat = false
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_kl7so"]
+material = SubResource("StandardMaterial3D_iufkg")
+size = Vector2(1, 2)
+center_offset = Vector3(0, 1, 0)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_kjml4"]
+
+[node name="Item" type="Node3D"]
+script = ExtResource("1_kl7so")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_kl7so")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.5, 0)
+shape = SubResource("CylinderShape3D_kjml4")

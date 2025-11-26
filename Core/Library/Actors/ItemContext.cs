@@ -1,8 +1,11 @@
 
+using Godot;
+
 namespace Dose.Core.Library.Actors
 {
-    public abstract class ItemContext : IActorContext
+    public abstract record ItemContext : IActorContext
     {
-        public abstract string DisplayName { get; }
+        public string DisplayName { get; set; } = "";
+        public Texture2D? Texture { get; set; }
     }
 }

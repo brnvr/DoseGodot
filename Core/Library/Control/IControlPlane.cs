@@ -8,5 +8,6 @@ namespace Dose.Core.Library.Control
     {
         void OnTargetChange(IActor? target);
         void OnDialogueChange(IDialogueNode node);
+        void OnDialogueEnd();
     }
 }

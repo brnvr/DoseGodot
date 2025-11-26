@@ -28,7 +28,7 @@ namespace Dose.Core.Scenes
 
         public void OnTargetChange(IActor? target)
         {
-            _ui?.SetCaption(target?.Context?.DisplayName ?? "");
+            _ui?.SetLabelValue("NameCaption", target?.Context?.DisplayName ?? "");
         }
 
         public void OnDialogueChange(IDialogueNode node)
@@ -42,6 +42,12 @@ namespace Dose.Core.Scenes
             {
                 uiComponent.OnUIEvent(_ui);
             }
-        } 
+        }
+
+        public void OnDialogueEnd()
+        {
+            _ui?.SetLabelValue("DialogueCaption", "");
+            _ui?.SetLabelVisible("NameCaption", true);
+        }
     }
 }

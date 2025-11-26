@@ -6,23 +6,18 @@ namespace Dose.Core.Scenes
 {
     public partial class UI : CanvasLayer, IUI
     {
-        Label? _caption;
-
-        public override void _Ready()
+        public void SetLabelValue(string labelName, string text)
         {
-            _caption = GetNode<Label>("Caption");
+            var label = GetNode<Label>(labelName);
+    
+            label.Text = text ?? "";
         }
 
-        public void SetCaption(string? text)
+        public void SetLabelVisible(string labelName, bool visible)
         {
-            if (_caption == null)
-            {
-                GD.PushWarning($"Calling {nameof(SetCaption)} before {nameof(_caption)} is initialized.");
+            var label = GetNode<Label>(labelName);
 
-                return;
-            }
-
-            _caption.Text = text ?? "";
+            label.Visible = visible;
         }   
     }
 }

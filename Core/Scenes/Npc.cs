@@ -9,12 +9,15 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Node3D, ITalkable, ISpeakable, IActor<Player>
+    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>
     {
         MeshInstance3D? _mesh;
 
-        public IActorContext? Context { get; private set; }
+
         public ISpeaker? Speaker { get; private set; }
+        public NpcContext? Context { get; private set; }
+
+        IActorContext? IActor.Context => Context;
 
         public Npc Initialize(NpcContext context, Player player)
         {
@@ -40,7 +43,7 @@ namespace Dose.Core.Scenes
 
         public IDialogue? GetDialogue()
         {
-            return ((NpcContext?)Context)?.Dialogue;
+            return Context?.Dialogue;
         }
 
         public void OnInteract(IInteraction<Player> interaction)
@@ -66,7 +69,7 @@ namespace Dose.Core.Scenes
 
             if (material is StandardMaterial3D stdMat)
             {
-                stdMat.AlbedoTexture = ((NpcContext)Context).Texture;
+                stdMat.AlbedoTexture = Context.Texture;
             }
         }
     }
