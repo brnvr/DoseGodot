@@ -1,6 +1,7 @@
 using System.Linq;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
 using Godot;
 using static Dose.Core.Library.GodotUtils;
@@ -20,8 +21,9 @@ namespace Dose.Core.Scenes
 
         public override void _Ready()
         {
+            Inventory = [];
+            InventoryController = new InventoryController(Inventory);
             _moveState = MoveState.Free;
-            //Inventory = new Inventory();
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
             _view = GetNode<Camera3D>("Head/View");
@@ -31,10 +33,8 @@ namespace Dose.Core.Scenes
 
         public override void _Process(double delta)
         {
-            if (Input.IsActionPressed("ui_cancel"))
-            {
-                Input.MouseMode = Input.MouseModeEnum.Visible;
-            }
+            ProcessInteract();
+            ProcessInventory();
         }
 
         public override void _PhysicsProcess(double delta)
@@ -50,10 +50,11 @@ namespace Dose.Core.Scenes
             {
                 ProcessLook(motion);
             }
+        }
 
-            var shouldInteract = @event is InputEventMouseButton mouseButtonEvent && mouseButtonEvent.ButtonIndex == MouseButton.Left && mouseButtonEvent.Pressed;
-
-            if (shouldInteract)
+        void ProcessInteract()
+        {
+            if (Input.IsActionJustPressed("Interact"))
             {
                 Interact();
             }
@@ -101,6 +102,18 @@ namespace Dose.Core.Scenes
                 }
         }
 
+        void ProcessInventory()
+        {
+            if (Input.IsActionJustPressed("InventoryPreviousItem"))
+                InventoryController?.GoToPreviousItem();
+
+            if (Input.IsActionJustPressed("InventoryNextItem"))
+                InventoryController?.GoToNextItem();
+
+            if (Input.IsActionJustPressed("InventorySelect"))
+                SelectedItem = SelectedItem is null ? InventoryController?.CurrentItem : null;
+        }
+
         void ProcessWalk()
         {
             if (!CanMove()) return;
@@ -115,13 +128,13 @@ namespace Dose.Core.Scenes
             forward = forward.Normalized();
             right = right.Normalized();
 
-            if (Input.IsActionPressed("ui_up"))
+            if (Input.IsActionPressed("MoveForward"))
                 direction += forward;
-            if (Input.IsActionPressed("ui_down"))
+            if (Input.IsActionPressed("MoveBackward"))
                 direction -= forward;
-            if (Input.IsActionPressed("ui_left"))
+            if (Input.IsActionPressed("MoveLeft"))
                 direction -= right;
-            if (Input.IsActionPressed("ui_right"))
+            if (Input.IsActionPressed("MoveRight"))
                 direction += right;
 
             Velocity = direction.Normalized() * _moveSpeed;

@@ -31,11 +31,12 @@ namespace Dose.Core.Library.Actors
 
         public DialogueTravesser? DialogueTravesser { get; private set; }
         public Inventory? Inventory { get; protected set; }
+        public InventoryController? InventoryController {get; protected set; }
+        public ItemContext? SelectedItem { get; protected set; }
 
         public BasePlayer Initialize(IControlPlane controlPlane)
         {
             _controlPlane = controlPlane;
-            Inventory = [];
 
             return this;
         }

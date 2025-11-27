@@ -6,7 +6,7 @@ using Dose.Core.Library.Actors;
 
 namespace Dose.Core.Library.DataStructures
 {
-    public class Inventory : IEnumerable
+    public class Inventory : IEnumerable<ItemContext>
     {
         private readonly List<InventoryRecord> _records = [];
         
@@ -51,6 +51,16 @@ namespace Dose.Core.Library.DataStructures
             return _records.Any(record => record.ItemContext == itemContext);
         }
 
+        public IEnumerator<ItemContext> GetEnumerator()
+        {
+            return _records.Select(item => item.ItemContext).GetEnumerator();
+        }
+
+        public ItemContext this[int index]
+        {
+            get => _records[index].ItemContext;
+        }
+
         InventoryRecord? Find(ItemContext itemContext)
         {
             return _records.Find(record => record.ItemContext == itemContext);
@@ -58,7 +68,7 @@ namespace Dose.Core.Library.DataStructures
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _records.Select(item => item.ItemContext).GetEnumerator();
+            return GetEnumerator();
         }
 
         record InventoryRecord
