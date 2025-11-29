@@ -140,7 +140,7 @@ namespace Dose.Core.Scenes
 
         protected void UpdateTarget()
         {
-            _controlPlane?.OnTargetChange(_currentTarget);
+            _controlPlane?.InteractivityController?.OnTargetChange(_currentTarget);
         }
 
         protected void LookAt(Node3D node, double delta)

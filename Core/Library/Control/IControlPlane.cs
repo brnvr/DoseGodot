@@ -5,7 +5,7 @@ namespace Dose.Core.Library.Control
 {
     public interface IControlPlane
     {
-        void OnTargetChange(IActor? target);
+        InteractivityController? InteractivityController {get; }
         InventoryController? InventoryController { get; }
         DialogueController? DialogueController  {get; }
         DoorNumberController? DoorNumberController { get; }

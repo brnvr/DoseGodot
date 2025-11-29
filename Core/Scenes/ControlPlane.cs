@@ -13,9 +13,10 @@ namespace Dose.Core.Scenes
         Agnes? _agnes;
         Player? _player;
 
-        public DoorNumberController DoorNumberController { get; } = new DoorNumberController();
         public DialogueController? DialogueController { get; private set; }
         public InventoryController? InventoryController  { get; private set; }
+        public InteractivityController? InteractivityController { get; private set; }
+        public DoorNumberController DoorNumberController { get; } = new DoorNumberController();
 
         public ControlPlane Initialize(UI ui, Player player, Npc npc)
         {
@@ -28,15 +29,9 @@ namespace Dose.Core.Scenes
 
             DialogueController = new DialogueController(_ui);
             InventoryController = new InventoryController(_player.Inventory);
+            InteractivityController = new InteractivityController(_ui);
 
             return this;
         }
-
-        public void OnTargetChange(IActor? target)
-        {
-            _ui?.SetLabelValue("NameCaption", target?.Context?.DisplayName ?? "");
-        }
-
-        
     }
 }
