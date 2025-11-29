@@ -52,7 +52,7 @@ namespace Dose.Core.Library.Locations
             {
                 var context = new DoorContext
                 {
-                    Number = ControlPlane.DoorNumberController.PopRandomNumber()
+                    Number = ControlPlane.DoorNumberController?.PopRandomNumber()
                 };
 
                 initializableDoor.Initialize(context);
