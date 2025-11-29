@@ -1,5 +1,6 @@
 using System;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.Events;
 using Godot;
 
 namespace Dose.Core.Library.Control
@@ -10,16 +11,16 @@ namespace Dose.Core.Library.Control
         int _currentNodeIndex;
 
         public IDialogue Dialogue { get; }
-        public EventHandler<NodeSetEventArgs>? NodeSet { get; set; }
+        public EventHandler<DialogueNodeSetEventArgs>? NodeSet { get; set; }
 
-        public DialogueRunner(IDialogue dialogue, EventHandler<NodeSetEventArgs>? nodeSet)
+        public DialogueRunner(IDialogue dialogue, EventHandler<DialogueNodeSetEventArgs>? nodeSet)
         {
             _currentDialogue = dialogue;
 
             Dialogue = dialogue;
             NodeSet = nodeSet;
 
-            NodeSet?.Invoke(this, new NodeSetEventArgs(GetCurrentNode()));
+            NodeSet?.Invoke(this, new DialogueNodeSetEventArgs(GetCurrentNode()));
         }
 
         public void Reset()
@@ -27,7 +28,7 @@ namespace Dose.Core.Library.Control
             _currentDialogue = Dialogue;
             _currentNodeIndex = 0;
 
-            NodeSet?.Invoke(this, new NodeSetEventArgs(GetCurrentNode()));
+            NodeSet?.Invoke(this, new DialogueNodeSetEventArgs(GetCurrentNode()));
         }
 
         public IDialogueNode GetCurrentNode()
@@ -56,7 +57,7 @@ namespace Dose.Core.Library.Control
             _currentDialogue = nextDialogue;
             _currentNodeIndex = nextNodeIndex;
 
-            NodeSet?.Invoke(this, new NodeSetEventArgs(GetCurrentNode()));
+            NodeSet?.Invoke(this, new DialogueNodeSetEventArgs(GetCurrentNode()));
 
             return true;
         }

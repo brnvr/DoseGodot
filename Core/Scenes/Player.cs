@@ -3,21 +3,46 @@ using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.Interactivity;
 using Godot;
 using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Player : BasePlayer
+    public partial class Player : CharacterBody3D, ITalker, IPicker
     {
+        protected enum MoveState
+        {
+            Locked,
+            Looking,
+            Focused,
+            Free
+        }
+
+        protected enum InteractionState
+        {
+            Curious,
+            Talking
+        }
+       
         const float RAY_LENGTH = 2.3f;
         
-        private RayCast3D? _rayCast;
-        
-
-        private float _cameraAngle = 0f;
+        RayCast3D? _rayCast;
+        float _cameraAngle = 0f;
         private float _mouseSensitivity = 0.1f;
-        private float _moveSpeed = 20f;
+        float _moveSpeed = 20f;
+
+        protected Node3D? _head;
+        protected Camera3D? _view;
+        protected IActor<Player>? _currentTarget;
+        protected IControlPlane? _controlPlane;
+        protected MoveState _moveState = MoveState.Locked;
+        protected InteractionState _interactionState;
+
+        public DialogueRunner? DialogueRunner { get; private set; }
+        public Inventory? Inventory => InventoryController?.Inventory;
+        public InventoryController? InventoryController {get; protected set; }
+        public ItemContext? SelectedItem { get; protected set; }
 
         public override void _Ready()
         {
@@ -49,6 +74,96 @@ namespace Dose.Core.Scenes
             {
                 ProcessLook(motion);
             }
+        }
+
+        public Player Initialize(IControlPlane controlPlane)
+        {
+            _controlPlane = controlPlane;
+
+            return this;
+        }
+
+        public void OnDialogueBegin(DialogueRunner dialogueRunner)
+        {
+            DialogueRunner = dialogueRunner;
+            
+            if (dialogueRunner.Dialogue is Dialogue)
+            {
+                _moveState = MoveState.Focused;
+                _interactionState = InteractionState.Talking;
+            }
+            
+            UpdateDialogue();
+        }
+
+        public bool CanMove()
+        {
+            return _moveState == MoveState.Free;
+        }
+
+        public bool CanLook()
+        {
+            return _moveState == MoveState.Free || _moveState == MoveState.Looking;
+        }
+
+        public void ProgressDialogue()
+        {
+            if (DialogueRunner == null)
+            {
+                GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
+                _moveState = MoveState.Free;
+                _interactionState = InteractionState.Curious;
+                _controlPlane?.OnDialogueEnd();
+
+                return;
+            }
+
+            if (!DialogueRunner.GoToNextNode())
+            {
+                DialogueRunner = null;
+                _moveState = MoveState.Free;
+                _interactionState = InteractionState.Curious;
+                _controlPlane?.OnDialogueEnd();
+
+                UpdateTarget();
+
+                return;
+            }
+
+            UpdateDialogue();
+        }
+
+        protected void UpdateDialogue()
+        {
+            if (DialogueRunner == null) return;
+
+            _controlPlane?.OnDialogueChange(DialogueRunner.GetCurrentNode());
+        }
+
+        protected void UpdateTarget()
+        {
+            _controlPlane?.OnTargetChange(_currentTarget);
+        }
+
+        protected void LookAt(Node3D node, double delta)
+        {
+            if (_head == null)
+            {
+                GD.PushWarning("View not defined. Skipping LookAt.");
+                return;
+            }
+
+            Vector3 from = _head.GlobalPosition;
+            Vector3 to = node.GlobalPosition + new Vector3(0, 2, 0);
+
+            // Compute desired rotation
+            Basis targetBasis = Basis.LookingAt(to - from, Vector3.Up);
+
+            // Smooth rotation
+            Basis currentBasis = _head.GlobalTransform.Basis;
+            Basis newBasis = currentBasis.Slerp(targetBasis, (float)(delta * 5f));
+
+            _head.GlobalTransform = new Transform3D(newBasis, from);
         }
 
         void ProcessInteract()

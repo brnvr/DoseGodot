@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Events;
 
 namespace Dose.Core.Library.DataStructures
 {
@@ -10,7 +11,7 @@ namespace Dose.Core.Library.DataStructures
     {
         private readonly List<InventoryRecord> _records = [];
 
-        public EventHandler<ItemDroppedEventArgs>? ItemDropped { get; set; }
+        public EventHandler<InventoryItemDroppedEventArgs>? ItemDropped { get; set; }
         
         public void Add(IItem item)
         {
@@ -47,7 +48,7 @@ namespace Dose.Core.Library.DataStructures
                 _records.Remove(record);
             }
 
-            ItemDropped?.Invoke(this, new ItemDroppedEventArgs(itemContext));
+            ItemDropped?.Invoke(this, new InventoryItemDroppedEventArgs(itemContext));
         }
 
         public bool Exists(ItemContext itemContext)

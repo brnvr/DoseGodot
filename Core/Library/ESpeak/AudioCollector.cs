@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Dose.Core.Library.Events;
 using Godot;
 
 namespace Dose.Core.Library.ESpeak
@@ -9,7 +10,7 @@ namespace Dose.Core.Library.ESpeak
         readonly List<short> _samples = [];
 
         public int SampleRate { get; } = sampleRate;
-        public EventHandler<SynthCompleteEventArgs>? SynthCompleted { get; set; }
+        public EventHandler<ESpeakSynthCompleteEventArgs>? SynthCompleted { get; set; }
 
         public unsafe void Synth(string text)
         {
@@ -30,7 +31,7 @@ namespace Dose.Core.Library.ESpeak
 			{
                 var wavBytes = CreateWav([.. _samples]);
 
-                SynthCompleted?.Invoke(this, new SynthCompleteEventArgs(wavBytes, SampleRate));
+                SynthCompleted?.Invoke(this, new ESpeakSynthCompleteEventArgs(wavBytes, SampleRate));
 
 				return 0;
 			}
