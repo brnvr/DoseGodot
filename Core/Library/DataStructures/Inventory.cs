@@ -9,6 +9,8 @@ namespace Dose.Core.Library.DataStructures
     public class Inventory : IEnumerable<ItemContext>
     {
         private readonly List<InventoryRecord> _records = [];
+
+        public EventHandler<ItemDroppedEventArgs>? ItemDropped { get; set; }
         
         public void Add(IItem item)
         {
@@ -44,6 +46,8 @@ namespace Dose.Core.Library.DataStructures
             {
                 _records.Remove(record);
             }
+
+            ItemDropped?.Invoke(this, new ItemDroppedEventArgs(itemContext));
         }
 
         public bool Exists(ItemContext itemContext)

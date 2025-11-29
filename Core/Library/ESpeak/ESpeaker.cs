@@ -10,20 +10,21 @@ namespace Dose.Core.Library.ESpeak
         readonly AudioStreamPlayer3D _audioStreamPlayer;
         
         public Voice Voice { get; }
-        public Action? OnFinished { get; }
+        public Action? Finished { get; }
         public bool IsSpeaking { get; protected set; }
 
-        public ESpeaker(Voice voice, Action? onFinished)
+        public ESpeaker(Voice voice, Action? finished)
         {
-            OnFinished = onFinished;
+            Finished = finished;
             Voice = voice;
 
-            _audioCollector = new AudioCollector(voice.SampleRate, ProcessESpeakAudio);
+            _audioCollector = new AudioCollector(voice.SampleRate);
+            _audioCollector.SynthCompleted += (sender, e) => ProcessESpeakAudio(e.WavBytes, e.SampleRate);
             _audioStreamPlayer = new AudioStreamPlayer3D();
             
-            if (OnFinished != null)
+            if (Finished != null)
             {
-                _audioStreamPlayer.Finished += OnFinished;
+                _audioStreamPlayer.Finished += Finished;
             }
 
             _audioStreamPlayer.Finished += () =>
@@ -41,7 +42,7 @@ namespace Dose.Core.Library.ESpeak
             _audioCollector.Synth(text);
         }
 
-         void ProcessESpeakAudio(byte[] data, int sampleRate)
+        void ProcessESpeakAudio(byte[] data, int sampleRate)
 		{
 			var stream = new AudioStreamWav
 			{

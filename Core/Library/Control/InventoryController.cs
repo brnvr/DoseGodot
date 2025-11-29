@@ -4,20 +4,65 @@ using Dose.Core.Library.DataStructures;
 
 namespace Dose.Core.Library.Control
 {
-    public class InventoryController(Inventory inventory)
+    public class InventoryController
     {
         int _currentItemIndex;
 
-        public Inventory Inventory { get; } = inventory;
+        public Inventory Inventory { get; }
         public ItemContext? CurrentItem { get => GetNextItem(0); }
+
+        public InventoryController(Inventory inventory)
+        {
+            Inventory = inventory;
+
+            Inventory.ItemDropped += (sender, e) =>
+            {
+                if (e.ItemContext == CurrentItem)
+                {
+                    GoToPreviousItem();
+                }
+            };
+        }
+
+        public void GoToFirstItem()
+        {
+            _currentItemIndex = 0;
+        }
+
+        public void GoToLastItem()
+        {
+            if (!Inventory.Any())
+                return;
+
+            _currentItemIndex = Inventory.Count() - 1;
+        }
+
+        public void GoToItem(ItemContext itemContext)
+        {
+            var index = Inventory
+                .Select((item, index) => new { item, index })
+                .FirstOrDefault(x => x.item == itemContext)
+                ?.index;
+
+            if (index != null)
+            {
+                _currentItemIndex = (int)index;
+            }
+        }
         
         public void GoToNextItem()
         {
+            if (!Inventory.Any())
+                return;
+
             _currentItemIndex = _currentItemIndex < Inventory.Count() - 1 ? _currentItemIndex + 1 : 0;
         }
 
         public void GoToPreviousItem()
         {
+            if (!Inventory.Any())
+                return;
+
             _currentItemIndex = _currentItemIndex > 0 ? _currentItemIndex - 1 : Inventory.Count() - 1;
         }
 

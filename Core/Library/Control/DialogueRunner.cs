@@ -4,22 +4,22 @@ using Godot;
 
 namespace Dose.Core.Library.Control
 {
-    public class DialogueTravesser
+    public class DialogueRunner
     {
         IDialogue _currentDialogue;
         int _currentNodeIndex;
 
         public IDialogue Dialogue { get; }
-        public Action<IDialogueNode>? OnNodeSet { get; }
+        public EventHandler<NodeSetEventArgs>? NodeSet { get; set; }
 
-        public DialogueTravesser(IDialogue dialogue, Action<IDialogueNode>? onNodeSet)
+        public DialogueRunner(IDialogue dialogue, EventHandler<NodeSetEventArgs>? nodeSet)
         {
             _currentDialogue = dialogue;
 
             Dialogue = dialogue;
-            OnNodeSet = onNodeSet;
+            NodeSet = nodeSet;
 
-            OnNodeSet?.Invoke(GetCurrentNode());
+            NodeSet?.Invoke(this, new NodeSetEventArgs(GetCurrentNode()));
         }
 
         public void Reset()
@@ -27,7 +27,7 @@ namespace Dose.Core.Library.Control
             _currentDialogue = Dialogue;
             _currentNodeIndex = 0;
 
-            OnNodeSet?.Invoke(GetCurrentNode());
+            NodeSet?.Invoke(this, new NodeSetEventArgs(GetCurrentNode()));
         }
 
         public IDialogueNode GetCurrentNode()
@@ -56,7 +56,7 @@ namespace Dose.Core.Library.Control
             _currentDialogue = nextDialogue;
             _currentNodeIndex = nextNodeIndex;
 
-            OnNodeSet?.Invoke(nextNode);
+            NodeSet?.Invoke(this, new NodeSetEventArgs(GetCurrentNode()));
 
             return true;
         }

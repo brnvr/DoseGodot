@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -27,9 +28,9 @@ namespace Dose.Core.Interactions
                         return;
                     }
 
-                    var travesser = new DialogueTravesser(dialogue, node =>
+                    var dialogueRunner = new DialogueRunner(dialogue, (sender, e) =>
                     {
-                        if (subject is ISpeakable speakable && node is DialogueSpeech speech)
+                        if (subject is ISpeakable speakable && e.Node is DialogueSpeech speech)
                         {
                             if (speakable.Speaker?.IsSpeaking == true)
                             {
@@ -45,7 +46,7 @@ namespace Dose.Core.Interactions
 
                     if (canTalk)
                     {
-                        talker.OnDialogueBegin(travesser);
+                        talker.OnDialogueBegin(dialogueRunner);
                     }
                 }
 

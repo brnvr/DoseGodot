@@ -29,8 +29,8 @@ namespace Dose.Core.Library.Actors
         protected MoveState _moveState = MoveState.Locked;
         protected InteractionState _interactionState;
 
-        public DialogueTravesser? DialogueTravesser { get; private set; }
-        public Inventory? Inventory { get; protected set; }
+        public DialogueRunner? DialogueRunner { get; private set; }
+        public Inventory? Inventory => InventoryController?.Inventory;
         public InventoryController? InventoryController {get; protected set; }
         public ItemContext? SelectedItem { get; protected set; }
 
@@ -41,11 +41,11 @@ namespace Dose.Core.Library.Actors
             return this;
         }
 
-        public void OnDialogueBegin(DialogueTravesser dialogueTravesser)
+        public void OnDialogueBegin(DialogueRunner dialogueRunner)
         {
-            DialogueTravesser = dialogueTravesser;
+            DialogueRunner = dialogueRunner;
             
-            if (dialogueTravesser.Dialogue is Dialogue)
+            if (dialogueRunner.Dialogue is Dialogue)
             {
                 _moveState = MoveState.Focused;
                 _interactionState = InteractionState.Talking;
@@ -66,9 +66,9 @@ namespace Dose.Core.Library.Actors
 
         public void ProgressDialogue()
         {
-            if (DialogueTravesser == null)
+            if (DialogueRunner == null)
             {
-                GD.PushWarning("Dialogue Travesser is null. Can't progress dialogue.");
+                GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
                 _controlPlane?.OnDialogueEnd();
@@ -76,9 +76,9 @@ namespace Dose.Core.Library.Actors
                 return;
             }
 
-            if (!DialogueTravesser.GoToNextNode())
+            if (!DialogueRunner.GoToNextNode())
             {
-                DialogueTravesser = null;
+                DialogueRunner = null;
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
                 _controlPlane?.OnDialogueEnd();
@@ -93,9 +93,9 @@ namespace Dose.Core.Library.Actors
 
         protected void UpdateDialogue()
         {
-            if (DialogueTravesser == null) return;
+            if (DialogueRunner == null) return;
 
-            _controlPlane?.OnDialogueChange(DialogueTravesser.GetCurrentNode());
+            _controlPlane?.OnDialogueChange(DialogueRunner.GetCurrentNode());
         }
 
         protected void UpdateTarget()

@@ -4,12 +4,12 @@ using Godot;
 
 namespace Dose.Core.Library.ESpeak
 {
-    public class AudioCollector(int sampleRate, Action<byte[], int> onSynthComplete)
+    public class AudioCollector(int sampleRate)
     {
         readonly List<short> _samples = [];
 
         public int SampleRate { get; } = sampleRate;
-        public Action<byte[], int> OnSynthComplete { get; } = onSynthComplete;
+        public EventHandler<SynthCompleteEventArgs>? SynthCompleted { get; set; }
 
         public unsafe void Synth(string text)
         {
@@ -30,7 +30,7 @@ namespace Dose.Core.Library.ESpeak
 			{
                 var wavBytes = CreateWav([.. _samples]);
 
-                OnSynthComplete(wavBytes, SampleRate);
+                SynthCompleted?.Invoke(this, new SynthCompleteEventArgs(wavBytes, SampleRate));
 
 				return 0;
 			}

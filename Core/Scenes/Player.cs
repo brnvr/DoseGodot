@@ -21,8 +21,7 @@ namespace Dose.Core.Scenes
 
         public override void _Ready()
         {
-            Inventory = [];
-            InventoryController = new InventoryController(Inventory);
+            InventoryController = new InventoryController([]);
             _moveState = MoveState.Free;
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
