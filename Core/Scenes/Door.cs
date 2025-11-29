@@ -2,6 +2,7 @@ using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Interactivity;
+using Dose.Core.Library.Locations;
 using Dose.Core.Library.Numbers;
 using Godot;
 using System;
@@ -17,7 +18,7 @@ namespace Dose.Core.Scenes
         Closing
     }
 
-    public partial class Door : Node3D, IActor<Player>, IInitializable, IToggleable<DoorState>
+    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>
     {
         const double MAX_OPENING = Math.PI / 2;
 
@@ -28,7 +29,7 @@ namespace Dose.Core.Scenes
 
         [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
 
-        public IActorContext Context => new TestDoorContext();
+        public IActorContext? Context { get; private set; }
         public DoorState State { get; private set; }
         public IReadOnlyDictionary<DoorState, string> DisplayNameForState { get; } = new Dictionary<DoorState, string>
         {
@@ -39,11 +40,12 @@ namespace Dose.Core.Scenes
         };
 
 
-        public void Initialize()
+        public void Initialize(DoorContext? context)
         {
             _opening = 0;
             State = DoorState.Closed;
             _yRotationStart = Rotation.Y;
+            Context = context;
         }
 
         public IInteraction<Player> GetDefaultInteraction(Player interactor)

@@ -40,13 +40,11 @@ namespace Dose.Core.Scenes
         protected InteractionState _interactionState;
 
         public DialogueRunner? DialogueRunner { get; private set; }
-        public Inventory? Inventory => InventoryController?.Inventory;
-        public InventoryController? InventoryController {get; protected set; }
+        public Inventory Inventory { get; } = [];
         public ItemContext? SelectedItem { get; protected set; }
 
         public override void _Ready()
         {
-            InventoryController = new InventoryController([]);
             _moveState = MoveState.Free;
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
@@ -113,7 +111,7 @@ namespace Dose.Core.Scenes
                 GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
-                _controlPlane?.OnDialogueEnd();
+                _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 return;
             }
@@ -123,7 +121,7 @@ namespace Dose.Core.Scenes
                 DialogueRunner = null;
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
-                _controlPlane?.OnDialogueEnd();
+                _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 UpdateTarget();
 
@@ -137,7 +135,7 @@ namespace Dose.Core.Scenes
         {
             if (DialogueRunner == null) return;
 
-            _controlPlane?.OnDialogueChange(DialogueRunner.GetCurrentNode());
+            _controlPlane?.DialogueController?.OnDialogueChange(DialogueRunner.GetCurrentNode());
         }
 
         protected void UpdateTarget()
@@ -219,13 +217,13 @@ namespace Dose.Core.Scenes
         void ProcessInventory()
         {
             if (Input.IsActionJustPressed("InventoryPreviousItem"))
-                InventoryController?.GoToPreviousItem();
+                _controlPlane?.InventoryController?.GoToPreviousItem();
 
             if (Input.IsActionJustPressed("InventoryNextItem"))
-                InventoryController?.GoToNextItem();
+                _controlPlane?.InventoryController?.GoToNextItem();
 
             if (Input.IsActionJustPressed("InventorySelect"))
-                SelectedItem = SelectedItem is null ? InventoryController?.CurrentItem : null;
+                SelectedItem = SelectedItem is null ? _controlPlane?.InventoryController?.CurrentItem : null;
         }
 
         void ProcessWalk()

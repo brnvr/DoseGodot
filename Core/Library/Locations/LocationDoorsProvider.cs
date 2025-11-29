@@ -1,15 +1,17 @@
 using System;
 using System.Linq;
-using Dose.Core.Library.Common;
+using Dose.Core.Library.Actors;
+using Dose.Core.Library.Control;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationDoorsProvider(IBuildableLocation location, PackedScene doorScene, int blockSize) : LocationBuilder(location)
+    public class LocationDoorsProvider(IBuildableLocation location, PackedScene doorScene, int blockSize, IControlPlane controlPlane) : LocationBuilder(location)
     {
         public int BlockSize { get; } = blockSize;
         public PackedScene DoorScene { get; } = doorScene;
+        public IControlPlane ControlPlane { get; } = controlPlane;
         
         protected override void OnBuildCell(Vector2I position)
         {
@@ -46,9 +48,14 @@ namespace Dose.Core.Library.Locations
             door.Position = position;
             door.RotateY(rotation);
 
-            if (door is IInitializable initializableDoor)
+            if (door is IDoor initializableDoor)
             {
-                initializableDoor.Initialize();
+                var context = new DoorContext
+                {
+                    Number = ControlPlane.DoorNumberController.PopRandomNumber()
+                };
+
+                initializableDoor.Initialize(context);
             }
         }
     }

@@ -3,6 +3,7 @@ using Godot;
 using System.Collections.Generic;
 using Dose.Core.Library.Numbers;
 using static Dose.Core.Library.GodotUtils;
+using Dose.Core.Library.Control;
 
 namespace Dose.Core.Scenes
 {
@@ -15,9 +16,9 @@ namespace Dose.Core.Scenes
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
 
-		public override void _Ready()
-		{
-			var mapGenerator = new CorridorMapGenerator(
+		public LocationManager Initialize(IControlPlane controlPlane)
+        {
+            var mapGenerator = new CorridorMapGenerator(
 				horizontalCells: 500,
 				verticalCells: 500,
 				probabilityToExtendCorridor: new Probability(0.7),
@@ -32,13 +33,15 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder>
 			{
 				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE),
-				new LocationDoorsProvider(location, _doorScene, BLOCK_SIZE)
+				new LocationDoorsProvider(location, _doorScene, BLOCK_SIZE, controlPlane)
 			};
 
 			foreach (var builder in builders)
 			{
 				builder.Build();
 			}
-		}
+
+			return this;
+        }
 	}
 }
