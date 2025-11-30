@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
 
@@ -11,7 +10,7 @@ namespace Dose.Core.Interactions
         public string DisplayName { get => GetDisplayName(); }
         public TInteractor Interactor { get; } = interactor;
 
-        public void Perform(IActor subject)
+        public virtual void Perform(IActor subject)
         {
             if (subject is IToggleable<TState> toggleable)
             {

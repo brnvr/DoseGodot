@@ -25,10 +25,12 @@ namespace Dose.Core.Scenes
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
-
+        ILocation? _otherLocation;
+        ILocationManager? _locationManager;
 
         [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
 
+        public ILocation? OtherLocation { get => _otherLocation; set { SetOtherLocation(value); }}
         public IActorContext? Context { get; private set; }
         public DoorState State { get; private set; }
         public IReadOnlyDictionary<DoorState, string> DisplayNameForState { get; } = new Dictionary<DoorState, string>
@@ -40,17 +42,35 @@ namespace Dose.Core.Scenes
         };
 
 
-        public void Initialize(DoorContext? context)
+        public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? otherLocation = null)
         {
             _opening = 0;
             State = DoorState.Closed;
             _yRotationStart = Rotation.Y;
             Context = context;
+            OtherLocation = otherLocation;
+            _locationManager = locationManager;
+        }
+
+        void SetOtherLocation(ILocation? location)
+        {
+            if (_otherLocation != null)
+            {
+                GD.PushError($"{nameof(Door)}.{nameof(_otherLocation)} has already been set.");
+                return;
+            }
+
+            _otherLocation = location;
         }
 
         public IInteraction<Player> GetDefaultInteraction(Player interactor)
         {
-            return new ToggleInteraction<Player, DoorState>(interactor);
+            if (_locationManager == null)
+            {
+                return new ToggleInteraction<Player, DoorState>(interactor);
+            }
+
+            return new OpenDoorInteraction<Player>(interactor, _locationManager);
         }
 
         public void OnInteract(IInteraction<Player> interaction)

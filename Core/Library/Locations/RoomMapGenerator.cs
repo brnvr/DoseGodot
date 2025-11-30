@@ -16,10 +16,9 @@ namespace Dose.Core.Library.Locations
         {
             var size = new Random().Next(MinSize, MaxSize);
             var map = new Map(size, size);
-            var direction = CardinalDirection.East;
             var startingPoint = new Vector2I();
 
-            GenerateWall(map, startingPoint, direction);
+            GenerateWall(map, startingPoint, CardinalDirection.East);
 
             return map;
         }
@@ -27,22 +26,30 @@ namespace Dose.Core.Library.Locations
         public void GenerateWall(Map map, Vector2I point, CardinalDirection direction)
         {
             var wallDirection = NextDirection(direction, GeoPositioning.ClockDirection.Counterclockwise);
+
+            map.TryGet(point, out MapCell? existingCell);
+
+            if (existingCell != null && existingCell.GetWall(wallDirection) != null)
+                return;
+
             var shouldBuildDoor = new RandomDecider(ProbabilityToBuildDoor).Roll();
-            var cell = new MapCell().WithWall(wallDirection, new MapCellWall(null, shouldBuildDoor));
+            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(null, shouldBuildDoor));
 
             map.Set(point, cell);
 
             var nextPoint = MoveTo(point, direction);
             var isNextPointInBounds = map.TryGet(nextPoint, out MapCell? nextCell);
 
-            if (nextCell != null)
+            if (isNextPointInBounds)
             {
+                GenerateWall(map, nextPoint, direction);
+
                 return;
             }
 
-            var nextDirection = isNextPointInBounds ? direction : NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
+            var nextDirection = NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
 
-            GenerateWall(map, nextPoint, nextDirection);
+            GenerateWall(map, point, nextDirection);
         }
     }
 }

@@ -7,11 +7,12 @@ using static Dose.Core.Library.GeoPositioning;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationDoorsProvider(IBuildableLocation location, PackedScene doorScene, int blockSize, IControlPlane controlPlane) : LocationBuilder(location)
+    public class LocationDoorsProvider(ILocationManager locationManager, IBuildableLocation location, PackedScene doorScene, int blockSize, IControlPlane controlPlane) : LocationBuilder(location)
     {
         public int BlockSize { get; } = blockSize;
         public PackedScene DoorScene { get; } = doorScene;
         public IControlPlane ControlPlane { get; } = controlPlane;
+        public ILocationManager LocationManager { get; } = locationManager;
         
         protected override void OnBuildCell(Vector2I position)
         {
@@ -55,7 +56,7 @@ namespace Dose.Core.Library.Locations
                     Number = ControlPlane.DoorNumberController?.PopRandomNumber()
                 };
 
-                initializableDoor.Initialize(context);
+                initializableDoor.Initialize(context, LocationManager, Location);
             }
         }
     }

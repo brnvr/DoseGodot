@@ -4,6 +4,7 @@ namespace Dose.Core.Library.Locations
 {
     public interface IDoor
     {
-        void Initialize(DoorContext? context);
+        ILocation? OtherLocation { get; set; }
+        void Initialize(DoorContext context, ILocationManager locationManager, ILocation otherLocation);
     }
 }
