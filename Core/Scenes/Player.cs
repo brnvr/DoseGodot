@@ -4,12 +4,13 @@ using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Interactivity;
+using Dose.Core.Library.Locations;
 using Godot;
 using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Player : CharacterBody3D, ITalker, IPicker
+    public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener
     {
         protected enum MoveState
         {
@@ -291,5 +292,34 @@ namespace Dose.Core.Scenes
                     break;
             }          
         }
+
+        public void OnDoorOpened(IDoor door)
+        {
+            Transform3D? local = null;
+
+            if (door is Node3D doorNode)
+            {
+                local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
+            }
+
+            _controlPlane?.LocationController?.UpdateLocation(door);
+
+            if (local != null && door.LinkedDoor is Node3D linkedDoorNode)
+            {
+                var rot180 = new Basis(Vector3.Up, Mathf.Pi);
+
+                var _local = (Transform3D)local;
+                _local.Basis = rot180 * _local.Basis;
+                _local.Origin = rot180 * _local.Origin;
+
+                GlobalTransform = linkedDoorNode.GlobalTransform * _local;
+            }
+
+            if (door.LinkedDoor is IToggleable linkedDoor)
+            {
+                linkedDoor.Toggle();
+            }
+        }
+
     }
 }

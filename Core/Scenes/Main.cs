@@ -18,8 +18,10 @@ namespace Dose.Core.Scenes
 			var ui = GetNode<UI>("UI");
 			var npc = GetNode<Npc>("Npc");
 			var player = GetNode<Player>("Player");
-			var controlPlane = GetNode<ControlPlane>("ControlPlane").Initialize(ui, player, npc);
+			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager").Initialize(controlPlane);
+
+			controlPlane.Initialize(ui, player, npc, locationManager);
 
 			AudioCollector.InitializeESpeak();
 			

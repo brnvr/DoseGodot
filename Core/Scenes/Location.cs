@@ -3,8 +3,6 @@ using Dose.Core.Library.Randomness;
 using Godot;
 using System;
 using System.Linq;
-using static Dose.Core.Library.GeoPositioning;
-using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Scenes
 {

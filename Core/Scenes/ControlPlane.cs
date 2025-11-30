@@ -1,35 +1,28 @@
 using Dose.Core.Actors.Npcs;
-using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
-using Dose.Core.Library.DataStructures;
-using Dose.Core.Library.UI;
 using Godot;
 
 namespace Dose.Core.Scenes
 {
     public partial class ControlPlane : Node, IControlPlane
     {
-        UI? _ui;
-        Agnes? _agnes;
-        Player? _player;
-
+        public LocationController? LocationController { get; private set; }
         public DialogueController? DialogueController { get; private set; }
         public InventoryController? InventoryController  { get; private set; }
         public InteractivityController? InteractivityController { get; private set; }
         public DoorNumberController DoorNumberController { get; } = new DoorNumberController();
 
-        public ControlPlane Initialize(UI ui, Player player, Npc npc)
+        public ControlPlane Initialize(UI ui, Player player, Npc npc, LocationManager locationManager)
         {
-            _agnes = new(player);
-            _ui = ui;
-            _player = player;
+            var agnes = new Agnes(player);
             
-            npc.Initialize(_agnes, player);
+            npc.Initialize(agnes, player);
             player.Initialize(this);
 
-            DialogueController = new DialogueController(_ui);
-            InventoryController = new InventoryController(_player.Inventory);
-            InteractivityController = new InteractivityController(_ui);
+            LocationController = new LocationController(locationManager);
+            DialogueController = new DialogueController(ui);
+            InventoryController = new InventoryController(player.Inventory);
+            InteractivityController = new InteractivityController(ui);
 
             return this;
         }

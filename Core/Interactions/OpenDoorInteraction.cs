@@ -1,4 +1,5 @@
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
 using Dose.Core.Scenes;
 using Godot;
@@ -13,32 +14,13 @@ namespace Dose.Core.Interactions
         {
             if (subject is IDoor door)
             {
-                if (door.LinkedDoor is null)
+                if (Interactor is IDoorOpener doorOpener)
                 {
-                    var location = LocationManager.CreateLocation();
-                    var otherDoor = location?.SelectRandomDoor();
-                    
-                    if (otherDoor != null)
-                    {
-                        door.LinkDoor(otherDoor);
-                    }
-
-                    LocationManager.CurrentLocation = location;
-                }
-                else
-                {
-                    LocationManager.CurrentLocation = door.LinkedDoor.Location;
-                }
-
-                if (Interactor is Node3D interactorNode && door.LinkedDoor is Node3D doorNode)
-                {
-                    interactorNode.Position = doorNode.Position;
-                }
-
-                door.LinkedDoor?.Location?.Clear(3);
-
-                base.Perform(subject);
+                    doorOpener.OnDoorOpened(door);
+                }    
             }
+
+            base.Perform(subject);
         }
     }
 }
