@@ -26,7 +26,7 @@ namespace Dose.Core.Scenes
 
 		IControlPlane? _controlPlane;
 		ILocation? _currentLocation;
-		GeoPositioning.ClockDirection _nextDoorClockDirection = GeoPositioning.ClockDirection.Clockwise;
+		ClockDirection _nextDoorClockDirection = ClockDirection.Clockwise;
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
 
@@ -79,8 +79,7 @@ namespace Dose.Core.Scenes
 			}
 
 			_nextDoorClockDirection = (
-				_nextDoorClockDirection == GeoPositioning.ClockDirection.Clockwise ?
-				GeoPositioning.ClockDirection.Counterclockwise : GeoPositioning.ClockDirection.Clockwise
+				_nextDoorClockDirection == ClockDirection.Clockwise ? ClockDirection.Counterclockwise : ClockDirection.Clockwise
 			);
 
 			return location;

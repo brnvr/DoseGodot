@@ -29,7 +29,7 @@ namespace Dose.Core.Library.Locations
 
         public void GenerateWall(Map map, Vector2I point, CardinalDirection direction)
         {
-            var wallDirection = NextDirection(direction, GeoPositioning.ClockDirection.Counterclockwise);
+            var wallDirection = NextDirection(direction, ClockDirection.Counterclockwise);
 
             map.TryGet(point, out MapCell? existingCell);
 
@@ -52,7 +52,7 @@ namespace Dose.Core.Library.Locations
                 return;
             }
 
-            var nextDirection = NextDirection(direction, GeoPositioning.ClockDirection.Clockwise);
+            var nextDirection = NextDirection(direction, ClockDirection.Clockwise);
 
             GenerateWall(map, point, nextDirection);
         }

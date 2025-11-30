@@ -9,14 +9,14 @@ using static Dose.Core.Library.Locations.MapCellWall;
 namespace Dose.Core.Library.Locations
 {
     public class LocationDoorsProvider(
-        ILocationManager locationManager, IBuildableLocation location, PackedScene doorScene, int blockSize, IControlPlane controlPlane, GeoPositioning.ClockDirection clockDirection
+        ILocationManager locationManager, IBuildableLocation location, PackedScene doorScene, int blockSize, IControlPlane controlPlane, ClockDirection clockDirection
     ) : LocationBuilder(location)
     {
         public int BlockSize { get; } = blockSize;
         public PackedScene DoorScene { get; } = doorScene;
         public IControlPlane ControlPlane { get; } = controlPlane;
         public ILocationManager LocationManager { get; } = locationManager;
-        public GeoPositioning.ClockDirection ClockDirection { get; } = clockDirection;
+        public ClockDirection ClockDirection { get; } = clockDirection;
         
         protected override void OnBuildCell(Vector2I position)
         {
@@ -60,7 +60,7 @@ namespace Dose.Core.Library.Locations
                     Number = ControlPlane.DoorNumberController?.PopRandomNumber()
                 };
 
-                initializableDoor.Initialize(context, LocationManager, Location);
+                initializableDoor.Initialize(context, LocationManager, Location, ClockOpposite(ClockDirection));
             }
         }
     }

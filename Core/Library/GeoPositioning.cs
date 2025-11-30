@@ -20,12 +20,6 @@ namespace Dose.Core.Library
             Vertical
         }
 
-        public enum ClockDirection
-        {
-            Clockwise,
-            Counterclockwise
-        }
-
         public static ICollection<CardinalDirection> AllDirections()
         {
             return
@@ -89,6 +83,11 @@ namespace Dose.Core.Library
                 CardinalDirection.West => point - new Vector2(distance, 0),
                 _ => throw new Exception("Invalid direction."),
             };
+        }
+
+        public static ClockDirection ClockOpposite(ClockDirection direction)
+        {
+            return direction == ClockDirection.Clockwise ? ClockDirection.Counterclockwise : ClockDirection.Clockwise;
         }
 
         public static CardinalDirection CardinalOpposite(CardinalDirection direction)

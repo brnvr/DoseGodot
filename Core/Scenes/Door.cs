@@ -27,8 +27,7 @@ namespace Dose.Core.Scenes
         readonly float _rotateSpeed = Mathf.DegToRad(5);
         ILocationManager? _locationManager;
 
-        [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
-
+        [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
         public ILocation? Location { get; private set; }
         public IDoor? LinkedDoor { get; private set; }
         public IActorContext? Context { get; private set; }
@@ -41,13 +40,14 @@ namespace Dose.Core.Scenes
           { DoorState.Closing, "open" },
         };
 
-        public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? location)
+        public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? location, ClockDirection openDirection)
         {
             _opening = 0;
             State = DoorState.Closed;
             _yRotationStart = Rotation.Y;
             Context = context;
             Location = location;
+            OpenDirection = openDirection;
             _locationManager = locationManager;
         }
 
