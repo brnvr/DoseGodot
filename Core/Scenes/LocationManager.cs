@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Dose.Core.Library.Numbers;
 using static Dose.Core.Library.GodotUtils;
 using Dose.Core.Library.Control;
+using Dose.Core.Library;
 
 namespace Dose.Core.Scenes
 {
@@ -21,9 +22,11 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
+		
 
 		IControlPlane? _controlPlane;
 		ILocation? _currentLocation;
+		GeoPositioning.ClockDirection _nextDoorClockDirection = GeoPositioning.ClockDirection.Clockwise;
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
 
@@ -67,13 +70,18 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder>
 			{
 				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE),
-				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane)
+				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane, _nextDoorClockDirection)
 			};
 
 			foreach (var builder in builders)
 			{
 				builder.Build();
 			}
+
+			_nextDoorClockDirection = (
+				_nextDoorClockDirection == GeoPositioning.ClockDirection.Clockwise ?
+				GeoPositioning.ClockDirection.Counterclockwise : GeoPositioning.ClockDirection.Clockwise
+			);
 
 			return location;
         }

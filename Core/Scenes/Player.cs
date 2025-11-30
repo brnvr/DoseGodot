@@ -308,11 +308,11 @@ namespace Dose.Core.Scenes
             {
                 var rot180 = new Basis(Vector3.Up, Mathf.Pi);
 
-                var _local = (Transform3D)local;
-                _local.Basis = rot180 * _local.Basis;
-                _local.Origin = rot180 * _local.Origin;
+                // var _local = (Transform3D)local;
+                // _local.Basis = rot180 * _local.Basis;
+                // _local.Origin = rot180 * _local.Origin;
 
-                GlobalTransform = linkedDoorNode.GlobalTransform * _local;
+                GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
             }
 
             if (door.LinkedDoor is IToggleable linkedDoor)
