@@ -4,6 +4,7 @@ using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
+using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
@@ -23,7 +24,7 @@ namespace Dose.Core.Library.Locations
 
             var cell = Location.Map.Get(position);
     
-            foreach (var direction in AllDirections().Where(direction => cell.GetWall(direction)?.HasDoor == true))
+            foreach (var direction in AllDirections().Where(direction => cell.GetWall(direction) != null && cell.GetWall(direction)?.DoorType != MapCellDoorType.None))
             {
                 AddDoor(position, direction);
             }

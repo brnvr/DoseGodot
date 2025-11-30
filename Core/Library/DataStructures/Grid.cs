@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 namespace Dose.Core.Library.DataStructures
@@ -26,6 +27,18 @@ namespace Dose.Core.Library.DataStructures
         public Vector2I[] GetFilledPositions()
         {
             return [.. _filledPositions];
+        }
+
+        public IEnumerable<T> GetDefinedValues()
+        {
+            List<T> definedValues = [];
+
+            foreach (var pos in _filledPositions)
+            {
+                definedValues.Add(_cells[pos.X, pos.Y]);
+            }
+
+            return definedValues;
         }
 
         public void Set(Vector2I position, T value)

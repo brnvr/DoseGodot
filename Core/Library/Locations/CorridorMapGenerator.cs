@@ -6,6 +6,7 @@ using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
+using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
@@ -35,6 +36,8 @@ namespace Dose.Core.Library.Locations
             var startingPoint = GetCenter();
             var selectedDirection = new RandomSelector<CardinalDirection>(AllDirections()).Pick();
             GenerateCorridor(map, startingPoint, selectedDirection);
+
+            new MapDoorEnsurer(map).EnsureAtLeastOne();
 
             return map;
         }
@@ -158,7 +161,7 @@ namespace Dose.Core.Library.Locations
         static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
         {
             var wallDirection = wallDirections.First();
-            var wall = new MapCellWall(null, false);
+            var wall = new MapCellWall(null, MapCellDoorType.None);
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -180,7 +183,8 @@ namespace Dose.Core.Library.Locations
             var buildOrientation = OrientationFromDirection(direction);
             var wallOrientation = OrientationFromDirection(wallDirection);
             var hasDoor = (buildOrientation != wallOrientation) && ((shouldBuildDoors0 && _directions0.Contains(wallDirection)) || (shouldBuildDoors1 && _directions1.Contains(wallDirection)));
-            var wall = new MapCellWall(null, hasDoor);
+            var doorType = hasDoor ? MapCellDoorType.Open : MapCellDoorType.None;
+            var wall = new MapCellWall(null, doorType);
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);

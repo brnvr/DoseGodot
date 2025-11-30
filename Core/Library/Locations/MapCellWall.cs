@@ -4,13 +4,20 @@ namespace Dose.Core.Library.Locations
 {
     public record MapCellWall
     {
-        public Texture2DArray? TextureArray { get; }
-        public bool HasDoor { get; }
+        public enum MapCellDoorType
+        {
+            None,
+            Open,
+            Locked
+        }
 
-        public MapCellWall(Texture2DArray? textureArray, bool hasDoor)
+        public Texture2DArray? TextureArray { get; }
+        public MapCellDoorType DoorType { get; set; }
+
+        public MapCellWall(Texture2DArray? textureArray, MapCellDoorType doorType)
         {
             TextureArray = textureArray;
-            HasDoor = hasDoor;
+            DoorType = doorType;
         }
     }
 }

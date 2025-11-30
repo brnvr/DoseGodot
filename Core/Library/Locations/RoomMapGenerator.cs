@@ -1,8 +1,10 @@
 using System;
+using System.Linq;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
+using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
@@ -20,6 +22,8 @@ namespace Dose.Core.Library.Locations
 
             GenerateWall(map, startingPoint, CardinalDirection.East);
 
+            new MapDoorEnsurer(map).EnsureAtLeastOne();
+
             return map;
         }
 
@@ -33,7 +37,8 @@ namespace Dose.Core.Library.Locations
                 return;
 
             var shouldBuildDoor = new RandomDecider(ProbabilityToBuildDoor).Roll();
-            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(null, shouldBuildDoor));
+            var doorType = shouldBuildDoor ? MapCellDoorType.Open : MapCellDoorType.None;
+            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(null, doorType));
 
             map.Set(point, cell);
 

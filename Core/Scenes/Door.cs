@@ -25,12 +25,12 @@ namespace Dose.Core.Scenes
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
-        ILocation? _otherLocation;
         ILocationManager? _locationManager;
 
         [Export] public ClockDirection OpenDirection = ClockDirection.Clockwise;
 
-        public ILocation? OtherLocation { get => _otherLocation; set { SetOtherLocation(value); }}
+        public ILocation? Location { get; private set; }
+        public IDoor? LinkedDoor { get; private set; }
         public IActorContext? Context { get; private set; }
         public DoorState State { get; private set; }
         public IReadOnlyDictionary<DoorState, string> DisplayNameForState { get; } = new Dictionary<DoorState, string>
@@ -41,26 +41,35 @@ namespace Dose.Core.Scenes
           { DoorState.Closing, "open" },
         };
 
-
-        public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? otherLocation = null)
+        public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? location)
         {
             _opening = 0;
             State = DoorState.Closed;
             _yRotationStart = Rotation.Y;
             Context = context;
-            OtherLocation = otherLocation;
+            Location = location;
             _locationManager = locationManager;
         }
 
-        void SetOtherLocation(ILocation? location)
+        public void LinkDoor(IDoor other)
         {
-            if (_otherLocation != null)
+            if (LinkedDoor == other)
             {
-                GD.PushError($"{nameof(Door)}.{nameof(_otherLocation)} has already been set.");
+                return;
+            }
+            else if (LinkedDoor != null)
+            {
+                GD.PushError($"{nameof(Door)}.{nameof(LinkedDoor)} has already been set.");
                 return;
             }
 
-            _otherLocation = location;
+            LinkedDoor = other;
+            other.LinkDoor(this);
+        }
+
+        public void UnlinkDoor()
+        {
+            LinkedDoor = null;
         }
 
         public IInteraction<Player> GetDefaultInteraction(Player interactor)
@@ -150,5 +159,4 @@ namespace Dose.Core.Scenes
             return true;
         }
     }
-
 }

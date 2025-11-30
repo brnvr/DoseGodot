@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
+using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
@@ -58,7 +59,7 @@ namespace Dose.Core.Library.Locations
                 return;
             }
 
-            var mesh = wall.HasDoor ? WallWithOpeningMesh : WallMesh;
+            var mesh = wall.DoorType != MapCellDoorType.None ? WallWithOpeningMesh : WallMesh;
 
             var centerPosition = MoveTo(point, direction, 0.5f);
             var wallPosition = new Vector3((centerPosition.X - Location.Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Location.Map.VerticalCells / 2) * BlockSize);

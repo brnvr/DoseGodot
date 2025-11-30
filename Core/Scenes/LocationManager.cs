@@ -27,6 +27,11 @@ namespace Dose.Core.Scenes
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
 
+		public override void _ExitTree()
+        {
+            CurrentLocation?.Clear(-1);
+        }
+
 		public LocationManager Initialize(IControlPlane controlPlane)
         {
 			_controlPlane = controlPlane;

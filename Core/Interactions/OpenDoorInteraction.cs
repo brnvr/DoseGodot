@@ -13,20 +13,29 @@ namespace Dose.Core.Interactions
         {
             if (subject is IDoor door)
             {
-                if (door.OtherLocation is null)
+                if (door.LinkedDoor is null)
                 {
                     var location = LocationManager.CreateLocation();
-
-                    if (location != null)
+                    var otherDoor = location?.SelectRandomDoor();
+                    
+                    if (otherDoor != null)
                     {
-                        door.OtherLocation = location;
-                        LocationManager.CurrentLocation = location;
+                        door.LinkDoor(otherDoor);
                     }
+
+                    LocationManager.CurrentLocation = location;
                 }
                 else
                 {
-                    LocationManager.CurrentLocation = door.OtherLocation;
+                    LocationManager.CurrentLocation = door.LinkedDoor.Location;
                 }
+
+                if (Interactor is Node3D interactorNode && door.LinkedDoor is Node3D doorNode)
+                {
+                    interactorNode.Position = doorNode.Position;
+                }
+
+                door.LinkedDoor?.Location?.Clear(3);
 
                 base.Perform(subject);
             }
