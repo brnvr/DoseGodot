@@ -22,6 +22,9 @@ namespace Dose.Core.Scenes
     {
         const double MAX_OPENING = Math.PI / 2;
 
+        MeshInstance3D? _mesh;
+        StaticBody3D? _body;
+        CollisionShape3D? _collisionShape;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
@@ -40,11 +43,20 @@ namespace Dose.Core.Scenes
           { DoorState.Closing, "open" },
         };
 
+        public override void _Ready()
+        {
+            _mesh = GetNode<MeshInstance3D>("Mesh");
+            _body = GetNode<StaticBody3D>("Body");
+            _collisionShape = _body.GetNode<CollisionShape3D>("CollisionShape");
+            
+            _yRotationStart = _mesh.Rotation.Y;
+        }
+
+
         public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? location, ClockDirection openDirection)
         {
             _opening = 0;
             State = DoorState.Closed;
-            _yRotationStart = Rotation.Y;
             Context = context;
             Location = location;
             OpenDirection = openDirection;
@@ -118,7 +130,7 @@ namespace Dose.Core.Scenes
                 case DoorState.Closing:
                     _opening = (float)new LinearInterpolator(_opening, 0, _rotateSpeed).Interpolate();
 
-                    if (_opening <= 0)
+                    if (_opening == 0)
                     {
                         State = DoorState.Closed;
                     }
@@ -132,12 +144,7 @@ namespace Dose.Core.Scenes
             base._Process(delta);
         }
 
-        void UpdateRotation()
-        {
-            Rotation = new Vector3(0, _yRotationStart + _opening, 0);
-        }
-
-        bool TryOpen()
+        public bool TryOpen(bool disableCollision = true)
         {
             if (State == DoorState.Open || State == DoorState.Opening)
             {
@@ -145,18 +152,44 @@ namespace Dose.Core.Scenes
             }
 
             State = DoorState.Opening;
+            if (disableCollision) DisableCollision();
+            
             return true;
         }
         
-        bool TryClose()
+        public bool TryClose()
         {
             if (State == DoorState.Closed || State == DoorState.Closing)
             {
                 return false;
             }
 
+            EnableCollision();
             State = DoorState.Closing;
+
             return true;
+        }
+
+
+        void UpdateRotation()
+        {
+            if (_mesh == null) return;
+
+            _mesh.Rotation = new Vector3(0, _yRotationStart + _opening, 0);
+        }
+
+        void EnableCollision()
+        {
+            if (_collisionShape == null) return;
+
+            _collisionShape.Disabled = false;
+        }
+        
+        void DisableCollision()
+        {
+            if (_collisionShape == null) return;
+
+            _collisionShape.Disabled = true;
         }
     }
 }

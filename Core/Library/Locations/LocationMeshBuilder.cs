@@ -14,6 +14,7 @@ namespace Dose.Core.Library.Locations
         public int BlockSize { get; } = blockSize;
         public Mesh WallMesh { get; } = wallMesh;
         public Mesh WallWithOpeningMesh { get; } = wallWithOpeningMesh;
+        public MeshInstance3D? Result { get; private set; }
 
         protected override void OnStart() {
             _surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
@@ -26,13 +27,13 @@ namespace Dose.Core.Library.Locations
 
         protected override void OnFinish()
         {
-            var meshInstance = new MeshInstance3D();
+            Result = new MeshInstance3D();
 
             _surfaceTool.Index();
-            meshInstance.Mesh = _surfaceTool.Commit();
-            meshInstance.CreateTrimeshCollision();
+            Result.Mesh = _surfaceTool.Commit();
+            Result.CreateTrimeshCollision();
 
-            Location.OnBuild(meshInstance);
+            Location.OnBuild(Result);
         }
 
         void AppendCell(Vector2I point, IEnumerable<CardinalDirection> directions)

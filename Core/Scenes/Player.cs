@@ -1,5 +1,4 @@
-using System.Linq;
-using Dose.Core.Interactions;
+using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
@@ -12,18 +11,26 @@ namespace Dose.Core.Scenes
 {
     public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener
     {
-        protected enum MoveState
+        enum MoveState
         {
             Locked,
+            Auto,
             Looking,
             Focused,
             Free
         }
 
-        protected enum InteractionState
+        enum InteractionState
         {
             Curious,
             Talking
+        }
+
+        class AutoMoveParameters(Vector3 position, float speed)
+        {
+            public float Speed { get; } = speed;
+            public Vector3 Position { get; } = position;
+            public EventHandler? Completed { get; set; }
         }
        
         const float RAY_LENGTH = 2.3f;
@@ -32,13 +39,13 @@ namespace Dose.Core.Scenes
         float _cameraAngle = 0f;
         private float _mouseSensitivity = 0.1f;
         float _moveSpeed = 20f;
-
-        protected Node3D? _head;
-        protected Camera3D? _view;
-        protected IActor<Player>? _currentTarget;
-        protected IControlPlane? _controlPlane;
-        protected MoveState _moveState = MoveState.Locked;
-        protected InteractionState _interactionState;
+        AutoMoveParameters? _autoMoveParameters;
+        Node3D? _head;
+        Camera3D? _view;
+        IActor<Player>? _currentTarget;
+        IControlPlane? _controlPlane;
+        MoveState _moveState = MoveState.Locked;
+        InteractionState _interactionState;
 
         public DialogueRunner? DialogueRunner { get; private set; }
         public Inventory Inventory { get; } = [];
@@ -64,6 +71,7 @@ namespace Dose.Core.Scenes
         {
             ProcessSeek();
             ProcessWalk();
+            ProcessAutoMove((float)delta);
             ProcessFocus();
         }
 
@@ -132,19 +140,71 @@ namespace Dose.Core.Scenes
             UpdateDialogue();
         }
 
-        protected void UpdateDialogue()
+        public void ProcessAutoMove(float delta)
+        {
+            if (_moveState != MoveState.Auto) return;
+            if (_autoMoveParameters == null) return;
+
+            var distance = _autoMoveParameters.Position - GlobalPosition;
+
+            Velocity = distance.Normalized() * _autoMoveParameters.Speed;
+
+            if (distance.Length() <= _autoMoveParameters.Speed * delta)
+            {
+                _autoMoveParameters.Completed?.Invoke(_autoMoveParameters, new EventArgs());
+                _autoMoveParameters = null;
+                _moveState = MoveState.Free;
+
+                return;
+            }
+            
+            MoveAndSlide();
+        }
+
+        public void OnDoorOpened(IDoor door)
+        {
+            Transform3D? local = null;
+
+            if (door is Door doorNode)
+            {
+                local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
+            }
+
+            _controlPlane?.LocationController?.UpdateLocation(door);
+
+            if (local != null && door.LinkedDoor is Door linkedDoorNode)
+            {
+                //var rot180 = new Basis(Vector3.Up, Mathf.Pi);
+                // var _local = (Transform3D)local;
+                // _local.Basis = rot180 * _local.Basis;
+                // _local.Origin = rot180 * _local.Origin;
+                GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
+
+                var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
+                var targetPosition = linkedDoorNode.GlobalPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign;
+                var parameters = new AutoMoveParameters(targetPosition, 5f);
+                parameters.Completed += (sender, e) => linkedDoorNode.TryClose();
+
+                AutoMoveTo(parameters);
+
+                linkedDoorNode.TryOpen();
+            }
+        }
+
+
+        void UpdateDialogue()
         {
             if (DialogueRunner == null) return;
 
             _controlPlane?.DialogueController?.OnDialogueChange(DialogueRunner.GetCurrentNode());
         }
 
-        protected void UpdateTarget()
+        void UpdateTarget()
         {
             _controlPlane?.InteractivityController?.OnTargetChange(_currentTarget);
         }
 
-        protected void LookAt(Node3D node, double delta)
+        void LookAt(Node3D node, double delta)
         {
             if (_head == null)
             {
@@ -293,33 +353,10 @@ namespace Dose.Core.Scenes
             }          
         }
 
-        public void OnDoorOpened(IDoor door)
+        void AutoMoveTo(AutoMoveParameters parameters)
         {
-            Transform3D? local = null;
-
-            if (door is Node3D doorNode)
-            {
-                local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
-            }
-
-            _controlPlane?.LocationController?.UpdateLocation(door);
-
-            if (local != null && door.LinkedDoor is Node3D linkedDoorNode)
-            {
-                var rot180 = new Basis(Vector3.Up, Mathf.Pi);
-
-                // var _local = (Transform3D)local;
-                // _local.Basis = rot180 * _local.Basis;
-                // _local.Origin = rot180 * _local.Origin;
-
-                GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
-            }
-
-            if (door.LinkedDoor is IToggleable linkedDoor)
-            {
-                linkedDoor.Toggle();
-            }
+            _autoMoveParameters = parameters;
+            _moveState = MoveState.Auto;
         }
-
     }
 }

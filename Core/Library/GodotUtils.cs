@@ -51,5 +51,53 @@ namespace Dose.Core.Library
             parentNode = null;
             return false;
         }
+
+        public static Mesh? FlipNormals(Mesh original)
+        {
+            if (original is ArrayMesh arrayMesh)
+            {
+                var newMesh = new ArrayMesh();
+                int surfaceCount = arrayMesh.GetSurfaceCount();
+
+                for (int s = 0; s < surfaceCount; s++)
+                {
+                    var arrays = arrayMesh.SurfaceGetArrays(s);
+
+                    Vector3[] normals  = arrays[(int)Mesh.ArrayType.Normal].As<Vector3[]>();
+                    int[] indices      = arrays[(int)Mesh.ArrayType.Index].As<int[]>();
+
+                    if (normals != null)
+                    {
+                        for (int i = 0; i < normals.Length; i++)
+                            normals[i] = -normals[i];
+
+                        arrays[(int)Mesh.ArrayType.Normal] = normals;
+                    }
+
+                    if (indices != null && indices.Length % 3 == 0)
+                    {
+                        for (int i = 0; i < indices.Length; i += 3)
+                        {
+                            (indices[i + 2], indices[i]) = (indices[i], indices[i + 2]);
+                        }
+
+                        arrays[(int)Mesh.ArrayType.Index] = indices;
+                    }
+
+                    newMesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays);
+                }
+
+                return newMesh;
+            }
+
+            var st = new SurfaceTool();
+            st.CreateFrom(original, 0);
+            st.Index();
+            var committed = st.Commit();
+            if (committed != null)
+                return FlipNormals(committed);
+
+            return null;
+        }
     }
 }

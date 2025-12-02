@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using Dose.Core.Library.Numbers;
 using static Dose.Core.Library.GodotUtils;
 using Dose.Core.Library.Control;
-using Dose.Core.Library;
+using Dose.Core.Library.Randomness;
+using Dose.Core.Library.DataStructures;
 
 namespace Dose.Core.Scenes
 {
@@ -23,9 +24,9 @@ namespace Dose.Core.Scenes
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
 		
-
 		IControlPlane? _controlPlane;
 		ILocation? _currentLocation;
+		LocationType? _currentLocationType;
 		ClockDirection _nextDoorClockDirection = ClockDirection.Clockwise;
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
@@ -51,6 +52,8 @@ namespace Dose.Core.Scenes
 
 		public Location? CreateLocation(LocationType type)
         {
+			_currentLocationType = type;
+
 			if (_controlPlane == null)
             {
 				GD.PushError("Can't create location because LocationManager has no defined IControlPlane.");
@@ -66,21 +69,26 @@ namespace Dose.Core.Scenes
             };
 
 			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE);
+			var locationMeshBuilder = new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE);
+			var locationDoorsProvider = new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane, _nextDoorClockDirection);
 
-			var builders = new List<LocationBuilder>
-			{
-				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE),
-				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane, _nextDoorClockDirection)
-			};
+			var builders = new List<LocationBuilder> { locationMeshBuilder, locationDoorsProvider };
 
 			foreach (var builder in builders)
 			{
 				builder.Build();
 			}
 
-			_nextDoorClockDirection = (
-				_nextDoorClockDirection == ClockDirection.Clockwise ? ClockDirection.Counterclockwise : ClockDirection.Clockwise
-			);
+			if (locationMeshBuilder.Result != null)
+            {
+                var inverted = new MeshInstance3D
+                {
+                    Mesh = FlipNormals(locationMeshBuilder.Result.Mesh)
+                };
+				
+				inverted.CreateTrimeshCollision();
+                location.AddChild(inverted);
+            }
 
 			return location;
         }
@@ -98,6 +106,10 @@ namespace Dose.Core.Scenes
             }
 
 			_currentLocation = location;
+
+			_nextDoorClockDirection = (
+				_nextDoorClockDirection == ClockDirection.Clockwise ? ClockDirection.Counterclockwise : ClockDirection.Clockwise
+			);
         }
 
 		static RoomMapGenerator GenerateRoomMap()
@@ -122,7 +134,20 @@ namespace Dose.Core.Scenes
 
         public ILocation? CreateLocation()
         {
-            return CreateLocation(LocationType.Room);
+			if (_currentLocation == null || _currentLocationType == null)
+				return null;
+
+			if (_currentLocationType is LocationType.Corridor)
+            	return CreateLocation(LocationType.Room);
+
+			var locationsTypes = new WeightedList<LocationType> {
+				{ LocationType.Room, 3 },
+				{ LocationType.Corridor, 1 }
+			};
+
+			var selector = new RandomSelector<LocationType>(locationsTypes);
+
+			return CreateLocation(selector.Pick());
         }
     }
 }

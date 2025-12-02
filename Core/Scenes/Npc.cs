@@ -1,4 +1,3 @@
-using System;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
@@ -12,7 +11,6 @@ namespace Dose.Core.Scenes
     public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>
     {
         MeshInstance3D? _mesh;
-
 
         public ISpeaker? Speaker { get; private set; }
         public NpcContext? Context { get; private set; }
