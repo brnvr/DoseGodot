@@ -151,9 +151,11 @@ namespace Dose.Core.Scenes
 
             if (distance.Length() <= _autoMoveParameters.Speed * delta)
             {
-                _autoMoveParameters.Completed?.Invoke(_autoMoveParameters, new EventArgs());
-                _autoMoveParameters = null;
+                var completedCallback = _autoMoveParameters.Completed;
+
                 _moveState = MoveState.Free;
+                _autoMoveParameters = null;
+                completedCallback?.Invoke(_autoMoveParameters, new EventArgs());
 
                 return;
             }
@@ -180,10 +182,17 @@ namespace Dose.Core.Scenes
                 // _local.Origin = rot180 * _local.Origin;
                 GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
 
-                var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
-                var targetPosition = linkedDoorNode.GlobalPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign;
+                var targetPosition = linkedDoorNode.GetHingeCenter();
                 var parameters = new AutoMoveParameters(targetPosition, 5f);
-                parameters.Completed += (sender, e) => linkedDoorNode.TryClose();
+                parameters.Completed += (sender, e) =>
+                {
+                    var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
+                    var parameters = new AutoMoveParameters(targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign, 5f);
+
+                    parameters.Completed += (sender, e) => linkedDoorNode.TryClose();
+
+                    AutoMoveTo(parameters);
+                };
 
                 AutoMoveTo(parameters);
 

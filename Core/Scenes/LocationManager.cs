@@ -69,26 +69,19 @@ namespace Dose.Core.Scenes
             };
 
 			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE);
-			var locationMeshBuilder = new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE);
-			var locationDoorsProvider = new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane, _nextDoorClockDirection);
 
-			var builders = new List<LocationBuilder> { locationMeshBuilder, locationDoorsProvider };
+			var builders = new List<LocationBuilder> 
+			{ 
+				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE, "WallMeshInstance"),
+				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane, _nextDoorClockDirection)
+			 };
 
 			foreach (var builder in builders)
 			{
 				builder.Build();
 			}
 
-			if (locationMeshBuilder.Result != null)
-            {
-                var inverted = new MeshInstance3D
-                {
-                    Mesh = FlipNormals(locationMeshBuilder.Result.Mesh)
-                };
-				
-				inverted.CreateTrimeshCollision();
-                location.AddChild(inverted);
-            }
+			location.CreateFlippedBack();
 
 			return location;
         }

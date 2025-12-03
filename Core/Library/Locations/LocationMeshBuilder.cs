@@ -7,14 +7,15 @@ using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh wallWithOpeningMesh, int blockSize) : LocationBuilder(location)
+    public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh wallWithOpeningMesh, int blockSize, string? meshInstanceName = null) : LocationBuilder(location)
     {
         readonly SurfaceTool _surfaceTool = new();
 
         public int BlockSize { get; } = blockSize;
         public Mesh WallMesh { get; } = wallMesh;
         public Mesh WallWithOpeningMesh { get; } = wallWithOpeningMesh;
-        public MeshInstance3D? Result { get; private set; }
+        public string? MeshInstanceName { get; } = meshInstanceName;
+        //public MeshInstance3D? Result { get; private set; }
 
         protected override void OnStart() {
             _surfaceTool.Begin(Mesh.PrimitiveType.Triangles);
@@ -27,13 +28,18 @@ namespace Dose.Core.Library.Locations
 
         protected override void OnFinish()
         {
-            Result = new MeshInstance3D();
+            var _meshInstance = new MeshInstance3D();
+
+            if (MeshInstanceName != null)
+            {
+                _meshInstance.Name = MeshInstanceName;
+            }
 
             _surfaceTool.Index();
-            Result.Mesh = _surfaceTool.Commit();
-            Result.CreateTrimeshCollision();
+            _meshInstance.Mesh = _surfaceTool.Commit();
+            _meshInstance.CreateTrimeshCollision();
 
-            Location.OnBuild(Result);
+            Location.OnBuild(_meshInstance);
         }
 
         void AppendCell(Vector2I point, IEnumerable<CardinalDirection> directions)

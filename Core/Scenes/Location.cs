@@ -3,6 +3,8 @@ using Dose.Core.Library.Randomness;
 using Godot;
 using System;
 using System.Linq;
+using static Dose.Core.Library.GodotUtils;
+
 
 namespace Dose.Core.Scenes
 {
@@ -30,6 +32,24 @@ namespace Dose.Core.Scenes
             Map = MapGenerator.GenerateMap();
 
             return this;
+        }
+
+        public void CreateFlippedBack(string nodeName="WallMeshInstance")
+        {
+            var _meshInstance = GetNode<MeshInstance3D>(nodeName);
+
+            if (_meshInstance == null)
+            {
+                GD.PushWarning($"{nodeName} node not found. Can't created flipped back.");
+                return;
+            }
+
+            var inverted = new MeshInstance3D
+            {
+                Mesh = FlipNormals(_meshInstance.Mesh)
+            };
+            
+            AddChild(inverted);
         }
 
         public IDoor SelectRandomDoor()

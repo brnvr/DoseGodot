@@ -170,6 +170,37 @@ namespace Dose.Core.Scenes
             return true;
         }
 
+        public Vector3 GetHingeCenter()
+        {
+            if (_mesh is null)
+                return Vector3.Zero;
+
+            var mesh = _mesh.Mesh;
+            var arrays = mesh.SurfaceGetArrays(0);
+            var vertices = (Vector3[])arrays[(int)Mesh.ArrayType.Vertex];
+
+            float hingeY = _mesh.Transform.Origin.Y;   // origin = hinge
+            const float tolerance = 0.01f; // accepts vertices close to hinge height
+
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+
+            foreach (var v in vertices)
+            {
+                if (Mathf.Abs(v.Y - hingeY) <= tolerance)
+                {
+                    minX = Mathf.Min(minX, v.X);
+                    maxX = Mathf.Max(maxX, v.X);
+                }
+            }
+
+            // midpoint at hinge-level
+            float centerX = (minX + maxX) * 0.5f;
+
+            // convert local to global
+            return _mesh.GlobalTransform * new Vector3(centerX, hingeY, 0);
+        }
+
 
         void UpdateRotation()
         {
