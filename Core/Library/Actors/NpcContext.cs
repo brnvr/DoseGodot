@@ -10,5 +10,6 @@ namespace Dose.Core.Library.Actors
         public IDialogue? Dialogue { get; set; }
         public Texture2D? Texture { get; set; }
         public Voice? Voice { get; set; }
+        public int MaxQuantity { get; set; } = 1;
     }
 }

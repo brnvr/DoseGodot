@@ -6,18 +6,18 @@ using static Dose.Core.Library.GodotUtils;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.Randomness;
 using Dose.Core.Library.DataStructures;
-using System.Threading.Tasks;
 using static Dose.Core.Library.GeoPositioning;
 using System;
-using System.Threading;
-using System.Collections.Concurrent;
+using Dose.Core.Library.Actors;
+using Dose.Core.Actors.Items;
 namespace Dose.Core.Scenes
 {
-	public partial class LocationManager : Node, ILocationManager
+	public partial class LocationManager : Node, ILocationManager, ILocationCreator
 	{
 		const int BLOCK_SIZE = 4;
 
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
+		readonly static PackedScene _itemScene = GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn");
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
@@ -107,10 +107,15 @@ namespace Dose.Core.Scenes
 
 			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, type);
 
+			var actorSelector = new LocationPopulatorSelector<Item, ItemContext>(
+				new LocationPopulatorSource<Item, ItemContext>(_itemScene, [new CurrantSyrup()])
+			);
+
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane)
+				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane),
+				new LocationPopulator<Item, ItemContext>(location, actorSelector, new Probability(0.1), BLOCK_SIZE)
 			};
 
 			foreach (var builder in builders)
@@ -158,102 +163,10 @@ namespace Dose.Core.Scenes
 			);
         }
 
-		class LocationQueue(LocationManager locationManager, int maxLocationsPerType)
-		{
-			readonly Dictionary<(LocationType, ClockDirection), ConcurrentQueue<ILocation>> _nextLocations = [];
+        ILocation? ILocationCreator.CreateLocation(LocationType type, ClockDirection doorsClockDirection)
+        {
+            return CreateLocation(type, doorsClockDirection);
+        }
 
-			public bool IsInitialized { get; private set; } = false;
-			public int MaxLocationsPerType { get; } = maxLocationsPerType;
-			public LocationManager LocationManager { get; } = locationManager;
-
-			public void Initialize()
-			{
-				if (IsInitialized)
-				{
-					GD.PushError("LocationQueue has already been initialized.");
-				}
-
-				foreach (var type in Enum.GetValues<LocationType>())
-				{
-					foreach (var direction in Enum.GetValues<ClockDirection>())
-					{
-						_nextLocations[(type, direction)] = new ConcurrentQueue<ILocation>();
-
-						while (_nextLocations.TryGetValue((type, direction), out ConcurrentQueue<ILocation>? value) && value.Count < MaxLocationsPerType)
-						{
-							var newLocation = LocationManager.CreateLocation(type, direction);
-
-							if (newLocation == null)
-							{
-								GD.PushError($"Failed to create location of type {type} and direction {direction} during LocationQueue initialization.");
-								continue;
-							}
-
-							_nextLocations[(type, direction)].Enqueue(newLocation);
-						}
-					}
-				}
-
-				IsInitialized = true;
-			}
-
-			public bool IsEmpty(LocationType type, ClockDirection direction)
-			{
-				return _nextLocations.TryGetValue((type, direction), out ConcurrentQueue<ILocation>? queue) && queue.IsEmpty;
-			}
-
-			public ILocation? PopNextLocation(LocationType type, ClockDirection direction)
-			{
-				var queue = _nextLocations[(type, direction)];
-
-				if (queue.IsEmpty)
-				{
-					GD.Print($"No pre-generated locations of type {type} and direction {direction} are available. Generating one on the fly...");
-					return LocationManager.CreateLocation(type, direction);
-				}
-
-				_ = Refill(type, direction);
-
-				queue.TryDequeue(out var nextLocation);
-
-				if (nextLocation == null)
-				{
-					GD.PushError($"Failed to dequeue next location of type {type} and direction {direction}.");
-				}
-
-				return nextLocation;
-			}
-
-			public void Free()
-			{
-				foreach (var queue in _nextLocations.Values)
-				{
-					while (queue.TryDequeue(out var location))
-					{
-						if (location is Node locationNode)
-						{
-							locationNode.QueueFree();
-						}
-					}
-				}
-			}
-
-			async Task Refill(LocationType type, ClockDirection direction)
-			{
-				await Task.Run(async () =>
-				{
-					//await Task.Delay(5000);
-					var newLocation = LocationManager.CreateLocation(type, direction);
-
-					if (newLocation == null)
-					{
-						GD.PushError($"Failed to create location of type {type} and direction {direction}.");
-						return;
-					}
-
-					_nextLocations[(type, direction)].Enqueue(newLocation);
-				});
-			}
-		}
     }
 }

@@ -8,11 +8,6 @@ using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public enum LocationType
-    {
-        Room, Corridor
-    }
-
     public partial class Location : Node3D, IBuildableLocation
     {
         public Map? Map { get; private set; }

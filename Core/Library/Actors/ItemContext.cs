@@ -7,5 +7,6 @@ namespace Dose.Core.Library.Actors
     {
         public string DisplayName { get; set; } = "";
         public Texture2D? Texture { get; set; }
+        public int MaxQuantity { get; set; } = -1;
     }
 }

@@ -53,6 +53,7 @@ namespace Dose.Core.Library.Locations
 
             if (Location is Node buildableLocation)
             {
+                //TODO: this should be handled by the location itself, not the provider
                 buildableLocation.AddChild(door);
                 //buildableLocation.OnBuild(door);
             }
