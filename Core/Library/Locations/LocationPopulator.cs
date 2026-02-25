@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
@@ -13,17 +12,29 @@ namespace Dose.Core.Library.Locations
         int blockSize
     ) : LocationBuilder(location) where TActor : class, IInitializableActor, new() where TActorContext : IActorContext
     {
+        private int _iterations;
+
         public LocationPopulatorSelector<TActor, TActorContext> Selector { get; } = selector;
         public Probability ProbabilityPopulate { get; } = probabilityPopulate;
         public int BlockSize { get; } = blockSize;
 
+        protected override void OnStart()
+        {
+            _iterations = 0;
+
+            var decider = new RandomDecider(ProbabilityPopulate);
+
+            while (decider.Roll())
+            {
+                _iterations++;
+            }
+
+            base.OnStart();
+        }
+
         protected override void OnBuildCell(Vector2I position)
         {
-            if (Selector.AvaliableContexts.Count == 0) return;
-
-            var shouldPopulate = new RandomDecider(ProbabilityPopulate).Roll();
-
-            if (!shouldPopulate) return;
+            if (_iterations <= 0) return;
 
             var nextActor = Selector.Select();
 
@@ -43,6 +54,8 @@ namespace Dose.Core.Library.Locations
             {
                 nextActorNode3D.Position = new Vector3(position.X - Location.Map.HorizontalCells / 2, 0, position.Y - Location.Map.VerticalCells / 2) * BlockSize;
             }
+
+            _iterations--;
             //_allActorContexts.Remove(nextActor);
         }
     }

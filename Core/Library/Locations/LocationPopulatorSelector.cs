@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Randomness;
-using Godot;
 
 namespace Dose.Core.Library.Locations
 {

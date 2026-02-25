@@ -12,6 +12,7 @@ namespace Dose.Core.Actors.Items
         {
             DisplayName = "currant syrup";
             Texture = ResourceLoader.Load<Texture2D>("res://Media/Textures/Npcs/Agnes/Idle_000.png");
+            MaxQuantity = 1;
         }
     }
 }
