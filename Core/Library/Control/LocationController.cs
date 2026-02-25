@@ -10,15 +10,17 @@ namespace Dose.Core.Library.Control
         {
             if (door.LinkedDoor is null)
             {
-                var location = LocationManager.CreateLocation();
-                var otherDoor = location?.SelectRandomDoor();
-                
-                if (otherDoor != null)
+                var location = LocationManager.GoToNextLocation();
+    
+                if (location != null)
                 {
-                    door.LinkDoor(otherDoor);
+                    var otherDoor = location.SelectRandomDoor();
+                
+                    if (otherDoor != null)
+                    {
+                        door.LinkDoor(otherDoor);
+                    }
                 }
-
-                LocationManager.CurrentLocation = location;
             }
             else
             {

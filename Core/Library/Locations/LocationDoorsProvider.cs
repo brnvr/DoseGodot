@@ -9,14 +9,17 @@ using static Dose.Core.Library.Locations.MapCellWall;
 namespace Dose.Core.Library.Locations
 {
     public class LocationDoorsProvider(
-        ILocationManager locationManager, IBuildableLocation location, PackedScene doorScene, int blockSize, IControlPlane controlPlane, ClockDirection clockDirection
+        ILocationManager locationManager,
+        IBuildableLocation location,
+        PackedScene doorScene,
+        int blockSize,
+        IControlPlane controlPlane
     ) : LocationBuilder(location)
     {
         public int BlockSize { get; } = blockSize;
         public PackedScene DoorScene { get; } = doorScene;
         public IControlPlane ControlPlane { get; } = controlPlane;
         public ILocationManager LocationManager { get; } = locationManager;
-        public ClockDirection ClockDirection { get; } = clockDirection;
         
         protected override void OnBuildCell(Vector2I position)
         {
@@ -40,7 +43,7 @@ namespace Dose.Core.Library.Locations
                 throw new Exception("Location doesn't have a defined Map.");
             }
 
-            var nextDirection = NextDirection(direction, ClockDirection);
+            var nextDirection = NextDirection(direction, Location.DoorsClockDirection);
             var pointDir = MoveTo(MoveTo(point, direction, 0.5f), nextDirection, -0.11275f);
 
             var position = new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
@@ -48,7 +51,11 @@ namespace Dose.Core.Library.Locations
 
             var door = (Node3D)DoorScene.Instantiate();
 
-            Location.OnBuild(door);
+            if (Location is Node buildableLocation)
+            {
+                buildableLocation.AddChild(door);
+                //buildableLocation.OnBuild(door);
+            }
 
             door.Position = position;
             door.RotateY(rotation);
@@ -60,7 +67,7 @@ namespace Dose.Core.Library.Locations
                     Number = ControlPlane.DoorNumberController?.PopRandomNumber()
                 };
 
-                initializableDoor.Initialize(context, LocationManager, Location, ClockOpposite(ClockDirection));
+                initializableDoor.Initialize(context, LocationManager, Location, ClockOpposite(Location.DoorsClockDirection));
             }
         }
     }

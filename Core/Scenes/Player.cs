@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
@@ -176,16 +177,13 @@ namespace Dose.Core.Scenes
 
             if (local != null && door.LinkedDoor is Door linkedDoorNode)
             {
-                //var rot180 = new Basis(Vector3.Up, Mathf.Pi);
-                // var _local = (Transform3D)local;
-                // _local.Basis = rot180 * _local.Basis;
-                // _local.Origin = rot180 * _local.Origin;
                 GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
 
                 var targetPosition = linkedDoorNode.GetHingeCenter();
                 var parameters = new AutoMoveParameters(targetPosition, 5f);
                 parameters.Completed += (sender, e) =>
                 {
+                    //door.OpenDirection = ClockOpposite(door.OpenDirection);
                     var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
                     var parameters = new AutoMoveParameters(targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign, 5f);
 

@@ -26,5 +26,15 @@ namespace Dose.Core.Scenes
 
             return this;
         }
+
+        public void Pause()
+        {
+            GetTree().Paused = true;
+        }
+
+        public void Unpause()
+        {
+            GetTree().Paused = false;
+        }
     }
 }

@@ -6,6 +6,13 @@ namespace Dose.Core.Scenes
 {
     public partial class UI : CanvasLayer, IUI
     {
+        public override void _Ready()
+        {
+            ProcessMode = ProcessModeEnum.Always;
+
+            base._Ready();
+        }
+
         public void SetLabelValue(string labelName, string text)
         {
             var label = GetNode<Label>(labelName);

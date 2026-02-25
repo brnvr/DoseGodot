@@ -8,21 +8,30 @@ using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
+    public enum LocationType
+    {
+        Room, Corridor
+    }
+
     public partial class Location : Node3D, IBuildableLocation
     {
         public Map? Map { get; private set; }
+        public LocationType? Type { get; private set; }
         public int BlockSize { get; private set; }
         public IMapGenerator? MapGenerator { get; private set; }
+        public ClockDirection DoorsClockDirection { get; private set; } = ClockDirection.Clockwise;
 
         public void OnBuild(Node node)
         {
-            AddChild(node);
+            CallDeferred(Node.MethodName.AddChild, node);
         }
 
-        public Location Initialize(IMapGenerator mapGenerator, int blockSize)
+        public Location Initialize(IMapGenerator mapGenerator, int blockSize, ClockDirection doorsClockDirection, LocationType type)
         {
+            Type = type;
             MapGenerator = mapGenerator;
             BlockSize = blockSize;
+            DoorsClockDirection = doorsClockDirection;
             
             if (Map != null)
             {

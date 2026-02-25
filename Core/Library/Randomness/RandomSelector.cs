@@ -13,7 +13,7 @@ namespace Dose.Core.Library.Randomness
         {
             var random = seed == null ? new Random() : new Random((int)seed);
 
-            return _values[random.Next(_values.Count())];
+            return _values[random.Next(_values.Count)];
         }
     }
 }
