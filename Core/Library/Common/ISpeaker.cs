@@ -1,6 +1,3 @@
-using Dose.Core.Library.ESpeak;
-using Godot;
-
 namespace Dose.Core.Library.Common
 {
     public interface ISpeaker

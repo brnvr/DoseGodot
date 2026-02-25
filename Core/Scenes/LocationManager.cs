@@ -9,7 +9,7 @@ using Dose.Core.Library.DataStructures;
 using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
-using Dose.Core.Actors.Items;
+using Dose.Core.LocationPopulatorSources;
 namespace Dose.Core.Scenes
 {
 	public partial class LocationManager : Node, ILocationManager, ILocationCreator
@@ -17,7 +17,6 @@ namespace Dose.Core.Scenes
 		const int BLOCK_SIZE = 4;
 
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
-		readonly static PackedScene _itemScene = GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn");
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
@@ -107,20 +106,29 @@ namespace Dose.Core.Scenes
 
 			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, type);
 
-			var actorSelector = new LocationPopulatorSelector<Item, ItemContext>(
-				new LocationPopulatorSource<Item, ItemContext>(_itemScene, [new CurrantSyrup()])
-			);
-
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE, "WallMeshInstance"),
 				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane),
-				new LocationPopulator<Item, ItemContext>(location, actorSelector, new Probability(0.1), BLOCK_SIZE)
 			};
 
 			foreach (var builder in builders)
 			{
 				builder.Build();
+			}
+
+			var actorSelector = new LocationPopulatorSelector<Item, ItemContext>(
+				new ItemsPopulatorSource()
+			);
+
+			var populators = new List<LocationPopulator>
+			{
+				new LocationPopulator<Item, ItemContext>(location, actorSelector, new Probability(0.1), BLOCK_SIZE)
+			};
+
+			foreach (var populator in populators)
+			{
+				populator.Populate();
 			}
 
 			//location.CreateFlippedBack();

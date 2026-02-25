@@ -1,4 +1,3 @@
-
 using Godot;
 
 namespace Dose.Core.Library.Actors

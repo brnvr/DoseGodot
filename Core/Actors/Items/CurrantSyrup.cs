@@ -1,7 +1,4 @@
 using Dose.Core.Library.Actors;
-using Dose.Core.Library.DataStructures;
-using Dose.Core.Library.ESpeak;
-using Dose.Core.Scenes;
 using Godot;
 
 namespace Dose.Core.Actors.Items
