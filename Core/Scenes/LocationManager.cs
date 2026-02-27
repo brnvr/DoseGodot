@@ -11,6 +11,8 @@ using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.ActorPools;
 using Dose.Core.ActorArgs;
+using Dose.Core.Quests;
+using System.Linq;
 namespace Dose.Core.Scenes
 {
 	public partial class LocationManager : Node, ILocationManager, ILocationCreator
@@ -48,6 +50,8 @@ namespace Dose.Core.Scenes
 			_locationQueue.Initialize();
 
 			CurrentLocation = _locationQueue.PopNextLocation(LocationType.Corridor, ClockDirection.Clockwise);
+
+			player.QuestBook.Add(new FindItemQuest(_itemPool.AvaliableContexts.ToList()[0]));
 
             return this;
         }
@@ -149,7 +153,7 @@ namespace Dose.Core.Scenes
 			var itemArgs = new ItemArgs();
 			var npcArgs = new NpcArgs
 			{
-				Talker = Player
+				Player = Player
 			};
 
 			var itemPopulator = new LocationPopulator<Item, ItemContext, ItemArgs>(

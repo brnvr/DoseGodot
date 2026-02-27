@@ -1,9 +1,9 @@
-using Dose.Core.Library.Interactivity;
+using Dose.Core.Scenes;
 
 namespace Dose.Core.ActorArgs
 {
     public class NpcArgs
     {
-        public ITalker? Talker { get; init; }
+        public Player? Player { get; init; }
     }
 }

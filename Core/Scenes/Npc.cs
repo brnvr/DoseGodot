@@ -33,13 +33,13 @@ namespace Dose.Core.Scenes
                 return;
             }
 
-            if (args.Talker == null)
+            if (args.Player == null)
             {
-                GD.Print($"No {nameof(ITalker)} provided in NpcArgs for NPC {Context.DisplayName}. Skipping speaker initialization.");
+                GD.Print($"No {nameof(args.Player)} provided in NpcArgs for NPC {Context.DisplayName}. Skipping speaker initialization.");
                 return;
             }
 
-            Speaker = new ESpeaker(Context.Voice, args.Talker.ProgressDialogue);
+            Speaker = new ESpeaker(Context.Voice, args.Player.ProgressDialogue);
             
             AddChild((Node)Speaker);
         }

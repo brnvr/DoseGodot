@@ -5,6 +5,9 @@ using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
+using Dose.Core.Library.Quests;
+using Dose.Core.QuestArgs;
+using Dose.Core.Quests;
 using Godot;
 using static Dose.Core.Library.GodotUtils;
 
@@ -50,6 +53,7 @@ namespace Dose.Core.Scenes
 
         public DialogueRunner? DialogueRunner { get; private set; }
         public Inventory Inventory { get; } = [];
+        public QuestBook QuestBook { get; } = [];
         public ItemContext? SelectedItem { get; protected set; }
 
         public override void _Ready()
@@ -60,7 +64,14 @@ namespace Dose.Core.Scenes
             _view = GetNode<Camera3D>("Head/View");
             _rayCast = GetNode<RayCast3D>("Head/View/RayCast3D");
             _rayCast.TargetPosition = new Vector3(0, 0, -RAY_LENGTH);
-
+            
+            Inventory.ItemAdded += (sender, e) =>
+            {
+                QuestBook.TestCompleted<FindItemQuest, ItemQuestArgs>(new ItemQuestArgs 
+                { 
+                    ItemContext = e.ItemContext
+                });
+            }; 
         }
 
         public override void _Process(double delta)
