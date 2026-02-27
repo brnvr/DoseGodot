@@ -1,6 +1,9 @@
 using System.Linq;
+using System.Text.Json;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.UI;
+using Godot;
 
 namespace Dose.Core.Library.Control
 {
@@ -10,13 +13,29 @@ namespace Dose.Core.Library.Control
 
         public Inventory Inventory { get; }
         public ItemContext? CurrentItem { get => GetNextItem(0); }
+        IUI? UI { get; }
 
-        public InventoryController(Inventory inventory)
+        public InventoryController(Inventory inventory, IUI? ui)
         {
+            UI = ui;
             Inventory = inventory;
+
+            Inventory.ItemAdded += (sender, e) =>
+            {
+                GD.Print($"Added {e.ItemContext.DisplayName} to inventory.");
+
+                if (UI != null)
+                {
+                    string json = JsonSerializer.Serialize(Inventory);
+
+                    UI.SetLabelValue("Inventory", json);
+                }
+            };
 
             Inventory.ItemDropped += (sender, e) =>
             {
+                GD.Print($"Dropped {e.ItemContext.DisplayName} from inventory.");
+
                 if (e.ItemContext == CurrentItem)
                 {
                     GoToPreviousItem();

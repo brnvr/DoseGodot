@@ -9,21 +9,27 @@ using Dose.Core.Library.DataStructures;
 using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
-using Dose.Core.LocationPopulatorSources;
+using Dose.Core.ActorPools;
+using System.Linq;
 namespace Dose.Core.Scenes
 {
 	public partial class LocationManager : Node, ILocationManager, ILocationCreator
 	{
 		const int BLOCK_SIZE = 4;
 
+		readonly static ItemPool _itemPool = new();
+		readonly static NpcPool _npcPool = new();
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
 		
-		public IControlPlane? _controlPlane;
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
+
+		public IControlPlane? ControlPlane { get; private set; }
+		public Player? Player { get; private set; }
+		
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
 
@@ -33,9 +39,10 @@ namespace Dose.Core.Scenes
 			_locationQueue?.Free();
         }
 
-		public LocationManager Initialize(IControlPlane controlPlane)
+		public LocationManager Initialize(IControlPlane controlPlane, Player player)
         {
-			_controlPlane = controlPlane;
+			Player = player;
+			ControlPlane = controlPlane;
 			_locationQueue = new LocationQueue(this, 2);
 
 			_locationQueue.Initialize();
@@ -73,13 +80,13 @@ namespace Dose.Core.Scenes
 		
 			if (_locationQueue == null)
 			{
-				GD.PushError("LocationManager is not initialized. Can't go to next location.");
+				GD.PushError($"{nameof(LocationManager)} is not initialized. Can't go to next location.");
 				return null;
 			}
 
 			if (_locationQueue == null)
 			{
-				GD.PushError("LocationManager is not initialized. Can't set next location.");
+				GD.PushError($"{nameof(LocationManager)} is not initialized. Can't set next location.");
 				return null;
 			}
 
@@ -90,9 +97,9 @@ namespace Dose.Core.Scenes
 
 		Location? CreateLocation(LocationType type, ClockDirection clockDirection)
 		{
-			if (_controlPlane == null)
+			if (ControlPlane == null)
             {
-				GD.PushError("Can't create location because LocationManager has no defined IControlPlane.");
+				GD.PushError($"{nameof(LocationManager)} has no defined {nameof(IControlPlane)}.");
                 return null;
             }
 
@@ -106,34 +113,67 @@ namespace Dose.Core.Scenes
 
 			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, type);
 
+			BuildLocation(location);
+			PopulateLocation(location);
+		
+			//location.CreateFlippedBack();
+
+			return location;
+		}
+
+		void BuildLocation(Location location)
+		{
+			if (ControlPlane == null)
+            {
+				GD.PushError($"{nameof(LocationManager)} has no defined {nameof(IControlPlane)}.");
+				return;
+            }
+
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, _controlPlane),
+				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, ControlPlane),
 			};
 
 			foreach (var builder in builders)
 			{
 				builder.Build();
 			}
+		}
 
-			var actorSelector = new LocationPopulatorSelector<Item, ItemContext>(
-				new ItemsPopulatorSource()
-			);
+		void PopulateLocation(Location location)
+		{
+			var itemSelector = new ActorPoolSelector<Item, ItemContext>(_itemPool);
+			var npcSelector = new ActorPoolSelector<Npc, NpcContext>(_npcPool);
+
+			var itemPopulator = new LocationPopulator<Item, ItemContext>(location, itemSelector, new Probability(0.5), BLOCK_SIZE);
+			var npcPopulator = new LocationPopulator<Npc, NpcContext>(location, npcSelector, new Probability(0.5), BLOCK_SIZE);
 
 			var populators = new List<LocationPopulator>
 			{
-				new LocationPopulator<Item, ItemContext>(location, actorSelector, new Probability(0.1), BLOCK_SIZE)
+				itemPopulator,
+				npcPopulator
 			};
+
+			HashSet<Vector2I> populatedPositions = [];
+			Dictionary<LocationPopulator, List<IInitializableActor>> generatedActors = [];
 
 			foreach (var populator in populators)
 			{
-				populator.Populate();
+				var actors = populator.Populate(populatedPositions, out populatedPositions);
+				generatedActors[populator] = actors;
 			}
 
-			//location.CreateFlippedBack();
+			if (Player == null)
+			{
+				GD.Print($"{nameof(LocationManager)} has no defined {nameof(Player)}. Can't initialize NPC speakers.");
+				return;
+			}
 
-			return location;
+			foreach (Npc npc in generatedActors[npcPopulator].Cast<Npc>())
+			{
+				npc.InitializeSpeaker(Player.ProgressDialogue);
+			}
 		}
 
 		void SetCurrentLocation(ILocation? location)

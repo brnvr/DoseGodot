@@ -60,6 +60,7 @@ namespace Dose.Core.Scenes
             _view = GetNode<Camera3D>("Head/View");
             _rayCast = GetNode<RayCast3D>("Head/View/RayCast3D");
             _rayCast.TargetPosition = new Vector3(0, 0, -RAY_LENGTH);
+
         }
 
         public override void _Process(double delta)

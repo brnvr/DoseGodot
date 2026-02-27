@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using Dose.Core.Actors.Items;
 using Dose.Core.Library.Actors;
-using Dose.Core.Library.Locations;
 using Dose.Core.Scenes;
 using Godot;
 
-namespace Dose.Core.LocationPopulatorSources
+namespace Dose.Core.ActorPools
 {
-    public class ItemsPopulatorSource : LocationPopulatorSource<Item, ItemContext>
+    public class ItemPool : ActorPool<Item, ItemContext>
     {
         readonly static PackedScene _itemScene = GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn");
         readonly static List<ItemContext> _defaultItems =
@@ -15,6 +14,6 @@ namespace Dose.Core.LocationPopulatorSources
             new CurrantSyrup()
         ];
         
-        public ItemsPopulatorSource() : base(_itemScene, _defaultItems) { }
+        public ItemPool() : base(_itemScene, _defaultItems) { }
     }
 }   

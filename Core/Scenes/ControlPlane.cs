@@ -12,16 +12,13 @@ namespace Dose.Core.Scenes
         public InteractivityController? InteractivityController { get; private set; }
         public DoorNumberController DoorNumberController { get; } = new DoorNumberController();
 
-        public ControlPlane Initialize(UI ui, Player player, Npc npc, LocationManager locationManager)
+        public ControlPlane Initialize(UI ui, Player player, LocationManager locationManager)
         {
-            var agnes = new Agnes(player);
-            
-            npc.Initialize(agnes, player);
             player.Initialize(this);
 
             LocationController = new LocationController(locationManager);
             DialogueController = new DialogueController(ui);
-            InventoryController = new InventoryController(player.Inventory);
+            InventoryController = new InventoryController(player.Inventory, ui);
             InteractivityController = new InteractivityController(ui);
 
             return this;

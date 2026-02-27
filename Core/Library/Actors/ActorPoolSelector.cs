@@ -1,16 +1,15 @@
 using System.Collections.Generic;
-using Dose.Core.Library.Actors;
 using Dose.Core.Library.Randomness;
 
-namespace Dose.Core.Library.Locations
+namespace Dose.Core.Library.Actors
 {
-    public class LocationPopulatorSelector<TActor, TActorContext>(LocationPopulatorSource<TActor, TActorContext> source)
+    public class ActorPoolSelector<TActor, TActorContext>(ActorPool<TActor, TActorContext> source)
         where TActor : class, IInitializableActor, new() where TActorContext : IActorContext
     {
         readonly List<TActorContext> _availableContexts = [.. source.AvaliableContexts];
         readonly Dictionary<TActorContext, int> _contextQuantities = [];
 
-        public LocationPopulatorSource<TActor, TActorContext> Source { get; } = source;
+        public ActorPool<TActor, TActorContext> Source { get; } = source;
         public List<TActorContext> AvaliableContexts => [.. _availableContexts];
         
         public TActor? Select()

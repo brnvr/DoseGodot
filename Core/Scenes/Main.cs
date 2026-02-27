@@ -16,12 +16,12 @@ namespace Dose.Core.Scenes
             AddChild(light);
 
 			var ui = GetNode<UI>("UI");
-			var npc = GetNode<Npc>("Npc");
+			//var npc = GetNode<Npc>("Npc");
 			var player = GetNode<Player>("Player");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
-			var locationManager = GetNode<LocationManager>("LocationManager").Initialize(controlPlane);
+			var locationManager = GetNode<LocationManager>("LocationManager").Initialize(controlPlane, player);
 
-			controlPlane.Initialize(ui, player, npc, locationManager);
+			controlPlane.Initialize(ui, player,locationManager);
 
 			AudioCollector.InitializeESpeak();
 			

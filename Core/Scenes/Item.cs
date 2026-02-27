@@ -1,3 +1,4 @@
+using System;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Godot;
@@ -14,7 +15,6 @@ namespace Dose.Core.Scenes
             Context = context;
             return this;
         }
-
 
         public void Destroy()
         {

@@ -1,12 +1,12 @@
 [gd_scene load_steps=6 format=3 uid="uid://bab2upmbmmoyh"]
 
 [ext_resource type="Script" uid="uid://bhpex71d701u6" path="res://Core/Scenes/Item.cs" id="1_kl7so"]
-[ext_resource type="Texture2D" uid="uid://dv7v0pr1nyo6l" path="res://Media/Textures/Placehoders/Npc.png" id="1_psx54"]
+[ext_resource type="Texture2D" uid="uid://dinna5i27gyg8" path="res://Media/Textures/Placehoders/Item.png" id="2_kl7so"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
 transparency = 1
 shading_mode = 0
-albedo_texture = ExtResource("1_psx54")
+albedo_texture = ExtResource("2_kl7so")
 texture_filter = 0
 texture_repeat = false
 billboard_mode = 2

@@ -1,3 +1,4 @@
+using System;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
@@ -8,7 +9,7 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>
+    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor
     {
         MeshInstance3D? _mesh;
 
@@ -17,24 +18,47 @@ namespace Dose.Core.Scenes
 
         IActorContext? IActor.Context => Context;
 
-        public Npc Initialize(NpcContext context, Player player)
+       IActor IInitializableActor.Initialize(IActorContext context)
+        {
+            if (context is not NpcContext npcContext)
+            {
+                GD.PushError($"{nameof(Npc)}.{nameof(IInitializableActor.Initialize)} called with non-{nameof(NpcContext)}.");
+                return this;
+            }
+
+            InitializeContext(npcContext);
+
+            return this;
+        }
+    
+        public Npc InitializeContext(NpcContext context)
         {
             Context = context;
-            
-            if (context.Voice == null)
-            {
-                GD.PushWarning("Voice not defined for NpcContext. Speaker won't be constructed.");
-            }
-            else
-            {
-                Speaker = new ESpeaker(context.Voice, player.ProgressDialogue);
-
-                AddChild((Node)Speaker);
-            }
 
             _mesh = GetNode<MeshInstance3D>("Mesh");
 
             UpdateTexture();
+
+            return this;
+        }
+
+        public Npc InitializeSpeaker(Action onDialogueComplete)
+        {
+            if (Context == null)
+            {
+                GD.PushWarning($"{nameof(Npc)}.{nameof(InitializeSpeaker)} called before {nameof(InitializeContext)}. {nameof(Speaker)} won't be constructed.");
+                return this;
+            }
+
+            if (Context.Voice == null)
+            {
+                GD.PushWarning($"{nameof(Npc)}.{nameof(InitializeSpeaker)} called with null voice in {nameof(NpcContext)}. {nameof(Speaker)} won't be constructed.");
+                return this;
+            }
+
+            Speaker = new ESpeaker(Context.Voice, onDialogueComplete);
+
+            AddChild((Node)Speaker);
 
             return this;
         }
@@ -58,7 +82,7 @@ namespace Dose.Core.Scenes
         {
             if (_mesh == null || Context == null)
             {
-                GD.PushWarning("NPC not initialized. Skipping UpdateTexture");
+                GD.PushWarning($"{nameof(Npc)} not initialized. Skipping {nameof(UpdateTexture)}.");
 
                 return;
             }

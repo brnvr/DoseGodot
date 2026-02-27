@@ -1,10 +1,9 @@
 using System.Collections.Generic;
-using Dose.Core.Library.Actors;
 using Godot;
 
-namespace Dose.Core.Library.Locations
+namespace Dose.Core.Library.Actors
 {
-    public class LocationPopulatorSource<TActor, TActorContext>(PackedScene actorScene, IEnumerable<TActorContext> avaliableContexts)
+    public class ActorPool<TActor, TActorContext>(PackedScene actorScene, IEnumerable<TActorContext> avaliableContexts)
         where TActor : class, IInitializableActor, new() where TActorContext : IActorContext
     {
         public PackedScene ActorScene { get; } = actorScene;

@@ -24,3 +24,11 @@ offset_right = 40.0
 offset_bottom = 40.0
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Inventory" type="Label" parent="."]
+offset_top = 54.0
+offset_right = 82.0
+offset_bottom = 94.0
+text = "asdasdasd"
+horizontal_alignment = 1
+vertical_alignment = 1
