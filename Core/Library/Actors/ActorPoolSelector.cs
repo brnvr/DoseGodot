@@ -3,16 +3,16 @@ using Dose.Core.Library.Randomness;
 
 namespace Dose.Core.Library.Actors
 {
-    public class ActorPoolSelector<TActor, TActorContext>(ActorPool<TActor, TActorContext> source)
-        where TActor : class, IInitializableActor, new() where TActorContext : IActorContext
+    public class ActorPoolSelector<TActor, TActorContext, TArgs>(ActorPool<TActor, TActorContext, TArgs> source)
+        where TActor : class, IInitializableActor<TActorContext, TArgs>, new() where TActorContext : IActorContext
     {
         readonly List<TActorContext> _availableContexts = [.. source.AvaliableContexts];
         readonly Dictionary<TActorContext, int> _contextQuantities = [];
 
-        public ActorPool<TActor, TActorContext> Source { get; } = source;
+        public ActorPool<TActor, TActorContext, TArgs> Source { get; } = source;
         public List<TActorContext> AvaliableContexts => [.. _availableContexts];
         
-        public TActor? Select()
+        public TActor? Select(TArgs args)
         {
             if (_availableContexts.Count == 0) return default;
 
@@ -27,14 +27,14 @@ namespace Dose.Core.Library.Actors
                 if (quantity >= context.MaxQuantity)
                 {
                     _availableContexts.Remove(context);
-                    return Select();
+                    return Select(args);
                 }
 
                 _contextQuantities[context] = quantity + 1;
             }
 
             var actor = Source.ActorScene.Instantiate<TActor>();
-            actor.Initialize(context);
+            actor.Initialize(context, args);
             return actor;
         }
     }

@@ -5,5 +5,6 @@ namespace Dose.Core.Library.Interactivity
     public interface ITalker
     {
         void OnDialogueBegin(DialogueRunner dialogueRunner);
+        void ProgressDialogue();
     }
 }

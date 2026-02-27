@@ -42,6 +42,13 @@ namespace Dose.Core.Library.ESpeak
             _audioCollector.Synth(text);
         }
 
+        public void Stop()
+        {
+            _audioStreamPlayer.Stop();
+            IsSpeaking = false;
+            Finished?.Invoke();
+        }
+
         void ProcessESpeakAudio(byte[] data, int sampleRate)
 		{
 			var stream = new AudioStreamWav

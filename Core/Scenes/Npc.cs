@@ -1,4 +1,5 @@
 using System;
+using Dose.Core.ActorArgs;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
@@ -9,7 +10,7 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor
+    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>
     {
         MeshInstance3D? _mesh;
 
@@ -17,21 +18,8 @@ namespace Dose.Core.Scenes
         public NpcContext? Context { get; private set; }
 
         IActorContext? IActor.Context => Context;
-
-       IActor IInitializableActor.Initialize(IActorContext context)
-        {
-            if (context is not NpcContext npcContext)
-            {
-                GD.PushError($"{nameof(Npc)}.{nameof(IInitializableActor.Initialize)} called with non-{nameof(NpcContext)}.");
-                return this;
-            }
-
-            InitializeContext(npcContext);
-
-            return this;
-        }
     
-        public Npc InitializeContext(NpcContext context)
+        public void Initialize(NpcContext context, NpcArgs args)
         {
             Context = context;
 
@@ -39,29 +27,34 @@ namespace Dose.Core.Scenes
 
             UpdateTexture();
 
-            return this;
-        }
-
-        public Npc InitializeSpeaker(Action onDialogueComplete)
-        {
-            if (Context == null)
-            {
-                GD.PushWarning($"{nameof(Npc)}.{nameof(InitializeSpeaker)} called before {nameof(InitializeContext)}. {nameof(Speaker)} won't be constructed.");
-                return this;
-            }
-
             if (Context.Voice == null)
             {
-                GD.PushWarning($"{nameof(Npc)}.{nameof(InitializeSpeaker)} called with null voice in {nameof(NpcContext)}. {nameof(Speaker)} won't be constructed.");
-                return this;
+                GD.Print($"No voice assigned to NPC {Context.DisplayName}. Skipping speaker initialization.");
+                return;
             }
 
-            Speaker = new ESpeaker(Context.Voice, onDialogueComplete);
+            if (args.Talker == null)
+            {
+                GD.Print($"No {nameof(ITalker)} provided in NpcArgs for NPC {Context.DisplayName}. Skipping speaker initialization.");
+                return;
+            }
 
+            Speaker = new ESpeaker(Context.Voice, args.Talker.ProgressDialogue);
+            
             AddChild((Node)Speaker);
-
-            return this;
         }
+
+        public override void _ExitTree()
+        {
+            if (Speaker?.IsSpeaking == true)
+            {
+                Speaker?.Stop();
+            }
+
+            base._ExitTree();
+
+        }
+
 
         public IDialogue? GetDialogue()
         {

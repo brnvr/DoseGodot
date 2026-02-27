@@ -119,7 +119,7 @@ namespace Dose.Core.Scenes
         {
             if (DialogueRunner == null)
             {
-                GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
+                GD.Print("Dialogue dialogueRunner is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
                 _controlPlane?.DialogueController?.OnDialogueEnd();

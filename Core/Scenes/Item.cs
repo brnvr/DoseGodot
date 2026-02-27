@@ -1,19 +1,19 @@
 using System;
+using Dose.Core.ActorArgs;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Item : Node3D, IActor<Player>, IInitializableActor, IItem
+    public partial class Item : Node3D, IActor<Player>, IInitializableActor<ItemContext, ItemArgs>, IItem
     {
         public ItemContext? Context { get; private set; }
         IActorContext? IActor.Context => Context;
 
-        public Item Initialize(ItemContext context)
+        public void Initialize(ItemContext context, ItemArgs args)
         {
             Context = context;
-            return this;
         }
 
         public void Destroy()

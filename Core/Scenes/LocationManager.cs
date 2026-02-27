@@ -10,7 +10,7 @@ using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.ActorPools;
-using System.Linq;
+using Dose.Core.ActorArgs;
 namespace Dose.Core.Scenes
 {
 	public partial class LocationManager : Node, ILocationManager, ILocationCreator
@@ -143,11 +143,30 @@ namespace Dose.Core.Scenes
 
 		void PopulateLocation(Location location)
 		{
-			var itemSelector = new ActorPoolSelector<Item, ItemContext>(_itemPool);
-			var npcSelector = new ActorPoolSelector<Npc, NpcContext>(_npcPool);
+			var itemSelector = new ActorPoolSelector<Item, ItemContext, ItemArgs>(_itemPool);
+			var npcSelector = new ActorPoolSelector<Npc, NpcContext, NpcArgs>(_npcPool);
 
-			var itemPopulator = new LocationPopulator<Item, ItemContext>(location, itemSelector, new Probability(0.5), BLOCK_SIZE);
-			var npcPopulator = new LocationPopulator<Npc, NpcContext>(location, npcSelector, new Probability(0.5), BLOCK_SIZE);
+			var itemArgs = new ItemArgs();
+			var npcArgs = new NpcArgs
+			{
+				Talker = Player
+			};
+
+			var itemPopulator = new LocationPopulator<Item, ItemContext, ItemArgs>(
+				location,
+				itemSelector,
+				new Probability(0.5),
+				itemArgs,
+				BLOCK_SIZE
+			);
+
+			var npcPopulator = new LocationPopulator<Npc, NpcContext, NpcArgs>(
+				location,
+				npcSelector,
+				new Probability(0.5),
+				npcArgs,
+				BLOCK_SIZE
+			);
 
 			var populators = new List<LocationPopulator>
 			{
@@ -156,23 +175,10 @@ namespace Dose.Core.Scenes
 			};
 
 			HashSet<Vector2I> populatedPositions = [];
-			Dictionary<LocationPopulator, List<IInitializableActor>> generatedActors = [];
 
 			foreach (var populator in populators)
 			{
-				var actors = populator.Populate(populatedPositions, out populatedPositions);
-				generatedActors[populator] = actors;
-			}
-
-			if (Player == null)
-			{
-				GD.Print($"{nameof(LocationManager)} has no defined {nameof(Player)}. Can't initialize NPC speakers.");
-				return;
-			}
-
-			foreach (Npc npc in generatedActors[npcPopulator].Cast<Npc>())
-			{
-				npc.InitializeSpeaker(Player.ProgressDialogue);
+				populator.Populate(populatedPositions, out populatedPositions);
 			}
 		}
 

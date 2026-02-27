@@ -60,19 +60,21 @@ namespace Dose.Core.Library.Locations
         protected abstract IInitializableActor? PopulateCell(Vector2I position);
     }
 
-    public class LocationPopulator<TActor, TActorContext>(
+    public class LocationPopulator<TActor, TActorContext, TArgs>(
         IBuildableLocation location,
-        ActorPoolSelector<TActor, TActorContext> selector,
+        ActorPoolSelector<TActor, TActorContext, TArgs> selector,
         Probability probabilityPopulate,
+        TArgs args,
         int blockSize
-    ) : LocationPopulator(location, probabilityPopulate, blockSize) where TActor : class, IInitializableActor, new() where TActorContext : IActorContext
+    ) : LocationPopulator(location, probabilityPopulate, blockSize) where TActor : class, IInitializableActor<TActorContext, TArgs>, new() where TActorContext : IActorContext
     {
         public new IBuildableLocation Location { get; } = location;
-        public ActorPoolSelector<TActor, TActorContext> Selector { get; } = selector;
+        public ActorPoolSelector<TActor, TActorContext, TArgs> Selector { get; } = selector;
+        public TArgs Args { get; } = args;
 
         protected override IInitializableActor? PopulateCell(Vector2I position)
         {
-            var nextActor = Selector.Select();
+            var nextActor = Selector.Select(Args);
 
             if (nextActor == null) return null;
     
