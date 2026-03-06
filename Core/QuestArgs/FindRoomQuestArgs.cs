@@ -1,6 +1,6 @@
 namespace Dose.Core.QuestArgs
 {
-    public class RoomQuestArgs
+    public class FindRoomQuestArgs
     {
         public required int RoomNumber { get; init; }
     }

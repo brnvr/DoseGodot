@@ -5,26 +5,26 @@ using Godot;
 
 namespace Dose.Core.Quests
 {
-    public class TalkToNpc(NpcContext npcContext) : Quest<FindNpcQuestArgs>
+    public class TalkToNpcQuest(NpcContext npcContext) : Quest<TalkToNpcQuestArgs>
     {
         public NpcContext NpcContext { get; } = npcContext;
 
-        public override bool Equals(Quest<FindNpcQuestArgs>? other)
+        public override bool Equals(Quest<TalkToNpcQuestArgs>? other)
         {
-            if (other is TalkToNpc talkToNpc)
+            if (other is TalkToNpcQuest talkToNpcQuest)
             {
-                return NpcContext == talkToNpc.NpcContext;
+                return NpcContext == talkToNpcQuest.NpcContext;
             }
 
             return false;
         }
 
-        protected override bool HasCompleted(FindNpcQuestArgs args)
+        protected override bool HasCompleted(TalkToNpcQuestArgs args)
         {
             return NpcContext == args.NpcContext;
         }
 
-        protected override void OnComplete(FindNpcQuestArgs args)
+        protected override void OnComplete(TalkToNpcQuestArgs args)
         {
             GD.Print($"Completed quest: Talk to {NpcContext.DisplayName}");
         }

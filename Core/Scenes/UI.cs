@@ -31,7 +31,7 @@ namespace Dose.Core.Scenes
             label.Visible = visible;
         }
 
-        public void Notificate(string message, float duration = 2f)
+        public void Notify(string message, float duration = 2f)
         {
             var notification = new Notification(message, duration);
             AddChild(notification);

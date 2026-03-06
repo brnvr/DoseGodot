@@ -67,7 +67,7 @@ namespace Dose.Core.Scenes
             
             Inventory.ItemAdded += (sender, e) =>
             {
-                QuestBook.TestCompleted<FindItemQuest, ItemQuestArgs>(new ItemQuestArgs 
+                QuestBook.TestCompleted<FindItemQuest, FindItemQuestArgs>(new FindItemQuestArgs 
                 { 
                     ItemContext = e.ItemContext
                 });

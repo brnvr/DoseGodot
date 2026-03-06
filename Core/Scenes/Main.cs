@@ -21,11 +21,10 @@ namespace Dose.Core.Scenes
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager").Initialize(controlPlane, player);
 
-			controlPlane.Initialize(ui, player,locationManager);
+			player.Initialize(controlPlane);
+			controlPlane.Initialize(ui, player, locationManager);
 
 			AudioCollector.InitializeESpeak();
-			
-			
 		}
 		
 		

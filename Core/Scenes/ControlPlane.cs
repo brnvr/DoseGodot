@@ -11,10 +11,9 @@ namespace Dose.Core.Scenes
         public InteractivityController? InteractivityController { get; private set; }
         public DoorNumberController DoorNumberController { get; } = new DoorNumberController();
 
+
         public ControlPlane Initialize(UI ui, Player player, LocationManager locationManager)
         {
-            player.Initialize(this);
-
             LocationController = new LocationController(locationManager);
             DialogueController = new DialogueController(ui);
             InventoryController = new InventoryController(player.Inventory, ui, ui);
@@ -23,14 +22,18 @@ namespace Dose.Core.Scenes
             return this;
         }
 
-        public void Pause()
+        public override void _Ready()
         {
-            GetTree().Paused = true;
+            ProcessMode = ProcessModeEnum.Always;
         }
 
-        public void Unpause()
+        public override void _Process(double delta)
         {
-            GetTree().Paused = false;
+            if (Input.IsActionJustPressed("Pause"))
+                GetTree().Paused = !GetTree().Paused;
+
+            base._Process(delta);
         }
+
     }
 }

@@ -34,7 +34,7 @@ namespace Dose.Core.Library.Control
                     UI.SetLabelValue("Inventory", json);
                 }
 
-                Notificator?.Notificate($"Added {e.ItemContext.DisplayName} to inventory.", 2f);
+                Notificator?.Notify($"Added {e.ItemContext.DisplayName} to inventory.", 2f);
             };
 
             Inventory.ItemDropped += (sender, e) =>
