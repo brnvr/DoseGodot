@@ -9,6 +9,16 @@ namespace Dose.Core.Quests
     {
         public ItemContext ItemContext { get; } = itemContext;
 
+        public override bool Equals(Quest<ItemQuestArgs>? other)
+        {
+            if (other is FindItemQuest findItemQuest)
+            {
+                return ItemContext == findItemQuest.ItemContext;
+            }
+
+            return false;
+        }
+
         protected override bool HasCompleted(ItemQuestArgs args)
         {
             return ItemContext == args.ItemContext;

@@ -1,4 +1,3 @@
-using Dose.Core.Actors.Npcs;
 using Dose.Core.Library.Control;
 using Godot;
 
@@ -18,7 +17,7 @@ namespace Dose.Core.Scenes
 
             LocationController = new LocationController(locationManager);
             DialogueController = new DialogueController(ui);
-            InventoryController = new InventoryController(player.Inventory, ui);
+            InventoryController = new InventoryController(player.Inventory, ui, ui);
             InteractivityController = new InteractivityController(ui);
 
             return this;

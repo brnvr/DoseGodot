@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
 namespace Dose.Core.Library.Quests
 {
@@ -10,6 +11,14 @@ namespace Dose.Core.Library.Quests
 
         public void Add<TArgs>(Quest<TArgs> quest)
         {
+            if (_quests.Contains(quest))
+            {
+                GD.Print($"Quest already exists: {quest}");
+                return;
+            }
+
+            GD.Print("Quest added: " + quest);
+
             _quests.Add(quest);
         }
 

@@ -32,3 +32,13 @@ offset_bottom = 94.0
 text = "asdasdasd"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Notifications" type="Label" parent="."]
+offset_left = 349.0
+offset_top = 58.0
+offset_right = 431.0
+offset_bottom = 98.0
+theme_override_font_sizes/font_size = 12
+text = "Notifications"
+horizontal_alignment = 2
+vertical_alignment = 1

@@ -1,14 +1,18 @@
+using Dose.Core.Library.Common;
 using Dose.Core.Library.UI;
 using Godot;
 using System;
 
 namespace Dose.Core.Scenes
 {
-    public partial class UI : CanvasLayer, IUI
+    public partial class UI : CanvasLayer, IUI, INotificator
     {
+        NotificationCenter? _notificationCenter;
+
         public override void _Ready()
         {
             ProcessMode = ProcessModeEnum.Always;
+            _notificationCenter = new NotificationCenter(this);
 
             base._Ready();
         }
@@ -25,6 +29,13 @@ namespace Dose.Core.Scenes
             var label = GetNode<Label>(labelName);
 
             label.Visible = visible;
-        }   
+        }
+
+        public void Notificate(string message, float duration = 2f)
+        {
+            var notification = new Notification(message, duration);
+            AddChild(notification);
+            _notificationCenter?.Add(notification);
+        }
     }
 }
