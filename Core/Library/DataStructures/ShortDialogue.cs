@@ -5,11 +5,11 @@ namespace Dose.Core.Library.DataStructures
 {
     public class ShortDialogue(string text) : IDialogue
     {
-        readonly DialogueSpeech _speech = new(text);
+        readonly DialogueLine _line = new(text);
 
         public IDialogueNode GetNode(int index)
         {
-            return _speech;
+            return _line;
         }
 
         public int GetNodeCount()

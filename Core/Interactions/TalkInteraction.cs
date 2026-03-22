@@ -30,7 +30,7 @@ namespace Dose.Core.Interactions
 
                     var dialogueRunner = new DialogueRunner(dialogue, (sender, e) =>
                     {
-                        if (subject is ISpeakable speakable && e.Node is DialogueSpeech speech)
+                        if (subject is ISpeakable speakable && e.Node is DialogueLine line)
                         {
                             if (speakable.Speaker?.IsSpeaking == true)
                             {
@@ -39,7 +39,7 @@ namespace Dose.Core.Interactions
                             
                             if (canTalk)
                             {
-                                speakable.Speaker?.Speak(speech.Text);
+                                speakable.Speaker?.Speak(line.Text);
                             }
                         }
                     });

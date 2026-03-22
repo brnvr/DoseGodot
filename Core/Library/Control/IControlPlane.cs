@@ -7,5 +7,6 @@ namespace Dose.Core.Library.Control
         InventoryController? InventoryController { get; }
         DialogueController? DialogueController  { get; }
         DoorNumberController? DoorNumberController { get; }
+        PauseController? PauseController { get; }
     }
 }

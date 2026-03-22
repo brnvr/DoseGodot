@@ -3,7 +3,7 @@ using Dose.Core.Library.UI;
 
 namespace Dose.Core.Library.DataStructures
 {
-    public class DialogueSpeech(string text) : IDialogueNode, IUIComponent
+    public class DialogueLine(string text) : IDialogueNode, IUIComponent
     {
         public string Text { get; } = text;
 

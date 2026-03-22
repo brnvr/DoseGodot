@@ -1,0 +1,15 @@
+startAt: asdasdas
+nodes:
+  asdasdas:
+    action: speak
+    args:
+      lines:
+      - sadasdasda
+      - teste 123
+      next: asdasdasd
+  as sadasd:
+    action: displayOptions
+    args:
+      options:
+      - text: Testing
+        next: asdasdasd
