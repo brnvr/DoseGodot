@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
-using Godot;
 
-namespace Dose.Core.Library.DataStructures
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueOptions(params DialogueOption[] options) : IDialogueNode
     {

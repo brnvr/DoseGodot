@@ -1,7 +1,6 @@
-using System;
 using Dose.Core.Library.UI;
 
-namespace Dose.Core.Library.DataStructures
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueLine(string text) : IDialogueNode, IUIComponent
     {

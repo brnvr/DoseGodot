@@ -1,5 +1,5 @@
 using Dose.Core.Library.Actors;
-using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Godot;
 

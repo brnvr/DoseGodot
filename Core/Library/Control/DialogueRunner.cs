@@ -1,5 +1,5 @@
 using System;
-using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.Events;
 using Godot;
 

@@ -1,4 +1,4 @@
-namespace Dose.Core.Library.DataStructures
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public interface IDialogue
     {

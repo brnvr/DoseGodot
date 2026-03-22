@@ -1,7 +1,4 @@
-using Dose.Core.Library.Control;
-using Dose.Core.Library.UI;
-
-namespace Dose.Core.Library.DataStructures
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public interface IDialogueNode
     {

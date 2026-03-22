@@ -1,6 +1,6 @@
 using System;
 
-namespace Dose.Core.Library.DataStructures
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueAction<TOther>(TOther other, Func<TOther, bool> Action) : IDialogueNode
     {

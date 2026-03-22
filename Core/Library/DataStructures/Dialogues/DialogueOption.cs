@@ -1,6 +1,6 @@
 using System;
 
-namespace Dose.Core.Library.DataStructures
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueOption(string text, Func<IDialogue, IDialogue> getNext)
     {

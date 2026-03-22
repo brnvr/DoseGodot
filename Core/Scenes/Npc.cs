@@ -1,9 +1,8 @@
-using System;
 using Dose.Core.ActorArgs;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
-using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.Interactivity;
 using Godot;

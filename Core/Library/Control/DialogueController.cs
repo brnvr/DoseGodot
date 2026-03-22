@@ -1,4 +1,4 @@
-using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.UI;
 
 namespace Dose.Core.Library.Control
