@@ -1,15 +1,21 @@
-startAt: asdasdas
+startAt: abc
 nodes:
-  asdasdas:
+  abc:
     action: speak
     args:
       lines:
       - sadasdasda
       - teste 123
-      next: asdasdasd
-  as sadasd:
+      next: def
+  def:
     action: displayOptions
     args:
       options:
       - text: Testing
-        next: asdasdasd
+        next: ghi
+  ghi:
+    action: speak
+    args:
+      lines:
+      - testttttt
+      - teeestttt

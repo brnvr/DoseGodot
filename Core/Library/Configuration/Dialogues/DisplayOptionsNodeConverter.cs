@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Dose.Core.Library.Configuration.Dialogues
 {
-    public class DisplayOptionsNodeConverter : YamlConfigConverter
+    public class DisplayOptionsNodeConverter() : YamlConfigConverter
     {
         public override DialogueConfigNode<DisplayOptionsNodeArgs> FromDict(Dictionary<string, object?> dict)
         {
@@ -24,5 +24,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
                 }
             };
         }
+
+        
     }
 }

@@ -33,23 +33,23 @@ namespace Dose.Core.Library.Configuration
 
             var raw = deserializer.Deserialize<object>(reader);
 
-            return Normalize(raw);
+            return NormalizeYamlDict(raw);
         }
 
-        static object Normalize(object input)
+        static object NormalizeYamlDict(object input)
         {
             if (input is IDictionary<object, object> dict)
             {
                 return dict.ToDictionary(
                     kvp => (string)kvp.Key,
-                    kvp => Normalize(kvp.Value)
+                    kvp => NormalizeYamlDict(kvp.Value)
                 );
             }
 
             if (input is IList list)
             {
                 return list.Cast<object>()
-                        .Select(Normalize)
+                        .Select(NormalizeYamlDict)
                         .ToList();
             }
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Dose.Core.Library.DataStructures.Dialogues;
 
 namespace Dose.Core.Library.Configuration.Dialogues
 {

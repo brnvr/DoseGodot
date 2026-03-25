@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Dose.Core.Library.DataStructures.Dialogues;
 using Godot;
 
 namespace Dose.Core.Library.Configuration.Dialogues
@@ -8,6 +9,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
     {
         public required string StartAt { get; init; }
         public required Dictionary<string, DialogueConfigNode> Nodes { get; init; }
+        public DialogueConfigNode FirstNode => Nodes[StartAt];
 
         public override Dictionary<string, object?> AsDict()
         {

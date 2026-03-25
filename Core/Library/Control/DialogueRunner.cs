@@ -62,8 +62,4 @@ namespace Dose.Core.Library.Control
             return true;
         }
     }
-
-    public class DialogueNode
-    {
-    }
 }

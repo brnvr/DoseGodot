@@ -11,40 +11,23 @@ namespace Dose.Core.Scenes
 	{
 		public override void _Ready()
 		{
-			DialogueConfig actions = new()
-			{
-				StartAt = "asdasdas",
-				Nodes = new()
-				{
-					{ "asdasdas", new SpeakNode {
-						Args = new SpeakNodeArgs {
-							Lines = [
-								"sadasdasda",
-								"teste 123"
-							],
-							Next = "asdasdasd",
-						}
-					}},
-					{ "as sadasd", new DisplayOptionsNode {
-						Args = new DisplayOptionsNodeArgs {
-							Options = [
-								new DisplayOptionsNodeOption {
-									Text = "Testing",
-									Next = "asdasdasd"
-								}
-							]
-						}
-					}}
-				}
-			};
-
-			actions.SaveYaml("D:/Godot/Dose/test.yml");
-
 			var loaded = (Dictionary<string, object>)YamlConfig.FromYaml("D:/Godot/Dose/test.yml");
 
-			var converter = new DialogueConfigConverter();
+			var converter = new DialogueConfigConverter(new Dictionary<string, YamlConfigConverter>
+			{
+				{ "speak", new SpeakNodeConverter() },
+				{ "displayOptions", new DisplayOptionsNodeConverter() }
+			});
 
-			var loadedAsObject = converter.FromDict(loaded);
+			var config = (DialogueConfig)converter.FromDict(loaded);
+
+			var builder = new DialogueBuilder(config, new Dictionary<string, IDialogueNodesBuilder>
+			{
+				{ "speak", new DialogueLinesBuilder() },
+				{ "displayOptions", new DialogueOptionsBuilder() }
+			});
+
+			var dialogue = builder.BuildDialogue();
 
             var light = new DirectionalLight3D
             {
