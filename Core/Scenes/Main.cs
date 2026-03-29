@@ -48,7 +48,5 @@ namespace Dose.Core.Scenes
 
 			AudioCollector.InitializeESpeak();
 		}
-		
-		
 	}
 }

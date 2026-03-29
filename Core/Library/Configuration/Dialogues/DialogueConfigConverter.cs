@@ -6,12 +6,6 @@ namespace Dose.Core.Library.Configuration.Dialogues
 {
     public class DialogueConfigConverter(Dictionary<string, YamlConfigConverter> nodeConverterMap) : YamlConfigConverter
     {
-        // readonly FrozenDictionary<string, DialogueConfigNodeConverter> _nodeConvertersMap = new Dictionary<string, DialogueConfigNodeConverter>
-        // {
-        //     { "speak", new SpeakNodeConverter() },
-        //     { "displayOptions", new DisplayOptionsNodeConverter() }
-        // }.ToFrozenDictionary();
-
         Dictionary<string, YamlConfigConverter> NodeConverterMap { get; } = nodeConverterMap;
 
         public override YamlConfig FromDict(Dictionary<string, object?> dict)
