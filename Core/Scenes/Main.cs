@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Dialogues;
+using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 
 using Godot;

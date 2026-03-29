@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Dose.Core.Library.DataStructures.Dialogues;
 
-namespace Dose.Core.Library.Configuration.Dialogues
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public interface IDialogueNodesBuilder
     {

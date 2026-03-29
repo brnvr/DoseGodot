@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Dose.Core.Library.DataStructures.Dialogues;
+using Dose.Core.Library.Configuration.Dialogues;
 
-namespace Dose.Core.Library.Configuration.Dialogues
+namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueBuilder(DialogueConfig dialogueConfig, Dictionary<string, IDialogueNodesBuilder> nodeBuilderMap)
     {
