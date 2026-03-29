@@ -9,23 +9,33 @@ using Dose.Core.Library.DataStructures;
 using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
-using Dose.Core.ActorPools;
 using Dose.Core.ActorArgs;
 using Dose.Core.Quests;
 using System.Linq;
+using Dose.Core.Library.Configuration.Actors;
 namespace Dose.Core.Scenes
 {
 	public partial class LocationManager : Node, ILocationManager, ILocationCreator
 	{
 		const int BLOCK_SIZE = 4;
 
-		readonly static ItemPool _itemPool = new();
-		readonly static NpcPool _npcPool = new();
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
-		
+		readonly static ActorPool<ItemContext> _itemPool = new ActorPool<ItemContext>(
+			configPath: "Configuration/Actors/Items",
+			actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn"),
+			configConverter: new ItemConfigConverter(),
+			contextBuilder: new ItemContextBuilder()
+		).LoadContexts();
+		readonly static ActorPool<NpcContext> _npcPool = new ActorPool<NpcContext>(
+			configPath: "Configuration/Actors/Npcs",
+			actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Npc.tscn"),
+			configConverter: new NpcConfigConverter(),
+			contextBuilder: new NpcContextBuilder()
+		).LoadContexts();
+
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
 

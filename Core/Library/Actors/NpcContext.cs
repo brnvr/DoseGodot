@@ -4,7 +4,7 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public abstract record NpcContext : IActorContext
+    public record NpcContext : IActorContext
     {
         public string DisplayName { get; set; } = "";
         public IDialogue? Dialogue { get; set; }
