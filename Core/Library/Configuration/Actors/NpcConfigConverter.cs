@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -12,7 +13,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 TexturePath = GetRequired<string>(dict, "texturePath"),
                 Voice = GetRequired<string>(dict, "voice"),
                 DialoguesDir = GetRequired<string>(dict, "dialoguesDir"),
-                CurrentDialogue = GetRequired<string>(dict, "currentDialogue")
+                AvaliableDialogues = GetRequired<List<object>>(dict, "avaliableDialogues").Select(o => (string)o)
             };
         }
     }

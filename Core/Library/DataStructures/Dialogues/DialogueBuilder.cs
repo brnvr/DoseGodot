@@ -4,19 +4,18 @@ using Dose.Core.Library.Configuration.Dialogues;
 
 namespace Dose.Core.Library.DataStructures.Dialogues
 {
-    public class DialogueBuilder(DialogueConfig dialogueConfig, Dictionary<string, IDialogueNodesBuilder> nodeBuilderMap)
+    public class DialogueBuilder(Dictionary<string, IDialogueNodesBuilder> nodeBuilderMap)
     {
-        public DialogueConfig DialogueConfig { get; } = dialogueConfig;
         public Dictionary<string, IDialogueNodesBuilder> NodeBuilderMap { get; } = nodeBuilderMap;
 
-        public Dialogue BuildDialogue()
+        public IDialogue BuildDialogue(DialogueConfig config)
         {
-            return BuildDialogue(DialogueConfig.StartAt);
+            return BuildDialogue(config, config.StartAt);
         }
 
-        public Dialogue BuildDialogue(string action)
+        public IDialogue BuildDialogue(DialogueConfig config, string action)
         {
-            var nodeMap = CreateNodeMap();
+            var nodeMap = CreateNodeMap(config);
 
             var dialogue = Dialogue.Start();
             var currentNodes = nodeMap[action];
@@ -39,13 +38,14 @@ namespace Dose.Core.Library.DataStructures.Dialogues
             return dialogue;
         }
 
-        Dictionary<string, NodeMapEntry> CreateNodeMap()
+        Dictionary<string, NodeMapEntry> CreateNodeMap(DialogueConfig config)
         {
-            return DialogueConfig.Nodes.ToDictionary(c => c.Key, c =>
+            return config.Nodes.ToDictionary(c => c.Key, c =>
             {
                 var builder = NodeBuilderMap[c.Value.Action];
-                var nodes = builder.GetDialogueNodes(this, c.Key);
-                var nodeConfig = DialogueConfig.Nodes[c.Key];
+                var context = new DialogueBuildContext(this, config);
+                var nodes = builder.GetDialogueNodes(context, c.Key);
+                var nodeConfig = config.Nodes[c.Key];
 
                 return new NodeMapEntry(nodes, nodeConfig.NextAction);
             });

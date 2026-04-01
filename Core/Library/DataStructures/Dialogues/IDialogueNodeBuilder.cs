@@ -4,6 +4,6 @@ namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public interface IDialogueNodesBuilder
     {
-        IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuilder dialogueBuilder, string key);
+        IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuildContext context, string key);
     }
 }

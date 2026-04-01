@@ -5,6 +5,7 @@ using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.Interactivity;
+using Dose.Core.Library.Randomness;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -57,7 +58,13 @@ namespace Dose.Core.Scenes
 
         public IDialogue? GetDialogue()
         {
-            return Context?.Dialogue;
+            if (Context == null)
+            {
+                return null;
+            }
+
+            var dialogueKey = new RandomSelector<string>(Context.AvaliableDialogueKeys).Pick();
+            return Context.DialogueMap[dialogueKey];
         }
 
         public void OnInteract(IInteraction<Player> interaction)

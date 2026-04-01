@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Godot;
@@ -6,10 +8,11 @@ namespace Dose.Core.Library.Actors
 {
     public record NpcContext : IActorContext
     {
-        public string DisplayName { get; set; } = "";
-        public IDialogue? Dialogue { get; set; }
-        public Texture2D? Texture { get; set; }
-        public Voice? Voice { get; set; }
-        public int MaxQuantity { get; set; } = 1;
+        public string DisplayName { get; init; } = "";
+        public Dictionary<string, IDialogue> DialogueMap { get; init; } = [];
+        public IEnumerable<string> AvaliableDialogueKeys { get; init; } = [];
+        public Texture2D? Texture { get; init; }
+        public Voice? Voice { get; init; }
+        public int MaxQuantity { get; init; } = 1;
     }
 }

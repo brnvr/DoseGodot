@@ -6,9 +6,9 @@ namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueLinesBuilder : IDialogueNodesBuilder
     {
-        public IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuilder dialogueBuilder, string key)
+        public IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuildContext context, string key)
         {
-            var nodeConfig = dialogueBuilder.DialogueConfig.Nodes[key];
+            var nodeConfig = context.DialogueConfig.Nodes[key];
             return ((SpeakNode)nodeConfig).Args.Lines.Select(line => new DialogueLine(line));
         }
     }

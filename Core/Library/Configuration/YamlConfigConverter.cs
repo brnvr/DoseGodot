@@ -21,7 +21,7 @@ namespace Dose.Core.Library.Configuration
 
         protected static T GetRequired<T>(Dictionary<string, object?> dict, string key)
         {
-            var value = GetOptional<T>(dict, key) ?? throw new Exception($"Dictionary doesn't contain required key {key}");
+            var value = GetOptional<T>(dict, key) ?? throw new Exception($"Dictionary doesn't contain required key \"{key}\".");
 
             return value;
         }

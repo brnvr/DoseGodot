@@ -8,7 +8,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
     {
         Dictionary<string, YamlConfigConverter> NodeConverterMap { get; } = nodeConverterMap;
 
-        public override YamlConfig FromDict(Dictionary<string, object?> dict)
+        public override DialogueConfig FromDict(Dictionary<string, object?> dict)
         {
             var nodes = GetRequired<Dictionary<string, object?>>(dict, "nodes");
 

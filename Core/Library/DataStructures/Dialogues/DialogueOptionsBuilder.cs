@@ -6,16 +6,16 @@ namespace Dose.Core.Library.DataStructures.Dialogues
 {
     public class DialogueOptionsBuilder : IDialogueNodesBuilder
     {
-        public IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuilder dialogueBuilder, string key)
+        public IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuildContext context, string key)
         {
-            var nodeConfig = dialogueBuilder.DialogueConfig.Nodes[key];
+            var nodeConfig = context.DialogueConfig.Nodes[key];
 
             var options = ((DisplayOptionsNode)nodeConfig).Args.Options.Select(option => {
                 return new DialogueOption(option.Text, current =>
                 {
-                    var next = dialogueBuilder.DialogueConfig.Nodes[option.Next];
+                    var next = context.DialogueConfig.Nodes[option.Next];
 
-                    var dialogue = dialogueBuilder.BuildDialogue(next.Action);
+                    var dialogue = context.DialogueBuilder.BuildDialogue(context.DialogueConfig, next.Action);
 
                     return dialogue;
                 });
