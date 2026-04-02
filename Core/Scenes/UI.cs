@@ -6,10 +6,11 @@ using Dose.Core.Library.Control;
 
 namespace Dose.Core.Scenes
 {
-    public partial class UI : CanvasLayer, IUI, INotificator, IMenuContainer
+    public partial class UI : CanvasLayer, IUI, INotificator
     {
         NotificationCenter? _notificationCenter;
         CenterContainer? _currentMenu;
+        Input.MouseModeEnum? _mouseModePrevious;
 
         public override void _Ready()
         {
@@ -45,6 +46,9 @@ namespace Dose.Core.Scenes
         {
             HideMenu();
 
+            _mouseModePrevious = Input.MouseMode;
+            Input.MouseMode = Input.MouseModeEnum.Visible;
+
             var center = new CenterContainer
             {
                 AnchorLeft = 0,
@@ -65,7 +69,9 @@ namespace Dose.Core.Scenes
                     Text = option.Text
                 };
 
-                button.Pressed += option.OnPressed;
+                if (option.OnPressed != null) button.Pressed += option.OnPressed;
+                if (option.OnHover != null) button.MouseEntered += option.OnHover;
+                if (option.OnExit != null) button.MouseExited += option.OnExit;
                 menuBox.AddChild(button);
             }
 
@@ -76,6 +82,11 @@ namespace Dose.Core.Scenes
 
         public void HideMenu()
         {
+            if (_mouseModePrevious != null)
+            {
+                Input.MouseMode = (Input.MouseModeEnum)_mouseModePrevious;
+            }
+            
             _currentMenu?.QueueFree();
             _currentMenu = null;
         }

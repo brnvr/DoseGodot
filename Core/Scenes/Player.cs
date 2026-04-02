@@ -239,6 +239,8 @@ namespace Dose.Core.Scenes
 
             // Smooth rotation
             Basis currentBasis = _head.GlobalTransform.Basis;
+            currentBasis = currentBasis.Orthonormalized();
+            targetBasis = targetBasis.Orthonormalized();
             Basis newBasis = currentBasis.Slerp(targetBasis, (float)(delta * 5f));
 
             _head.GlobalTransform = new Transform3D(newBasis, from);

@@ -1,9 +1,14 @@
 using System.Collections.Generic;
+using System.Linq;
+using Dose.Core.Library.Control;
+using Dose.Core.Library.UI;
 
 namespace Dose.Core.Library.DataStructures.Dialogues
 {
-    public class DialogueOptions(params DialogueOption[] options) : IDialogueNode
+    public class DialogueOptions(params DialogueOption[] options) : IDialogueNode, IUIComponent
     {
+        IUI? _currentUI;
+
         public IEnumerable<DialogueOption> Options { get; } = options;
         public DialogueOption? Selected { get; set; }
 
@@ -25,13 +30,22 @@ namespace Dose.Core.Library.DataStructures.Dialogues
                 return null;
             }
 
-            nextDialogue = Dialogue.Start();
+            nextDialogue = Selected.GetNext();
             nextNodeIndex = 0;
 
-            return Selected.GetNext(nextDialogue).GetNode(0);
+            _currentUI?.HideMenu();
+
+            return nextDialogue.GetNode(0);
         }
 
-        public bool Process()
+        public void OnUIEvent(IUI ui)
+        {
+            _currentUI = ui;
+
+            var menuOptions = Options.Select(o => new MenuOption(text: o.Text, onHover: () => Selected = o));
+
+            ui.DisplayMenu(menuOptions);
+        }        public bool Process()
         {
             return true;
         }

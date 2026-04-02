@@ -11,11 +11,9 @@ namespace Dose.Core.Library.DataStructures.Dialogues
             var nodeConfig = context.DialogueConfig.Nodes[key];
 
             var options = ((DisplayOptionsNode)nodeConfig).Args.Options.Select(option => {
-                return new DialogueOption(option.Text, current =>
+                return new DialogueOption(option.Text, () =>
                 {
-                    var next = context.DialogueConfig.Nodes[option.Next];
-
-                    var dialogue = context.DialogueBuilder.BuildDialogue(context.DialogueConfig, next.Action);
+                    var dialogue = context.DialogueBuilder.BuildDialogue(context.DialogueConfig, option.Next);
 
                     return dialogue;
                 });

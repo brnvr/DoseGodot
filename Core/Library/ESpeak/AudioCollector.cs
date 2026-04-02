@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Dose.Core.Library.Events;
-using Godot;
 
 namespace Dose.Core.Library.ESpeak
 {

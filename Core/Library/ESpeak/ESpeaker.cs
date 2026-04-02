@@ -21,15 +21,12 @@ namespace Dose.Core.Library.ESpeak
             _audioCollector = new AudioCollector(voice.SampleRate);
             _audioCollector.SynthCompleted += (sender, e) => ProcessESpeakAudio(e.WavBytes, e.SampleRate);
             _audioStreamPlayer = new AudioStreamPlayer3D();
-            
-            if (Finished != null)
-            {
-                _audioStreamPlayer.Finished += Finished;
-            }
 
             _audioStreamPlayer.Finished += () =>
             {
                 IsSpeaking = false;
+
+                Finished?.Invoke();
             };
 
             AddChild(_audioStreamPlayer);
@@ -46,7 +43,6 @@ namespace Dose.Core.Library.ESpeak
         {
             _audioStreamPlayer.Stop();
             IsSpeaking = false;
-            Finished?.Invoke();
         }
 
         void ProcessESpeakAudio(byte[] data, int sampleRate)

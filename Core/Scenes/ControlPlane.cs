@@ -24,11 +24,11 @@ namespace Dose.Core.Scenes
             {
                 PauseController.Paused += (s, e) => {
                     GetTree().Paused = true;
-                    Input.MouseMode = Input.MouseModeEnum.Visible;
+                    //Input.MouseMode = Input.MouseModeEnum.Visible;
                 };
                 PauseController.Unpaused += (s, e) => {
                     GetTree().Paused = false;
-                    Input.MouseMode = Input.MouseModeEnum.Captured;
+                    //Input.MouseMode = Input.MouseModeEnum.Captured;
                 };
                 PauseController.Quit += (s, e) => {
                     GetTree().Quit();
