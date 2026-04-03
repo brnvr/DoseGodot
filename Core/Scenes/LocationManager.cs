@@ -14,7 +14,6 @@ using Dose.Core.Quests;
 using System.Linq;
 using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Configuration.Dialogues;
-using Dose.Core.Library.Configuration;
 using Dose.Core.Library.DataStructures.Dialogues;
 namespace Dose.Core.Scenes
 {
@@ -36,18 +35,10 @@ namespace Dose.Core.Scenes
 			configPath: "Configuration/Actors/Npcs",
 			actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Npc.tscn"),
 			configConverter: new NpcConfigConverter(),
-			contextBuilder: new NpcContextBuilder(
-				new DialogueConfigConverter(new Dictionary<string, YamlConfigConverter>
-				{
-					{ "speak", new SpeakNodeConverter() },
-					{ "displayOptions", new DisplayOptionsNodeConverter() }
-				}),
-				new DialogueBuilder(new Dictionary<string, IDialogueNodesBuilder>
-				{
-					{ "speak", new DialogueLinesBuilder() },
-					{ "displayOptions", new DialogueOptionsBuilder() }
-				})
-			)
+			contextBuilder: new NpcContextBuilder([
+				new("speak", new SpeakNodeConverter(), new DialogueLinesBuilder()),
+				new("displayOptions", new DisplayOptionsNodeConverter(), new DialogueOptionsBuilder())
+			])
 		).LoadContexts();
 
 		ILocation? _currentLocation;

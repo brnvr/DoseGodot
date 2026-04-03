@@ -10,10 +10,10 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public class NpcContextBuilder(DialogueConfigConverter dialogueConfigConverter, DialogueBuilder dialogueBuilder) : IActorContextBuilder
+    public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IActorContextBuilder
     {
-        DialogueConfigConverter DialogueConfigConverter { get; } = dialogueConfigConverter;
-        DialogueBuilder DialogueBuilder { get; } = dialogueBuilder;
+        public DialogueConfigConverter DialogueConfigConverter = new(actions.ToDictionary(a => a.Key, a => a.DialogueNodeConverter));
+        public DialogueBuilder DialogueBuilder = new (actions.ToDictionary(a => a.Key, a => a.DialogueNodeBuilder));
 
         public NpcContext BuildContext(NpcConfig npcConfig)
         {

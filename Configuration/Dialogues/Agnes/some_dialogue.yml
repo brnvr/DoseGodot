@@ -26,7 +26,7 @@ nodes:
     action: speak
     args:
       lines:
-        - Leave;
+        - Leave.
 
   mno:
     action: displayOptions
