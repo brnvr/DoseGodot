@@ -5,7 +5,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
 {
     public class SpeakNodeConverter : YamlConfigConverter
     {
-        public override DialogueConfigNode<SpeakNodeArgs> FromDict(Dictionary<string, object?> dict)
+        public override SpeakNode FromDict(Dictionary<string, object?> dict)
         {
             return new SpeakNode
             {

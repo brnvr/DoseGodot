@@ -2,7 +2,7 @@
 startAt: abc
 nodes:
   abc:
-    action: speak
+    type: speak
     args:
       lines:
         - What do you want? I don't have time to talk to you right now. I'm busy with work.
@@ -10,26 +10,26 @@ nodes:
       next: mno
 
   def:
-    action: speak
+    type: speak
     args:
       lines:
         - I'm doing fine, thanks for asking. Just busy with work as usual.
         
   ghi:
-    action: speak
+    type: speak
     args:
       lines:
         - I'm doing well, but I appreciate the concern. I'll be okay.
         - Thanks for offering, but I think I can handle things on my own.
 
   jkl:
-    action: speak
+    type: execute
     args:
-      lines:
-        - Leave.
+      action: exitGame
+      next: prq
 
   mno:
-    action: displayOptions
+    type: displayOptions
     args:
       options:
       - text: I just wanted to check in and see how you're doing. Is everything okay?
@@ -39,3 +39,8 @@ nodes:
       - text: I don't know bye
         next: jkl
       
+  prq:
+    type: speak
+    args:
+      lines:
+      - Well I gotta go

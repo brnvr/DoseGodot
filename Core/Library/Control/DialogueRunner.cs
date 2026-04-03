@@ -40,9 +40,9 @@ namespace Dose.Core.Library.Control
         {
             var currentNode = GetCurrentNode();
 
-            var nextNode = currentNode.GetNextNode(_currentDialogue, _currentNodeIndex, out var nextDialogue, out var nextNodeIndex);
+            var nextNodeIndex = currentNode.GetNextNodeIndex(_currentDialogue, _currentNodeIndex, out var nextDialogue);
 
-            if (nextNode == null)
+            if (nextNodeIndex == null)
             {
                 return false;
             }
@@ -55,7 +55,7 @@ namespace Dose.Core.Library.Control
             }
 
             _currentDialogue = nextDialogue;
-            _currentNodeIndex = nextNodeIndex;
+            _currentNodeIndex = (int)nextNodeIndex;
 
             NodeSet?.Invoke(this, new DialogueNodeSetEventArgs(GetCurrentNode()));
 

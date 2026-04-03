@@ -12,30 +12,25 @@ namespace Dose.Core.Library.DataStructures.Dialogues
         public IEnumerable<DialogueOption> Options { get; } = options;
         public DialogueOption? Selected { get; set; }
 
-        public IDialogueNode? GetNextNode(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue, out int nextNodeIndex)
+        public int? GetNextNodeIndex(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue)
         {
             if (Selected == null)
             {
                 nextDialogue = currentDialogue;
-                nextNodeIndex = currentNodeIndex;
-
-                return this;
+                return currentNodeIndex;
             }
 
             if (currentNodeIndex >= currentDialogue.GetNodeCount())
             {
                 nextDialogue = null;
-                nextNodeIndex = currentNodeIndex;
-
                 return null;
             }
 
             nextDialogue = Selected.GetNext();
-            nextNodeIndex = 0;
 
             _currentUI?.HideMenu();
 
-            return nextDialogue.GetNode(0);
+            return 0;
         }
 
         public void OnUIEvent(IUI ui)
@@ -45,9 +40,10 @@ namespace Dose.Core.Library.DataStructures.Dialogues
             var menuOptions = Options.Select(o => new MenuOption(text: o.Text, onExit: () => Selected = null, onHover: () => Selected = o));
 
             ui.DisplayMenu(menuOptions);
-        }        public bool Process()
+        }
+
+        public void Process()
         {
-            return true;
         }
     }
 }

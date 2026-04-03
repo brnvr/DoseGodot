@@ -78,6 +78,7 @@ namespace Dose.Core.Scenes
         {
             ProcessInteract();
             ProcessInventory();
+            ProcessDialogue();
         }
 
         public override void _PhysicsProcess(double delta)
@@ -244,6 +245,11 @@ namespace Dose.Core.Scenes
             Basis newBasis = currentBasis.Slerp(targetBasis, (float)(delta * 5f));
 
             _head.GlobalTransform = new Transform3D(newBasis, from);
+        }
+
+        void ProcessDialogue()
+        {
+            DialogueRunner?.GetCurrentNode().Process();
         }
 
         void ProcessInteract()

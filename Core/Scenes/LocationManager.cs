@@ -10,11 +10,6 @@ using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.ActorArgs;
-using Dose.Core.Quests;
-using System.Linq;
-using Dose.Core.Library.Configuration.Actors;
-using Dose.Core.Library.Configuration.Dialogues;
-using Dose.Core.Library.DataStructures.Dialogues;
 namespace Dose.Core.Scenes
 {
 	public partial class LocationManager : Node, ILocationManager, ILocationCreator
@@ -25,24 +20,11 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
-		readonly static ActorPool<ItemContext> _itemPool = new ActorPool<ItemContext>(
-			configPath: "Configuration/Actors/Items",
-			actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn"),
-			configConverter: new ItemConfigConverter(),
-			contextBuilder: new ItemContextBuilder()
-		).LoadContexts();
-		readonly static ActorPool<NpcContext> _npcPool = new ActorPool<NpcContext>(
-			configPath: "Configuration/Actors/Npcs",
-			actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Npc.tscn"),
-			configConverter: new NpcConfigConverter(),
-			contextBuilder: new NpcContextBuilder([
-				new("speak", new SpeakNodeConverter(), new DialogueLinesBuilder()),
-				new("displayOptions", new DisplayOptionsNodeConverter(), new DialogueOptionsBuilder())
-			])
-		).LoadContexts();
 
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
+		ActorPool<ItemContext>? _itemPool;
+		ActorPool<NpcContext>? _npcPool;
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
@@ -56,17 +38,19 @@ namespace Dose.Core.Scenes
 			_locationQueue?.Free();
         }
 
-		public LocationManager Initialize(IControlPlane controlPlane, Player player)
+		public LocationManager Initialize(IControlPlane controlPlane, Player player, ActorPool<ItemContext> itemPool, ActorPool<NpcContext> npcPool)
         {
 			Player = player;
 			ControlPlane = controlPlane;
+			_itemPool = itemPool;
+			_npcPool = npcPool;
 			_locationQueue = new LocationQueue(this, 2);
 
 			_locationQueue.Initialize();
 
 			CurrentLocation = _locationQueue.PopNextLocation(LocationType.Corridor, ClockDirection.Clockwise);
 
-			player.QuestBook.Add(new FindItemQuest(_itemPool.AvaliableContexts.ToList()[0]));
+			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvaliableContexts.ToList()[0]));
 
             return this;
         }
@@ -162,6 +146,18 @@ namespace Dose.Core.Scenes
 
 		void PopulateLocation(Location location)
 		{
+			if (_itemPool == null)
+			{
+				GD.PushWarning($"{nameof(_itemPool)} is null");
+				return;
+			}
+
+			if (_npcPool == null)
+			{
+				GD.PushWarning($"{nameof(_npcPool)} is null");
+				return;
+			}
+
 			var itemSelector = new ActorPoolSelector<Item, ItemContext, ItemArgs>(_itemPool);
 			var npcSelector = new ActorPoolSelector<Npc, NpcContext, NpcArgs>(_npcPool);
 

@@ -13,12 +13,12 @@ namespace Dose.Core.Library.DataStructures.Dialogues
             return BuildDialogue(config, config.StartAt);
         }
 
-        public IDialogue BuildDialogue(DialogueConfig config, string action)
+        public IDialogue BuildDialogue(DialogueConfig config, string type)
         {
             var nodeMap = CreateNodeMap(config);
 
             var dialogue = Dialogue.Start();
-            var currentNodes = nodeMap[action];
+            var currentNodes = nodeMap[type];
 
             while (true)
             {
@@ -27,12 +27,12 @@ namespace Dose.Core.Library.DataStructures.Dialogues
                     dialogue = dialogue.WithNode(node);
                 }
 
-                if (currentNodes.NextAction == null)
+                if (currentNodes.NextNode == null)
                 {
                     break;
                 }
 
-                currentNodes = nodeMap[currentNodes.NextAction];
+                currentNodes = nodeMap[currentNodes.NextNode];
             }
 
             return dialogue;
@@ -42,19 +42,19 @@ namespace Dose.Core.Library.DataStructures.Dialogues
         {
             return config.Nodes.ToDictionary(c => c.Key, c =>
             {
-                var builder = NodeBuilderMap[c.Value.Action];
+                var builder = NodeBuilderMap[c.Value.Type];
                 var context = new DialogueBuildContext(this, config);
                 var nodes = builder.GetDialogueNodes(context, c.Key);
                 var nodeConfig = config.Nodes[c.Key];
 
-                return new NodeMapEntry(nodes, nodeConfig.NextAction);
+                return new NodeMapEntry(nodes, nodeConfig.NextNode);
             });
         }
 
-        readonly struct NodeMapEntry(IEnumerable<IDialogueNode> nodes, string? nextAction)
+        readonly struct NodeMapEntry(IEnumerable<IDialogueNode> nodes, string? nextNode)
         {
             public IEnumerable<IDialogueNode> Nodes { get; } = nodes;
-            public string? NextAction { get; } = nextAction;
+            public string? NextNode { get; } = nextNode;
         }
     }
 }

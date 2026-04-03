@@ -6,7 +6,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
 {
     public class DisplayOptionsNodeConverter() : YamlConfigConverter
     {
-        public override DialogueConfigNode<DisplayOptionsNodeArgs> FromDict(Dictionary<string, object?> dict)
+        public override DisplayOptionsNode FromDict(Dictionary<string, object?> dict)
         {
             var optionsRaw = GetRequired<IEnumerable<object>>(dict, "options");
 

@@ -8,9 +8,9 @@ namespace Dose.Core.Library.DataStructures.Dialogues
     {
         public IEnumerable<IDialogueNode> GetDialogueNodes(DialogueBuildContext context, string key)
         {
-            var nodeConfig = context.DialogueConfig.Nodes[key];
+            var nodeConfig = (DisplayOptionsNode)context.DialogueConfig.Nodes[key];
 
-            var options = ((DisplayOptionsNode)nodeConfig).Args.Options.Select(option => {
+            var options = nodeConfig.Args.Options.Select(option => {
                 return new DialogueOption(option.Text, () =>
                 {
                     var dialogue = context.DialogueBuilder.BuildDialogue(context.DialogueConfig, option.Next);

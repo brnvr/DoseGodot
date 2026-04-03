@@ -6,20 +6,16 @@ namespace Dose.Core.Library.DataStructures.Dialogues
     {
         public string Text { get; } = text;
 
-        public IDialogueNode? GetNextNode(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue, out int nextNodeIndex)
+        public int? GetNextNodeIndex(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue)
         {
             nextDialogue = currentDialogue;
 
             if (currentNodeIndex >= currentDialogue.GetNodeCount() - 1)
             {
-                nextNodeIndex = currentNodeIndex;
-
                 return null;
             }
 
-            nextNodeIndex = currentNodeIndex + 1;
-
-            return currentDialogue.GetNode(nextNodeIndex);
+            return currentNodeIndex + 1;
         }
 
         public void OnUIEvent(IUI ui)
@@ -28,9 +24,8 @@ namespace Dose.Core.Library.DataStructures.Dialogues
             ui.SetLabelVisible("NameCaption", false);
         }
 
-        public bool Process()
+        public void Process()
         {
-            return true;
         }
     }
 }

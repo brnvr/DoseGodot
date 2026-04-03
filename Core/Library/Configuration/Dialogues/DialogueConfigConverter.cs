@@ -18,9 +18,9 @@ namespace Dose.Core.Library.Configuration.Dialogues
                 Nodes = nodes.ToDictionary(node => node.Key, node =>
                 {
                     var nodeDict = node.Value as Dictionary<string, object> ?? throw new FormatException($"Invalid format for node {node.Key}.");
-                    var action = nodeDict["action"] as string ?? throw new FormatException($"Invalid action for node {node.Key}.");
-                    var converter = NodeConverterMap[action];
-                    var args = nodeDict["args"] as Dictionary<string, object?> ?? throw new FormatException($"Invalid args for action {action} in node {node.Key}.");
+                    var type = nodeDict["type"] as string ?? throw new FormatException($"Invalid node type: {node.Key}");
+                    var converter = NodeConverterMap[type];
+                    var args = nodeDict["args"] as Dictionary<string, object?> ?? throw new FormatException($"Invalid args for type \"{type}\" in node {node.Key}.");
 
                     return (DialogueConfigNode)converter.FromDict(args);
                 })

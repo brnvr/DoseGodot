@@ -2,22 +2,34 @@ using System;
 
 namespace Dose.Core.Library.DataStructures.Dialogues
 {
-    public class DialogueAction<TOther>(TOther other, Func<TOther, bool> Action) : IDialogueNode
+    public abstract class DialogueAction(Action onFinish) : IDialogueNode
     {
-        public TOther Other { get; } = other;
-        public Func<TOther, bool> Action { get; } = Action;
-
-        public bool Process()
-        {
-            return Action(Other);
-        }
-
-        public IDialogueNode? GetNextNode(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue, out int nextNodeIndex)
+        public Action OnFinish { get; } = onFinish;
+  
+        public int? GetNextNodeIndex(IDialogue currentDialogue, int currentNodeIndex, out IDialogue? nextDialogue)
         {
             nextDialogue = currentDialogue;
-            nextNodeIndex = currentNodeIndex + 1;
 
-            return currentDialogue.GetNode(nextNodeIndex);
+            if (currentNodeIndex >= currentDialogue.GetNodeCount() - 1)
+            {
+                return null;
+            }
+
+            return currentNodeIndex + 1;
+        }
+
+        public abstract void Process();
+    }
+
+    public class DialogueAction<TArgs>(Action<TArgs, Action> action, TArgs args, Action onFinish) : DialogueAction(onFinish)
+    {
+        public TArgs Args { get; } = args;
+        public Action<TArgs, Action> Action { get; } = action;
+
+
+        public override void Process()
+        {
+            Action(Args, OnFinish);
         }
     }
 }

@@ -4,8 +4,8 @@ namespace Dose.Core.Library.Configuration.Dialogues
 {
     public abstract class DialogueConfigNode : YamlConfig
     {
-        public abstract string Action { get; }
-        public abstract string? NextAction { get; }
+        public abstract string Type { get; }
+        public abstract string? NextNode { get; }
     } 
 
     public abstract class DialogueConfigNode<TArgs>  : DialogueConfigNode where TArgs : YamlConfig
@@ -16,7 +16,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             return new Dictionary<string, object?>
             {
-                { "action", Action },
+                { "type", Type },
                 { "args", Args.AsDict() }
             };
         }
