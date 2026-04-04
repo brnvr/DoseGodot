@@ -21,6 +21,14 @@ namespace Dose.Core.Scenes
 
         }
 
+        public override void _ExitTree()
+        {
+            _notificationCenter?.QueueFree();
+
+            base._ExitTree();
+        }
+
+
         public void SetLabelValue(string labelName, string text)
         {
             var label = GetNode<Label>(labelName);
