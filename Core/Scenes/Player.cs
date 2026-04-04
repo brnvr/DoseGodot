@@ -1,5 +1,6 @@
 using System;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.DataStructures.Dialogues;
@@ -137,7 +138,7 @@ namespace Dose.Core.Scenes
         {
             if (DialogueRunner == null)
             {
-                GD.Print("Dialogue dialogueRunner is null. Can't progress dialogue.");
+                GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
                 _interactionState = InteractionState.Curious;
                 _controlPlane?.DialogueController?.OnDialogueEnd();
@@ -153,6 +154,11 @@ namespace Dose.Core.Scenes
                 _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 UpdateTarget();
+
+                if (_currentTarget is ISpeakable speakable)
+                {
+                    speakable.Speaker?.Stop();
+                }
 
                 return;
             }

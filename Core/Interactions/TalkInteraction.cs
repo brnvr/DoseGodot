@@ -36,11 +36,13 @@ namespace Dose.Core.Interactions
                         {
                             if (e.Node is DialogueLine line)
                             {
-                                // TODO: Revisit this logic
-                                // if (speakable.Speaker?.IsSpeaking == true)
-                                // {
-                                //     canTalk = false;
-                                // }
+                                if (sender is DialogueRunner runner && runner.Dialogue is ShortDialogue)
+                                {
+                                    if (speakable.Speaker?.IsSpeaking == true)
+                                    {
+                                        canTalk = false;
+                                    }
+                                }
                                 
                                 if (canTalk)
                                 {

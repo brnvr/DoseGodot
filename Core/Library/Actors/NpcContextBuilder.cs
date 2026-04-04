@@ -13,7 +13,17 @@ namespace Dose.Core.Library.Actors
     public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IActorContextBuilder
     {
         public DialogueConfigConverter DialogueConfigConverter = new(actions.ToDictionary(a => a.Key, a => a.DialogueNodeConverter));
-        public DialogueBuilder DialogueBuilder = new (actions.ToDictionary(a => a.Key, a => a.DialogueNodeBuilder));
+        public DialogueBuilder DialogueBuilder = new(
+            actions.ToDictionary(a => a.Key, a => a.DialogueNodeBuilder),
+            buildShortDialogue: node =>
+            {
+                if (node is not SpeakNode speakNode || speakNode.Args.Lines.Count() > 1)
+                {
+                    return null;
+                }
+
+                return speakNode.Args.Lines.First();
+            });
 
         public NpcContext BuildContext(NpcConfig npcConfig)
         {

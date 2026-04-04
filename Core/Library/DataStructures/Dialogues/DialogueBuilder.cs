@@ -1,12 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Configuration.Dialogues;
 
 namespace Dose.Core.Library.DataStructures.Dialogues
 {
-    public class DialogueBuilder(Dictionary<string, IDialogueNodesBuilder> nodeBuilderMap)
+    public class DialogueBuilder(
+        Dictionary<string, IDialogueNodesBuilder> nodeBuilderMap,
+        Func<DialogueConfigNode, string?>? buildShortDialogue = null
+    )
     {
         public Dictionary<string, IDialogueNodesBuilder> NodeBuilderMap { get; } = nodeBuilderMap;
+        public Func<DialogueConfigNode, string?>? BuildShortDialogue { get; } = buildShortDialogue;
 
         public IDialogue BuildDialogue(DialogueConfig config)
         {
@@ -15,6 +20,11 @@ namespace Dose.Core.Library.DataStructures.Dialogues
 
         public IDialogue BuildDialogue(DialogueConfig config, string type)
         {
+            if (config.Nodes.Count == 1 && BuildShortDialogue?.Invoke(config.FirstNode) is string shortLine)
+            {
+                return new ShortDialogue(shortLine);
+            } 
+
             var nodeMap = CreateNodeMap(config);
 
             var dialogue = Dialogue.Start();
