@@ -27,7 +27,8 @@ namespace Dose.Core.Scenes
         enum InteractionState
         {
             Curious,
-            Talking
+            Talking,
+            Locked
         }
 
         class AutoMoveParameters(Vector3 position, float speed)
@@ -76,7 +77,7 @@ namespace Dose.Core.Scenes
 
         public override void _Process(double delta)
         {
-            ProcessInteract();
+            if (CanInteract()) ProcessInteract();
             ProcessInventory();
             ProcessDialogue();
         }
@@ -125,6 +126,11 @@ namespace Dose.Core.Scenes
         public bool CanLook()
         {
             return _moveState == MoveState.Free || _moveState == MoveState.Looking;
+        }
+
+        public bool CanInteract()
+        {
+            return _interactionState != InteractionState.Locked;
         }
 
         public void ProgressDialogue()

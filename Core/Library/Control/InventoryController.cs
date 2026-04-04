@@ -1,8 +1,10 @@
+using System;
 using System.Linq;
 using System.Text.Json;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.Events;
 using Dose.Core.Library.UI;
 using Godot;
 
@@ -14,8 +16,10 @@ namespace Dose.Core.Library.Control
 
         public Inventory Inventory { get; }
         public ItemContext? CurrentItem { get => GetNextItem(0); }
-        IUI UI { get; }
-        INotificator? Notificator { get; }
+        public IUI UI { get; }
+        public INotificator? Notificator { get; }
+        public EventHandler<InventoryItemSetEventArgs>? ItemSet { get; set; }
+        
 
         public InventoryController(Inventory inventory, IUI ui, INotificator? notificator)
         {
@@ -46,11 +50,18 @@ namespace Dose.Core.Library.Control
                     GoToPreviousItem();
                 }
             };
+
+            ItemSet += (sender, e) =>
+            {
+                UI?.SetLabelValue("ItemSelected", e.ItemContext?.DisplayName ?? "");
+            };
         }
 
         public void GoToFirstItem()
         {
             _currentItemIndex = 0;
+
+            ItemSet?.Invoke(this, new InventoryItemSetEventArgs(CurrentItem));
         }
 
         public void GoToLastItem()
@@ -59,6 +70,8 @@ namespace Dose.Core.Library.Control
                 return;
 
             _currentItemIndex = Inventory.Count() - 1;
+            
+            ItemSet?.Invoke(this, new InventoryItemSetEventArgs(CurrentItem));
         }
 
         public void GoToItem(ItemContext itemContext)
@@ -72,6 +85,8 @@ namespace Dose.Core.Library.Control
             {
                 _currentItemIndex = (int)index;
             }
+
+            ItemSet?.Invoke(this, new InventoryItemSetEventArgs(CurrentItem));
         }
         
         public void GoToNextItem()
@@ -80,6 +95,8 @@ namespace Dose.Core.Library.Control
                 return;
 
             _currentItemIndex = _currentItemIndex < Inventory.Count() - 1 ? _currentItemIndex + 1 : 0;
+
+            ItemSet?.Invoke(this, new InventoryItemSetEventArgs(CurrentItem));
         }
 
         public void GoToPreviousItem()
@@ -88,6 +105,8 @@ namespace Dose.Core.Library.Control
                 return;
 
             _currentItemIndex = _currentItemIndex > 0 ? _currentItemIndex - 1 : Inventory.Count() - 1;
+
+            ItemSet?.Invoke(this, new InventoryItemSetEventArgs(CurrentItem));
         }
 
         public ItemContext? GetNextItem(int offset)

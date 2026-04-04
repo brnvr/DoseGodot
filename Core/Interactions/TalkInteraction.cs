@@ -1,3 +1,4 @@
+using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -27,19 +28,28 @@ namespace Dose.Core.Interactions
                         return;
                     }
 
+                    var dialogueId = Guid.NewGuid().ToString();
+
                     var dialogueRunner = new DialogueRunner(dialogue, (sender, e) =>
                     {
-                        if (subject is ISpeakable speakable && e.Node is DialogueLine line)
+                        if (subject is ISpeakable speakable)
                         {
-                            if (speakable.Speaker?.IsSpeaking == true)
+                            if (e.Node is DialogueLine line)
                             {
-                                canTalk = false;
-                            }
-                            
-                            if (canTalk)
+                                // TODO: Revisit this logic
+                                // if (speakable.Speaker?.IsSpeaking == true)
+                                // {
+                                //     canTalk = false;
+                                // }
+                                
+                                if (canTalk)
+                                {
+                                    speakable.Speaker?.Speak(line.Text);
+                                }
+                            } else
                             {
-                                speakable.Speaker?.Speak(line.Text);
-                            }
+                                speakable.Speaker?.Stop();
+                            }  
                         }
                     });
 
