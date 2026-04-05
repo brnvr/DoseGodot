@@ -46,10 +46,19 @@ text = "Notifications"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="ItemSelected" type="Label" parent="."]
+[node name="CurrentItem" type="Label" parent="."]
 offset_top = 108.0
 offset_right = 82.0
 offset_bottom = 148.0
+theme_override_font_sizes/font_size = 8
+text = "No items"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ActiveItem" type="Label" parent="."]
+offset_top = 145.0
+offset_right = 82.0
+offset_bottom = 185.0
 theme_override_font_sizes/font_size = 8
 text = "No item selected"
 horizontal_alignment = 1

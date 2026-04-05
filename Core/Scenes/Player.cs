@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -29,7 +30,8 @@ namespace Dose.Core.Scenes
         {
             Curious,
             Talking,
-            Locked
+            Locked,
+            HoldingItem
         }
 
         class AutoMoveParameters(Vector3 position, float speed)
@@ -340,14 +342,35 @@ namespace Dose.Core.Scenes
 
         void ProcessInventory()
         {
-            if (Input.IsActionJustPressed("InventoryPreviousItem"))
-                _controlPlane?.InventoryController?.GoToPreviousItem();
+            if (_interactionState == InteractionState.Curious)
+            {
+                if (Input.IsActionJustPressed("InventoryPreviousItem"))
+                    _controlPlane?.InventoryController?.GoToPreviousItem();
 
-            if (Input.IsActionJustPressed("InventoryNextItem"))
-                _controlPlane?.InventoryController?.GoToNextItem();
+                if (Input.IsActionJustPressed("InventoryNextItem"))
+                    _controlPlane?.InventoryController?.GoToNextItem();
+
+                if (Input.IsActionJustPressed("InventorySelect"))
+                    SelectedItem = SelectedItem is null ? _controlPlane?.InventoryController?.CurrentItem : null;
+            }
 
             if (Input.IsActionJustPressed("InventorySelect"))
-                SelectedItem = SelectedItem is null ? _controlPlane?.InventoryController?.CurrentItem : null;
+            {
+                if (_interactionState == InteractionState.HoldingItem)
+                {
+                    _interactionState = InteractionState.Curious;
+                    _controlPlane?.InventoryController?.UI.SetLabelValue(
+                        "ActiveItem", "no item selected"
+                    );
+                }
+                else if (_controlPlane?.InventoryController?.CurrentItem != null)
+                {
+                    _interactionState = InteractionState.HoldingItem;
+                    _controlPlane.InventoryController.UI.SetLabelValue(
+                        "ActiveItem", _controlPlane.InventoryController.CurrentItem.DisplayName
+                    );
+                }
+            }
         }
 
         void ProcessWalk()
@@ -407,8 +430,6 @@ namespace Dose.Core.Scenes
             }
 
             LookAt((Vector3)lookAtPoint, 0.01);
-
-            GD.Print(GlobalPosition.DistanceTo(((Node3D)lookable).GlobalPosition));
         }
 
         Vector3? GetLookableLookAtPoint(ILookable lookable, float refDist = 3) {

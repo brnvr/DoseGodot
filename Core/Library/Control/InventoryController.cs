@@ -53,7 +53,15 @@ namespace Dose.Core.Library.Control
 
             ItemSet += (sender, e) =>
             {
-                UI?.SetLabelValue("ItemSelected", e.ItemContext?.DisplayName ?? "");
+                UI?.SetLabelValue("CurrentItem", e.ItemContext?.DisplayName ?? "");
+            };
+
+            Inventory.ItemAdded += (sender, e) =>
+            {
+                if (Inventory.Count() == 1)
+                {
+                    UI?.SetLabelValue("CurrentItem", e.ItemContext?.DisplayName ?? "");
+                }
             };
         }
 
