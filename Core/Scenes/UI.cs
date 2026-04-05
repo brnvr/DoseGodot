@@ -12,6 +12,8 @@ namespace Dose.Core.Scenes
         CenterContainer? _currentMenu;
         Input.MouseModeEnum? _mouseModePrevious;
 
+        public bool IsMenuDisplayed { get; private set; }
+
         public override void _Ready()
         {
             ProcessMode = ProcessModeEnum.Always;
@@ -52,9 +54,14 @@ namespace Dose.Core.Scenes
 
         public void DisplayMenu(IEnumerable<MenuOption> options)
         {
-            HideMenu();
+            _currentMenu?.QueueFree();
+            
+            if (!IsMenuDisplayed)
+            {
+                _mouseModePrevious = Input.MouseMode;
+            }
 
-            _mouseModePrevious = Input.MouseMode;
+            IsMenuDisplayed = true;
             Input.MouseMode = Input.MouseModeEnum.Visible;
 
             var center = new CenterContainer
@@ -90,6 +97,13 @@ namespace Dose.Core.Scenes
 
         public void HideMenu()
         {
+            if (!IsMenuDisplayed)
+            {
+                return;
+            }
+
+            IsMenuDisplayed = false;
+
             if (_mouseModePrevious != null)
             {
                 Input.MouseMode = (Input.MouseModeEnum)_mouseModePrevious;
