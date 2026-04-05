@@ -78,14 +78,14 @@ namespace Dose.Core.Scenes
 
         public override void _Process(double delta)
         {
-            if (CanInteract()) ProcessInteract();
+            ProcessInteract();
             ProcessInventory();
             ProcessDialogue();
         }
 
         public override void _PhysicsProcess(double delta)
         {
-            if (CanLook()) ProcessSeek();
+            ProcessSeek();
             ProcessWalk();
             ProcessAutoMove((float)delta);
             ProcessFocus();
@@ -119,6 +119,11 @@ namespace Dose.Core.Scenes
             UpdateDialogue();
         }
 
+        public bool CanSeek()
+        {
+            return CanLook() && _moveState != MoveState.Focused;
+        }
+
         public bool CanMove()
         {
             return _moveState == MoveState.Free;
@@ -126,7 +131,9 @@ namespace Dose.Core.Scenes
 
         public bool CanLook()
         {
-            return _moveState == MoveState.Free || _moveState == MoveState.Looking;
+            return
+                _moveState == MoveState.Free || _moveState == MoveState.Looking || _moveState == MoveState.Focused &&
+                Input.MouseMode == Input.MouseModeEnum.Captured;
         }
 
         public bool CanInteract()
@@ -279,6 +286,8 @@ namespace Dose.Core.Scenes
 
         void ProcessInteract()
         {
+            if (!CanInteract()) return;
+
             if (Input.IsActionJustPressed("Interact"))
             {
                 Interact();
@@ -287,6 +296,8 @@ namespace Dose.Core.Scenes
 
         void ProcessSeek()
         {
+            if (!CanSeek()) return;
+
             var previousTarget = _currentTarget;
             _currentTarget = null;
 
