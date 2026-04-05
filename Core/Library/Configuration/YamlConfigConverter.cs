@@ -19,6 +19,11 @@ namespace Dose.Core.Library.Configuration
             return (T?)value;
         }
 
+        protected static T GetOptional<T>(Dictionary<string, object?> dict, string key, T def)
+        {
+            return GetOptional<T>(dict, key) ?? def;
+        }
+
         protected static T GetRequired<T>(Dictionary<string, object?> dict, string key)
         {
             var value = GetOptional<T>(dict, key) ?? throw new Exception($"Dictionary doesn't contain required key \"{key}\".");

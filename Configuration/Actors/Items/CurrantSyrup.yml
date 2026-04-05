@@ -1,3 +1,9 @@
 ---
 displayName: currant syrup
 texturePath: "res://Media/Textures/Placehoders/Item.png"
+execute:
+  - action: movePlayer
+    args:
+      x: 1,
+      y: 0,
+      z: 1

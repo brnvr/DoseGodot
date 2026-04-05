@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using System.Threading;
+using Dose.Core.ActionPerformers;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Configuration.Dialogues;
 using Dose.Core.Library.DataStructures.Dialogues;
@@ -29,7 +30,10 @@ namespace Dose.Core.Scenes
 				configPath: "Configuration/Actors/Items",
 				actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn"),
 				configConverter: new ItemConfigConverter(),
-				contextBuilder: new ItemContextBuilder()
+				contextBuilder: new ItemContextBuilder(new Dictionary<string, IActionPerformer>
+				{
+					{ "movePlayer", new MovePlayerPerformer(player) }
+				})
 			).LoadContexts();
 			
 			var npcPool = new ActorPool<NpcContext>(

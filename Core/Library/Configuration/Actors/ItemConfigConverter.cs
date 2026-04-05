@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -10,7 +11,18 @@ namespace Dose.Core.Library.Configuration.Actors
             {
                 DisplayName = GetRequired<string>(dict, "displayName"),
                 TexturePath = GetRequired<string>(dict, "texturePath"),
-                MaxQuantity = GetOptional<int?>(dict, "maxQuantity")
+                MaxQuantity = GetOptional<int?>(dict, "maxQuantity"),
+                Execute = GetOptional<List<object>>(dict, "execute", []).Select(o => {
+                    var dict = (Dictionary<string, object?>)o;
+                    var action = dict["action"] ?? "";
+                    var args = dict["args"];
+
+                    return new ItemActionConfig
+                    {
+                        Action = (string)action,
+                        Args = args is null ? [] : (Dictionary<string, object?>)args
+                    };
+                })
             };
         }
     }

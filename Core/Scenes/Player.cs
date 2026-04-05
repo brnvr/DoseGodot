@@ -75,7 +75,15 @@ namespace Dose.Core.Scenes
                 { 
                     ItemContext = e.ItemContext
                 });
-            }; 
+            };
+
+            Inventory.ItemDropped += (sender, e) =>
+            {
+                if (!Inventory.Any())
+                {
+                    _interactionState = InteractionState.Curious;
+                }  
+            };
         }
 
         public override void _Process(double delta)
