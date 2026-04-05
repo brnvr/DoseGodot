@@ -85,7 +85,7 @@ namespace Dose.Core.Scenes
 
         public override void _PhysicsProcess(double delta)
         {
-            ProcessSeek();
+            if (CanLook()) ProcessSeek();
             ProcessWalk();
             ProcessAutoMove((float)delta);
             ProcessFocus();
@@ -236,27 +236,40 @@ namespace Dose.Core.Scenes
             _controlPlane?.InteractivityController?.OnTargetChange(_currentTarget);
         }
 
-        void LookAt(Node3D node, double delta)
+        void LookAt(Vector3 to, double delta)
         {
-            if (_head == null)
+            if (_head == null || _view == null)
             {
                 GD.PushWarning("View not defined. Skipping LookAt.");
                 return;
             }
 
             Vector3 from = _head.GlobalPosition;
-            Vector3 to = node.GlobalPosition + new Vector3(0, 2, 0);
 
-            // Compute desired rotation
-            Basis targetBasis = Basis.LookingAt(to - from, Vector3.Up);
+            // --- YAW ONLY (this preserves your original correct behavior) ---
+            Vector3 flatDir = to - from;
+            flatDir.Y = 0;
 
-            // Smooth rotation
+            Basis targetBasis = Basis.LookingAt(flatDir, Vector3.Up);
+
             Basis currentBasis = _head.GlobalTransform.Basis;
             currentBasis = currentBasis.Orthonormalized();
             targetBasis = targetBasis.Orthonormalized();
-            Basis newBasis = currentBasis.Slerp(targetBasis, (float)(delta * 5f));
 
+            Basis newBasis = currentBasis.Slerp(targetBasis, (float)(delta * 5f));
             _head.GlobalTransform = new Transform3D(newBasis, from);
+
+            // --- PITCH (separate, clean) ---
+            Vector3 dir = (to - from).Normalized();
+            float targetPitch = Mathf.Asin(dir.Y);
+
+            float newPitch = Mathf.LerpAngle(_view.Rotation.X, targetPitch, (float)(delta * 5f));
+            newPitch = Mathf.Clamp(newPitch, Mathf.DegToRad(-90), Mathf.DegToRad(90));
+
+            _view.Rotation = new Vector3(newPitch, 0, 0);
+
+            // keep mouse system in sync
+            _cameraAngle = Mathf.RadToDeg(newPitch);
         }
 
         void ProcessDialogue()
@@ -359,23 +372,46 @@ namespace Dose.Core.Scenes
 
             if (_currentTarget == null)
             {
-                GD.PushWarning("_currentTarget is null. Setting MoveState to Free.");
+                GD.PushWarning($"{nameof(_currentTarget)} is null. Setting MoveState to Free.");
 
                 _moveState = MoveState.Free;
 
                 return;
             }
 
-            if (_currentTarget is not Node3D node)
+            if (_currentTarget is not ILookable lookable)
             {
-                GD.PushWarning("_currentTarget is not a Node3D");
+                GD.PushWarning($"{nameof(_currentTarget)} is not an ${nameof(ILookable)}");
 
                 _moveState = MoveState.Free;
 
                 return;
             }
 
-            LookAt(node, 0.01);
+            var lookAtPoint = GetLookableLookAtPoint(lookable);
+
+            if (lookAtPoint == null)
+            {
+                return;
+            }
+
+            LookAt((Vector3)lookAtPoint, 0.01);
+
+            GD.Print(GlobalPosition.DistanceTo(((Node3D)lookable).GlobalPosition));
+        }
+
+        Vector3? GetLookableLookAtPoint(ILookable lookable, float refDist = 3) {
+            if (lookable is not Node3D lookableNode)
+            {
+                GD.PushWarning($"{nameof(lookable)} is not a {nameof(Node3D)}. Can't execute {nameof(GetLookableLookAtPoint)}.");
+                return null;
+            }
+
+            var dist = GlobalPosition.DistanceTo(lookableNode.GlobalPosition);
+
+            Vector3 prop = (1 - (dist / refDist)) * (lookable.TopLookTarget - lookable.CenterLookTarget);
+
+            return lookable.CenterLookTarget + prop;
         }
 
         void Interact()

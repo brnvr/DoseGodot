@@ -8,26 +8,22 @@ nodes:
         - What do you want? I don't have time to talk to you right now. I'm busy with work.
         - Oh, it's you. I guess I can spare a few minutes. What do you need?
       next: mno
-
   def:
     type: speak
     args:
       lines:
         - I'm doing fine, thanks for asking. Just busy with work as usual.
-        
   ghi:
     type: speak
     args:
       lines:
         - I'm doing well, but I appreciate the concern. I'll be okay.
         - Thanks for offering, but I think I can handle things on my own.
-
   jkl:
     type: execute
     args:
       action: exitGame
       next: prq
-
   mno:
     type: displayOptions
     args:
@@ -38,7 +34,6 @@ nodes:
         next: ghi
       - text: I don't know bye
         next: jkl
-      
   prq:
     type: speak
     args:

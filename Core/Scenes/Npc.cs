@@ -10,15 +10,20 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>
+    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>, ILookable
     {
         MeshInstance3D? _mesh;
 
+        public float EyeHeightProportion { get; private set; } = 0.9f;
         public ISpeaker? Speaker { get; private set; }
         public NpcContext? Context { get; private set; }
+        public Node3D LookTarget => GetNode<Node3D>("LookTarget");
+        public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, _mesh?.GetAabb().Size.Y * EyeHeightProportion ?? 0, 0);
+        public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, _mesh?.GetAabb().Size.Y * .5f ?? 0, 0);
 
         IActorContext? IActor.Context => Context;
-    
+
+
         public void Initialize(NpcContext context, NpcArgs args)
         {
             Context = context;
