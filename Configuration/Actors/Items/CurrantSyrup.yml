@@ -1,5 +1,5 @@
 ---
-displayName: currant syrup
+identifier: currant syrup
 texturePath: "res://Media/Textures/Placehoders/Item.png"
 execute:
   - action: movePlayer

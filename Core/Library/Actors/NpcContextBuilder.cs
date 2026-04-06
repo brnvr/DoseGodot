@@ -29,6 +29,7 @@ namespace Dose.Core.Library.Actors
         {
             return new NpcContext
             {
+                Identifier = npcConfig.Identifier,
                 DisplayName = npcConfig.DisplayName,
                 Texture = ResourceLoader.Load<Texture2D>(npcConfig.TexturePath),
                 Voice = new Voice(npcConfig.Voice, 16000),

@@ -465,7 +465,38 @@ namespace Dose.Core.Scenes
                 case InteractionState.Talking:
                     ProgressDialogue();
                     break;
+
+                case InteractionState.HoldingItem:
+                    if (_currentTarget != null) UseItemWith(_currentTarget);
+                    break;
             }          
+        }
+
+        void UseItemWith(IActor<Player> actor)
+        {
+            var item = _controlPlane?.InventoryController?.CurrentItem;
+
+            if (item == null)
+            {
+                GD.PushWarning($"Player is not holding any item. Skipping {nameof(UseItemWith)}");
+                return;
+            }
+
+            if (actor.Context == null)
+            {
+                GD.PushWarning($"Actor context is undefined. Skipping {nameof(UseItemWith)}");
+                return;
+            }
+
+            var executable = item.InteractWith.FirstOrDefault(item => item.ActorName == actor.Context.Identifier);
+
+            if (executable == null)
+            {
+                GD.Print($"No interaction found for item {item.Identifier} with actor {actor.Context.Identifier}");
+                return;
+            }
+
+            executable.Execute();
         }
 
         void AutoMoveTo(AutoMoveParameters parameters)

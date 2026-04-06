@@ -4,6 +4,7 @@ namespace Dose.Core.Library.Configuration.Actors
 {
     public class NpcConfig : YamlConfig
     {
+        public required string Identifier { get; set; }
         public required string DisplayName { get; init; }
         public required string TexturePath { get; init; }
         public required string DialoguesDir { get; set; }
@@ -14,6 +15,7 @@ namespace Dose.Core.Library.Configuration.Actors
         {
             return new Dictionary<string, object?>
             {
+                { "identifier", Identifier },
                 { "displayName", DisplayName },
                 { "texturePath", TexturePath },
                 { "dialoguesDir", DialoguesDir },

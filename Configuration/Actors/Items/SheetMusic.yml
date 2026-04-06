@@ -1,5 +1,5 @@
 ---
-displayName: sheet music
+identifier: sheet music
 texturePath: "res://Media/Textures/Placehoders/Item.png"
 execute:
   - action: movePlayer
@@ -7,3 +7,8 @@ execute:
       x: 1,
       y: 0,
       z: 1
+interactWith:
+  - actor: Agnes
+  - action: receive
+    args:
+      arg0: value

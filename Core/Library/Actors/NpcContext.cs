@@ -8,6 +8,7 @@ namespace Dose.Core.Library.Actors
 {
     public record NpcContext : IActorContext
     {
+        public required string Identifier { get; init; }
         public string DisplayName { get; init; } = "";
         public Dictionary<string, IDialogue> DialogueMap { get; init; } = [];
         public IEnumerable<string> AvaliableDialogueKeys { get; init; } = [];

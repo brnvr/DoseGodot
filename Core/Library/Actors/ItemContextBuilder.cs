@@ -16,6 +16,7 @@ namespace Dose.Core.Library.Actors
         {
             return new ItemContext
             {
+                Identifier = itemConfig.Identifier,
                 DisplayName = itemConfig.DisplayName,
                 Texture = ResourceLoader.Load<Texture2D>(itemConfig.TexturePath),
                 MaxQuantity = itemConfig.MaxQuantity ?? -1,
@@ -24,6 +25,12 @@ namespace Dose.Core.Library.Actors
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
                 }),
+                InteractWith = itemConfig.InteractWith.Select(config => new InteractionExecutable
+                {
+                    ActorName = config.Actor,
+                    Performer = ActionPerformerMap[config.Action],
+                    Args = config.Args
+                })
             };
         }
 

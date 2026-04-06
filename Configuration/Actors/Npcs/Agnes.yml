@@ -1,5 +1,5 @@
 ---
-displayName: Agnes
+identifier: Agnes
 texturePath: res://Media/Textures/Npcs/Agnes/Idle_000.png
 voice: mb-us1
 dialoguesDir: Configuration/Dialogues/Agnes
