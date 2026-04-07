@@ -9,9 +9,9 @@ namespace Dose.Core.Library.Actors
         public required IActionPerformer Performer { get; init; }
         public Dictionary<string, object?> Args { get; init; } = [];
 
-        public void Execute()
+        public void Execute(object sender)
         {
-            Performer.Perform(Args);
+            Performer.Perform(sender, Args);
         }
     }
 }

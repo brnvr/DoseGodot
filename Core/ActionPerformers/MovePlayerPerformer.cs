@@ -22,7 +22,7 @@ namespace Dose.Core.ActionPerformers
             };
         }
 
-        public override void Perform(MovePlayerPerformerArgs args)
+        public override void Perform(object sender, MovePlayerPerformerArgs args)
         {
             args.Player.Position += args.Distance;
         }

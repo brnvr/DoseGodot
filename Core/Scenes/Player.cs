@@ -496,7 +496,7 @@ namespace Dose.Core.Scenes
                 return;
             }
 
-            executable.Execute();
+            executable.Execute(item);
         }
 
         void AutoMoveTo(AutoMoveParameters parameters)
