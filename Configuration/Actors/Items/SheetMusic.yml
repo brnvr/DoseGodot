@@ -9,6 +9,6 @@ execute:
       z: 1
 interactWith:
   - actor: Agnes
-  - action: receive
+    action: receive
     args:
       arg0: value

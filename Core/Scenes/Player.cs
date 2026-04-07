@@ -478,21 +478,21 @@ namespace Dose.Core.Scenes
 
             if (item == null)
             {
-                GD.PushWarning($"Player is not holding any item. Skipping {nameof(UseItemWith)}");
+                GD.PushWarning($"Player is not holding any item. Skipping {nameof(UseItemWith)}.");
                 return;
             }
 
             if (actor.Context == null)
             {
-                GD.PushWarning($"Actor context is undefined. Skipping {nameof(UseItemWith)}");
+                GD.PushWarning($"Actor context is undefined. Skipping {nameof(UseItemWith)}.");
                 return;
             }
 
-            var executable = item.InteractWith.FirstOrDefault(item => item.ActorName == actor.Context.Identifier);
+            var executable = item.InteractWith.FirstOrDefault(item => item.ActorIdentifier == actor.Context.Identifier);
 
             if (executable == null)
             {
-                GD.Print($"No interaction found for item {item.Identifier} with actor {actor.Context.Identifier}");
+                GD.Print($"No interaction found for item \"{item.Identifier}\" with actor \"{actor.Context.Identifier}\".");
                 return;
             }
 

@@ -16,28 +16,28 @@ namespace Dose.Core.Library.Configuration.Actors
                 TexturePath = GetRequired<string>(dict, "texturePath"),
                 MaxQuantity = GetOptional<int?>(dict, "maxQuantity"),
                 Execute = GetOptional<List<object>>(dict, "execute", []).Select(o => {
-                    var dict = (Dictionary<string, object?>)o;
+                    var dict = (Dictionary<object, object?>)o;
                     var action = dict["action"] ?? "";
-                    var args = dict["args"];
+                    var args = (Dictionary<object, object?>?)dict["args"] ?? [];
 
                     return new ItemActionConfig
                     {
                         Action = (string)action,
-                        Args = args is null ? [] : (Dictionary<string, object?>)args
+                        Args = args is null ? [] : args.ToDictionary(kvp => (string)kvp.Key, kvp => kvp.Value)
                     };
                 }),
                 InteractWith = GetOptional<List<object>>(dict, "interactWith", []).Select(o =>
                 {
-                    var dict = (Dictionary<string, object?>)o;
+                    var dict = (Dictionary<object, object?>)o;
                     var actor = dict["actor"] ?? "";
                     var action = dict["action"] ?? "";
-                    var args = dict["args"];
+                    var args = (Dictionary<object, object?>?)dict["args"] ?? [];
 
                     return new ItemInteractionConfig
                     {
                         Actor = (string)actor,
                         Action = (string)action,
-                        Args = args is null ? [] : (Dictionary<string, object?>)args
+                        Args = args is null ? [] : args.ToDictionary(kvp => (string)kvp.Key, kvp => kvp.Value)
                     };
                 })
             };

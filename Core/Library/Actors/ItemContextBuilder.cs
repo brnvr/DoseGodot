@@ -27,7 +27,7 @@ namespace Dose.Core.Library.Actors
                 }),
                 InteractWith = itemConfig.InteractWith.Select(config => new InteractionExecutable
                 {
-                    ActorName = config.Actor,
+                    ActorIdentifier = config.Actor,
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
                 })
