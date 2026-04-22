@@ -4,6 +4,7 @@ using System.Linq;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Actors;
+using Dose.Core.Library.Interactivity;
 using Godot;
 
 namespace Dose.Core.Library.Actors
@@ -25,12 +26,13 @@ namespace Dose.Core.Library.Actors
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
                 }),
-                InteractWith = itemConfig.InteractWith.Select(config => new InteractionExecutable
+                InteractWith = itemConfig.InteractWith.Select(config => new InteractionOperator
                 {
                     ActorIdentifier = config.Actor,
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
-                })
+                }),
+                KeepAfterUse = itemConfig.KeepAfterUse
             };
         }
 

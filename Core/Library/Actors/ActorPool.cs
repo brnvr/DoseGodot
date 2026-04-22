@@ -14,17 +14,17 @@ namespace Dose.Core.Library.Actors
         IActorContextBuilder contextBuilder
     ) where TActorContext : IActorContext
     {
-        readonly List<TActorContext> _avaliableContexts = [];
+        readonly List<TActorContext> _availableContexts = [];
 
         public PackedScene ActorScene { get; } = actorScene;
         public string ConfigPath { get; } = configPath;
         public YamlConfigConverter ConfigConverter { get; } = configConverter;
         public IActorContextBuilder ContextBuilder { get; } = contextBuilder;
-        public List<TActorContext> AvaliableContexts => [.._avaliableContexts];
+        public List<TActorContext> AvailableContexts => [.._availableContexts];
 
         public ActorPool<TActorContext> LoadContexts()
         {
-            _avaliableContexts.Clear();
+            _availableContexts.Clear();
             var files = Directory.GetFiles(ConfigPath);
             var deserializer = new DeserializerBuilder().Build();
 
@@ -37,7 +37,7 @@ namespace Dose.Core.Library.Actors
                 var config = ConfigConverter.FromDict(dict);
                 var context = ContextBuilder.BuildContext(config);
 
-                _avaliableContexts.Add((TActorContext)context);
+                _availableContexts.Add((TActorContext)context);
             }
 
             return this;

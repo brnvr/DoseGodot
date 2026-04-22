@@ -8,7 +8,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string DisplayName { get; init; }
         public required string TexturePath { get; init; }
         public required string DialoguesDir { get; set; }
-        public required IEnumerable<string> AvaliableDialogues { get; init; }
+        public required IEnumerable<string> AvailableDialogues { get; init; }
         public required string Voice { get; init; }
 
         public override Dictionary<string, object?> AsDict()
@@ -19,7 +19,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 { "displayName", DisplayName },
                 { "texturePath", TexturePath },
                 { "dialoguesDir", DialoguesDir },
-                { "avaliableDialogues", AvaliableDialogues },
+                { "availableDialogues", AvailableDialogues },
                 { "Voice", Voice },
             };
         }

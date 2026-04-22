@@ -68,7 +68,7 @@ namespace Dose.Core.Scenes
                 return null;
             }
 
-            var dialogueKey = new RandomSelector<string>(Context.AvaliableDialogueKeys).Pick();
+            var dialogueKey = new RandomSelector<string>(Context.AvailableDialogueKeys).Pick();
             return Context.DialogueMap[dialogueKey];
         }
 

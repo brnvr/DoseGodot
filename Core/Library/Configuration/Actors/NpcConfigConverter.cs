@@ -15,7 +15,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 TexturePath = GetRequired<string>(dict, "texturePath"),
                 Voice = GetRequired<string>(dict, "voice"),
                 DialoguesDir = GetRequired<string>(dict, "dialoguesDir"),
-                AvaliableDialogues = GetRequired<List<object>>(dict, "avaliableDialogues").Select(o => (string)o)
+                AvailableDialogues = GetRequired<List<object>>(dict, "availableDialogues").Select(o => (string)o)
             };
         }
     }

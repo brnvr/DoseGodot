@@ -1,7 +1,0 @@
-namespace Dose.Core.Library.Actors
-{
-    public class InteractionExecutable : Executable
-    {
-        public required string ActorIdentifier { get; init; }
-    }
-}

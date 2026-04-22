@@ -33,7 +33,7 @@ namespace Dose.Core.Scenes
 				contextBuilder: new ItemContextBuilder(new Dictionary<string, IActionPerformer>
 				{
 					{ "movePlayer", new MovePlayerPerformer(player) },
-					{ "receive", new ReceivePerformer() }
+					{ "receive", new ReceivePerformer(player) }
 				})
 			).LoadContexts();
 			

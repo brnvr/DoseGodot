@@ -106,9 +106,9 @@ namespace Dose.Core.Library.Locations
         }
 
 
-        bool Bifurcate(Map map, Vector2I point, IEnumerable<CardinalDirection> avaliableDirections)
+        bool Bifurcate(Map map, Vector2I point, IEnumerable<CardinalDirection> availableDirections)
         {
-            var nextDirection = ChooseNextDirection(map, point, avaliableDirections);
+            var nextDirection = ChooseNextDirection(map, point, availableDirections);
 
             if (nextDirection == null)
             {
@@ -129,7 +129,7 @@ namespace Dose.Core.Library.Locations
 
             if (shouldBifurcate)
             {
-                var successful = Bifurcate(map, point, avaliableDirections.Except([(CardinalDirection)nextDirection]));
+                var successful = Bifurcate(map, point, availableDirections.Except([(CardinalDirection)nextDirection]));
 
                 return canBifurcate || successful;
             }
@@ -137,14 +137,14 @@ namespace Dose.Core.Library.Locations
             return canBifurcate;
         }
 
-        static CardinalDirection? ChooseNextDirection(Map map, Vector2I point, IEnumerable<CardinalDirection> avaliableDirections)
+        static CardinalDirection? ChooseNextDirection(Map map, Vector2I point, IEnumerable<CardinalDirection> availableDirections)
         {
-            if (!avaliableDirections.Any())
+            if (!availableDirections.Any())
             {
                 return null;
             }
 
-            var selectedDirection = new RandomSelector<CardinalDirection>(avaliableDirections).Pick();
+            var selectedDirection = new RandomSelector<CardinalDirection>(availableDirections).Pick();
 
             var nextPoint = MoveTo(point, selectedDirection);
 
@@ -155,7 +155,7 @@ namespace Dose.Core.Library.Locations
                 return selectedDirection;
             }
 
-            return ChooseNextDirection(map, point, avaliableDirections.Except([selectedDirection]));
+            return ChooseNextDirection(map, point, availableDirections.Except([selectedDirection]));
         }
 
         static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)

@@ -5,7 +5,7 @@ using Godot;
 
 namespace Dose.Core.ActionPerformers
 {
-    public class MovePlayerPerformer(Player player) : ActionPerformer<MovePlayerPerformerArgs>
+    public class MovePlayerPerformer(Player player) : ActionPerformer<object, MovePlayerPerformerArgs>
     {
         public Player Player { get; } = player;
 

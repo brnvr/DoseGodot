@@ -8,9 +8,10 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string Identifier { get; init; }
         public required string DisplayName { get; init; }
         public required string TexturePath { get; init; }
-        public required IEnumerable<ItemActionConfig> Execute { get; set; }
+        public required IEnumerable<ItemActionConfig> Execute { get; init; }
         public int? MaxQuantity { get; init; }
-        public required IEnumerable<ItemInteractionConfig> InteractWith { get; set; }
+        public required IEnumerable<ItemInteractionConfig> InteractWith { get; init; }
+        public required bool KeepAfterUse { get; init; }
 
         public override Dictionary<string, object?> AsDict()
         {
@@ -19,7 +20,8 @@ namespace Dose.Core.Library.Configuration.Actors
                 { "identifier", Identifier },
                 { "displayName", DisplayName },
                 { "texturePath", TexturePath },
-                { "maxQuantity", MaxQuantity }
+                { "maxQuantity", MaxQuantity },
+                { "keepAfterUse", KeepAfterUse }
             };
 
             if (Execute.Any())

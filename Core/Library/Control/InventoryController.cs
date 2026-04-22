@@ -45,10 +45,14 @@ namespace Dose.Core.Library.Control
             {
                 GD.Print($"Dropped {e.ItemContext.DisplayName} from inventory.");
 
-                if (e.ItemContext == CurrentItem)
+                if (UI != null)
                 {
-                    GoToPreviousItem();
+                    string json = JsonSerializer.Serialize(Inventory);
+
+                    UI.SetLabelValue("Inventory", json);
                 }
+
+                UI?.SetLabelValue("CurrentItem", e.ItemContext?.DisplayName ?? "");
             };
 
             ItemSet += (sender, e) =>

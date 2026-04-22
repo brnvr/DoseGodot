@@ -29,16 +29,16 @@ namespace Dose.Core.Library.Locations
                 return actors;
             }
 
-            var avaliablePositions = Location.Map.GetFilledPositions().Except(populatedPositions).ToList();
+            var availablePositions = Location.Map.GetFilledPositions().Except(populatedPositions).ToList();
             var decider = new RandomDecider(ProbabilityPopulate);
 
             while (decider.Roll())
             {
-                var positionSelector = new RandomSelector<Vector2I>(avaliablePositions);
+                var positionSelector = new RandomSelector<Vector2I>(availablePositions);
                 var position = positionSelector.Pick();
 
                 populatedPositionsOut.Add(position);
-                avaliablePositions.Remove(position);
+                availablePositions.Remove(position);
 
                 var actor = PopulateCell(position);
                 if (actor == null)
@@ -48,7 +48,7 @@ namespace Dose.Core.Library.Locations
 
                 actors.Add(actor);
 
-                if (avaliablePositions.Count == 0)
+                if (availablePositions.Count == 0)
                 {
                     return actors;
                 }

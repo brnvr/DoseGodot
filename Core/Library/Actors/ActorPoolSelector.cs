@@ -6,11 +6,11 @@ namespace Dose.Core.Library.Actors
     public class ActorPoolSelector<TActor, TActorContext, TArgs>(ActorPool<TActorContext> source)
         where TActor : class, IInitializableActor<TActorContext, TArgs>, new() where TActorContext : IActorContext
     {
-        readonly List<TActorContext> _availableContexts = [.. source.AvaliableContexts];
+        readonly List<TActorContext> _availableContexts = [.. source.AvailableContexts];
         readonly Dictionary<TActorContext, int> _contextQuantities = [];
 
         public ActorPool<TActorContext> Source { get; } = source;
-        public List<TActorContext> AvaliableContexts => [.. _availableContexts];
+        public List<TActorContext> AvailableContexts => [.. _availableContexts];
         
         public TActor? Select(TArgs args)
         {

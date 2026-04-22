@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Dose.Core.Library.Common;
+using Dose.Core.Library.Interactivity;
 using Godot;
 
 namespace Dose.Core.Library.Actors
@@ -11,6 +12,7 @@ namespace Dose.Core.Library.Actors
         public Texture2D? Texture { get; init; }
         public int MaxQuantity { get; init; } = -1;
         public required IEnumerable<Executable> Execute { get; init; }
-        public required IEnumerable<InteractionExecutable> InteractWith { get; init; }
+        public required IEnumerable<InteractionOperator> InteractWith { get; init; }
+        public required bool KeepAfterUse { get; set; }
     }
 }

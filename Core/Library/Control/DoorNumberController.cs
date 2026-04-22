@@ -7,7 +7,7 @@ namespace Dose.Core.Library.Control
 {
     public class DoorNumberController
     {
-        IEnumerable<int> _avaliableNumbers = [];
+        IEnumerable<int> _availableNumbers = [];
 
         public DoorNumberController()
         {
@@ -16,21 +16,21 @@ namespace Dose.Core.Library.Control
 
         public void Reset()
         {
-            _avaliableNumbers = Enumerable.Range(1, 999);
+            _availableNumbers = Enumerable.Range(1, 999);
         }
 
         public int PopRandomNumber()
         {
-            if (!_avaliableNumbers.Any())
+            if (!_availableNumbers.Any())
             {
-                GD.PushError("No avaliable door numbers.");
+                GD.PushError("No available door numbers.");
 
                 return 0;
             }
 
-            var number = new RandomSelector<int>(_avaliableNumbers).Pick();
+            var number = new RandomSelector<int>(_availableNumbers).Pick();
 
-            _avaliableNumbers = _avaliableNumbers.Except([number]);
+            _availableNumbers = _availableNumbers.Except([number]);
 
             return number;
         }

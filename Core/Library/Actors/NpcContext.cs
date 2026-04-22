@@ -11,7 +11,7 @@ namespace Dose.Core.Library.Actors
         public required string Identifier { get; init; }
         public string DisplayName { get; init; } = "";
         public Dictionary<string, IDialogue> DialogueMap { get; init; } = [];
-        public IEnumerable<string> AvaliableDialogueKeys { get; init; } = [];
+        public IEnumerable<string> AvailableDialogueKeys { get; init; } = [];
         public Texture2D? Texture { get; init; }
         public Voice? Voice { get; init; }
         public int MaxQuantity { get; init; } = 1;

@@ -39,7 +39,8 @@ namespace Dose.Core.Library.Configuration.Actors
                         Action = (string)action,
                         Args = args is null ? [] : args.ToDictionary(kvp => (string)kvp.Key, kvp => kvp.Value)
                     };
-                })
+                }),
+                KeepAfterUse = GetOptional<bool?>(dict, "keepAfterUse", false) ?? false
             };
         }
     }

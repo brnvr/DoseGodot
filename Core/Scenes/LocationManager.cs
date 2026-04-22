@@ -50,7 +50,7 @@ namespace Dose.Core.Scenes
 
 			CurrentLocation = _locationQueue.PopNextLocation(LocationType.Corridor, ClockDirection.Clockwise);
 
-			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvaliableContexts.ToList()[0]));
+			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvailableContexts.ToList()[0]));
 
             return this;
         }

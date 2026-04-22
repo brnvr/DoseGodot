@@ -101,7 +101,7 @@ namespace Dose.Core.Library.DataStructures
 
             public int Decrement()
             {
-                return Math.Min(0, Quantity--);
+                return Math.Max(0, --Quantity);
             }
         }
     }

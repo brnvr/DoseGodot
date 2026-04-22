@@ -488,15 +488,13 @@ namespace Dose.Core.Scenes
                 return;
             }
 
-            var executable = item.InteractWith.FirstOrDefault(item => item.ActorIdentifier == actor.Context.Identifier);
-
-            if (executable == null)
+            foreach (var op in item.InteractWith)
             {
-                GD.Print($"No interaction found for item \"{item.Identifier}\" with actor \"{actor.Context.Identifier}\".");
-                return;
+                if (op.TryInteract(item, actor.Context))
+                {
+                    GD.Print($"Interacted with actor \"{actor.Context.Identifier}\" using item \"{item.Identifier}\".");
+                }
             }
-
-            executable.Execute(item);
         }
 
         void AutoMoveTo(AutoMoveParameters parameters)
