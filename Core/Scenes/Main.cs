@@ -1,3 +1,4 @@
+using Godot;
 using System.Collections.Generic;
 using Dose.Core.ActionPerformers;
 using Dose.Core.Library.Actors;
@@ -6,8 +7,6 @@ using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Configuration.Dialogues;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
-
-using Godot;
 
 namespace Dose.Core.Scenes
 {
@@ -25,6 +24,7 @@ namespace Dose.Core.Scenes
 			var ui = GetNode<UI>("UI");
 			var player = GetNode<Player>("Player");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
+			var locationManager = GetNode<LocationManager>("LocationManager");
 
 			var itemPool = new ActorPool<ItemContext>(
 				configPath: "Configuration/Actors/Items",
@@ -55,8 +55,7 @@ namespace Dose.Core.Scenes
 				])
 			).LoadContexts();
 
-			var locationManager = GetNode<LocationManager>("LocationManager").Initialize(controlPlane, player, itemPool, npcPool);
-
+			locationManager.Initialize(controlPlane, player, itemPool, npcPool);
 			player.Initialize(controlPlane);
 			controlPlane.Initialize(ui, player, locationManager);
 
