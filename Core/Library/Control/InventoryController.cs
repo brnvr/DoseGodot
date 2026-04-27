@@ -19,7 +19,10 @@ namespace Dose.Core.Library.Control
         public IUI UI { get; }
         public INotificator? Notificator { get; }
         public EventHandler<InventoryItemSetEventArgs>? ItemSet { get; set; }
-        
+
+        public string InventoryLabelName { get; init; } = "Inventory";
+        public string CurrentItemLabelName { get; init; } = "CurrentItem";
+        public string ActiveItemLabelName { get; init; } = "ActiveItem";
 
         public InventoryController(Inventory inventory, IUI ui, INotificator? notificator)
         {
@@ -34,8 +37,7 @@ namespace Dose.Core.Library.Control
                 if (UI != null)
                 {
                     string json = JsonSerializer.Serialize(Inventory);
-
-                    UI.SetLabelValue("Inventory", json);
+                    UI.SetLabelValue(InventoryLabelName, json);
                 }
 
                 Notificator?.Notify($"Added {e.ItemContext.DisplayName} to inventory.", 2f);
@@ -48,23 +50,22 @@ namespace Dose.Core.Library.Control
                 if (UI != null)
                 {
                     string json = JsonSerializer.Serialize(Inventory);
-
-                    UI.SetLabelValue("Inventory", json);
+                    UI.SetLabelValue(InventoryLabelName, json);
                 }
 
-                UI?.SetLabelValue("CurrentItem", e.ItemContext?.DisplayName ?? "");
+                UI?.SetLabelValue(CurrentItemLabelName, e.ItemContext?.DisplayName ?? "");
             };
 
             ItemSet += (sender, e) =>
             {
-                UI?.SetLabelValue("CurrentItem", e.ItemContext?.DisplayName ?? "");
+                UI?.SetLabelValue(CurrentItemLabelName, e.ItemContext?.DisplayName ?? "");
             };
 
             Inventory.ItemAdded += (sender, e) =>
             {
                 if (Inventory.Count() == 1)
                 {
-                    UI?.SetLabelValue("CurrentItem", e.ItemContext?.DisplayName ?? "");
+                    UI?.SetLabelValue(CurrentItemLabelName, e.ItemContext?.DisplayName ?? "");
                 }
             };
         }
@@ -144,12 +145,12 @@ namespace Dose.Core.Library.Control
                 return;
             }
 
-            UI.SetLabelValue("ActiveItem", CurrentItem.DisplayName);
+            UI.SetLabelValue(ActiveItemLabelName, CurrentItem.DisplayName);
         }
 
         public void OnActiveItemUnselected()
         {
-            UI.SetLabelValue("ActiveItem", "");
+            UI.SetLabelValue(ActiveItemLabelName, "");
         }
     }
 }

@@ -5,11 +5,12 @@ namespace Dose.Core.Library.Control
 {
     public class InteractivityController(IUI? ui)
     {
-        IUI? UI { get; } = ui;
+        public IUI? UI { get; } = ui;
+        public string NameCaptionLabelName { get; init; } = "NameCaption";
 
         public void OnTargetChange(IActor? target)
         {
-            UI?.SetLabelValue("NameCaption", target?.Context?.DisplayName ?? "");
+            UI?.SetLabelValue(NameCaptionLabelName, target?.Context?.DisplayName ?? "");
         }
     }
 }
