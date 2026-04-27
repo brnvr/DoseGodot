@@ -22,7 +22,7 @@ namespace Dose.Core.Scenes
             InventoryController = new InventoryController(player.Inventory, ui, ui);
             InteractivityController = new InteractivityController(ui);
             PauseController = new PauseController(ui);
-            DoorNumberController = new DoorNumberController();
+            DoorNumberController = new DoorNumberController(13);
             QuestBookController = new QuestBookController(player.QuestBook, ui);
 
             if (PauseController != null)
