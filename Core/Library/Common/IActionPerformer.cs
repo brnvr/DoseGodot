@@ -4,6 +4,6 @@ namespace Dose.Core.Library.Common
 {
     public interface IActionPerformer
     {        
-        public void Perform(object sender, Dictionary<string, object?> args);
+        public bool Perform(object sender, Dictionary<string, object?> args);
     }
 }

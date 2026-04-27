@@ -9,9 +9,9 @@ namespace Dose.Core.ActionPerformers
     {
         public Player Player { get; } = player;
 
-        public override void Perform(ItemContext item, InteractionPerformerArgs args)
+        public override bool Perform(ItemContext item, InteractionPerformerArgs args)
         {
-            if (args.ActorContext is null) return;
+            if (args.ActorContext is null) return true;
 
             if (!item.KeepAfterUse)
             {
@@ -19,6 +19,8 @@ namespace Dose.Core.ActionPerformers
             }
             
             GD.Print($"Item delivered to \"{args.ActorContext.DisplayName}\": {item.Identifier}");
+
+            return true;
         }
     }
 }

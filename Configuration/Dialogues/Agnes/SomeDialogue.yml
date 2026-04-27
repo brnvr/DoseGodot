@@ -24,6 +24,8 @@ nodes:
     args:
       action: exitGame
       next: prq
+      args:
+        x: 1
   mno:
     type: displayOptions
     args:

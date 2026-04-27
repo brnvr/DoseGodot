@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
@@ -15,7 +16,7 @@ using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener
+    public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener, IActionExecuter
     {
         enum MoveState
         {
@@ -495,6 +496,17 @@ namespace Dose.Core.Scenes
                     GD.Print($"Interacted with actor \"{actor.Context.Identifier}\" using item \"{item.Identifier}\".");
                 }
             }
+        }
+
+        public bool ExecuteAction(IActionPerformer actionPerformer, Dictionary<string, object?> args)
+        {
+            if (_currentTarget is null)
+            {
+                GD.PushWarning($"{nameof(_currentTarget)} is null. Skipping {ExecuteAction}...");
+                return true;
+            }
+
+            return actionPerformer.Perform(_currentTarget, args);
         }
 
         void AutoMoveTo(AutoMoveParameters parameters)

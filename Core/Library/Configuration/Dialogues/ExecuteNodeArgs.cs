@@ -6,12 +6,14 @@ namespace Dose.Core.Library.Configuration.Dialogues
     {
         public string? Next { get; init; }
         public required string Action { get; init; }
+        public required Dictionary<string, object?> Args;
 
         public override Dictionary<string, object?> AsDict()
         {
             var dict = new Dictionary<string, object?>
             {
-                { "action", Action }
+                { "action", Action },
+                { "args", Args }
             };
 
             if (Next != null)

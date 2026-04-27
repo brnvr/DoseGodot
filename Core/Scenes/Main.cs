@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Dose.Core.ActionPerformers;
 using Dose.Core.Library.Actors;
@@ -44,11 +45,12 @@ namespace Dose.Core.Scenes
 				contextBuilder: new NpcContextBuilder([
 					new("speak", new SpeakNodeConverter(), new DialogueLinesBuilder()),
 					new ("execute", new ExecuteNodeConverter(), new DialogueActionBuilder(
-						new Dictionary<string, DialogueAction> {
-							{ "exitGame", new DialogueAction<Player>((player, onFinish) => {
-								player.Position = new Vector3(player.Position.X + 1, player.Position.Y, player.Position.Z);
-							}, player, player.ProgressDialogue) }
-						}
+						dialogueActionMap: new Dictionary<string, IActionPerformer>
+						{
+							{ "exitGame", new MovePlayerPerformer(player) }
+						},
+						actionExecuter: player,
+						onFinish: player.ProgressDialogue
 					)),
 					new("displayOptions", new DisplayOptionsNodeConverter(), new DialogueOptionsBuilder())
 				])
