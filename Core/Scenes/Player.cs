@@ -32,7 +32,8 @@ namespace Dose.Core.Scenes
             Curious,
             Talking,
             Locked,
-            HoldingItem
+            HoldingItem,
+            QuestBookOpened
         }
 
         class AutoMoveParameters(Vector3 position, float speed)
@@ -92,6 +93,7 @@ namespace Dose.Core.Scenes
             ProcessInteract();
             ProcessInventory();
             ProcessDialogue();
+            ProcessQuestBook();
         }
 
         public override void _PhysicsProcess(double delta)
@@ -149,7 +151,27 @@ namespace Dose.Core.Scenes
 
         public bool CanInteract()
         {
-            return _interactionState != InteractionState.Locked;
+            return _interactionState != InteractionState.Locked && _interactionState != InteractionState.QuestBookOpened;
+        }
+
+        public bool CanSwitchItem()
+        {
+            return _interactionState == InteractionState.Curious;
+        }
+
+        public bool CanSelectItem()
+        {
+            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.HoldingItem;
+        }
+
+        bool CanCloseQuestBook()
+        {
+            return _interactionState == InteractionState.QuestBookOpened;
+        }
+        
+        bool CanOpenQuestBook()
+        {
+            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.HoldingItem;
         }
 
         public void ProgressDialogue()
@@ -305,6 +327,41 @@ namespace Dose.Core.Scenes
             }
         }
 
+        void ProcessQuestBook()
+        {
+            if (_interactionState == InteractionState.QuestBookOpened)
+            {
+                if (Input.IsActionJustPressed("ToggleQuestBook") || Input.IsActionJustPressed("Interact") || Input.IsActionJustPressed("InventorySelect"))
+                {
+                    CloseQuestBook();
+                }
+
+                return;
+            }
+
+            if (Input.IsActionJustPressed("ToggleQuestBook"))
+            {
+                OpenQuestBook();
+            }     
+        }
+
+        void OpenQuestBook()
+        {
+            if (!CanOpenQuestBook()) return;
+
+            UnselectItem();
+            _interactionState = InteractionState.QuestBookOpened;
+            _controlPlane?.QuestBookController?.OnQuestBookOpened();
+        }
+
+        void CloseQuestBook()
+        {
+            if (!CanCloseQuestBook()) return;
+
+            _interactionState = InteractionState.Curious;
+            _controlPlane?.QuestBookController?.OnQuestBookClosed();  
+        }
+
         void ProcessSeek()
         {
             if (!CanSeek()) return;
@@ -351,35 +408,40 @@ namespace Dose.Core.Scenes
 
         void ProcessInventory()
         {
-            if (_interactionState == InteractionState.Curious)
+            if (CanSwitchItem())
             {
                 if (Input.IsActionJustPressed("InventoryPreviousItem"))
                     _controlPlane?.InventoryController?.GoToPreviousItem();
 
                 if (Input.IsActionJustPressed("InventoryNextItem"))
-                    _controlPlane?.InventoryController?.GoToNextItem();
-
-                if (Input.IsActionJustPressed("InventorySelect"))
-                    SelectedItem = SelectedItem is null ? _controlPlane?.InventoryController?.CurrentItem : null;
+                    _controlPlane?.InventoryController?.GoToNextItem();      
             }
 
-            if (Input.IsActionJustPressed("InventorySelect"))
+            if (CanSelectItem() && Input.IsActionJustPressed("InventorySelect"))
             {
                 if (_interactionState == InteractionState.HoldingItem)
                 {
-                    _interactionState = InteractionState.Curious;
-                    _controlPlane?.InventoryController?.UI.SetLabelValue(
-                        "ActiveItem", "no item selected"
-                    );
+                    UnselectItem();
                 }
                 else if (_controlPlane?.InventoryController?.CurrentItem != null)
                 {
-                    _interactionState = InteractionState.HoldingItem;
-                    _controlPlane.InventoryController.UI.SetLabelValue(
-                        "ActiveItem", _controlPlane.InventoryController.CurrentItem.DisplayName
-                    );
+                    SelectItem();
                 }
             }
+        }
+
+        void UnselectItem()
+        {
+            SelectedItem = null;
+            _interactionState = InteractionState.Curious;
+            _controlPlane?.InventoryController?.OnActiveItemUnselected();
+        }
+
+        void SelectItem()
+        {
+            SelectedItem = _controlPlane?.InventoryController?.CurrentItem;
+            _interactionState = InteractionState.HoldingItem;
+            _controlPlane?.InventoryController?.OnActiveItemSet();
         }
 
         void ProcessWalk()

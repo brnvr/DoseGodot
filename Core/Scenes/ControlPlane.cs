@@ -1,4 +1,5 @@
 using Dose.Core.Library.Control;
+using Dose.Core.Library.Quests;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -10,7 +11,9 @@ namespace Dose.Core.Scenes
         public InventoryController? InventoryController  { get; private set; }
         public InteractivityController? InteractivityController { get; private set; }
         public PauseController? PauseController { get; private set; }
-        public DoorNumberController DoorNumberController { get; } = new DoorNumberController();
+        public DoorNumberController? DoorNumberController { get; private set; }
+        public QuestBookController? QuestBookController { get; private set; }
+
 
         public ControlPlane Initialize(UI ui, Player player, LocationManager locationManager)
         {
@@ -19,6 +22,8 @@ namespace Dose.Core.Scenes
             InventoryController = new InventoryController(player.Inventory, ui, ui);
             InteractivityController = new InteractivityController(ui);
             PauseController = new PauseController(ui);
+            DoorNumberController = new DoorNumberController();
+            QuestBookController = new QuestBookController(ui);
 
             if (PauseController != null)
             {

@@ -8,5 +8,6 @@ namespace Dose.Core.Library.Control
         DialogueController? DialogueController  { get; }
         DoorNumberController? DoorNumberController { get; }
         PauseController? PauseController { get; }
+        QuestBookController? QuestBookController { get; }
     }
 }

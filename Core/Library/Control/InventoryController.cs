@@ -135,5 +135,21 @@ namespace Dose.Core.Library.Control
 
             return Inventory[index];
         }
+
+        public void OnActiveItemSet()
+        {
+            if (CurrentItem == null)
+            {
+                GD.PushWarning($"{nameof(CurrentItem)} is null. Skipping {nameof(OnActiveItemSet)}...");
+                return;
+            }
+
+            UI.SetLabelValue("ActiveItem", CurrentItem.DisplayName);
+        }
+
+        public void OnActiveItemUnselected()
+        {
+            UI.SetLabelValue("ActiveItem", "");
+        }
     }
 }
