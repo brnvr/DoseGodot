@@ -42,7 +42,8 @@ namespace Dose.Core.Library.Locations
         {
             if (Location.Map == null)
             {
-                throw new Exception("Location doesn't have a defined Map.");
+                GD.PushError($"{nameof(Location)} doesn't have a defined ${nameof(Location.Map)}.");
+                return;
             }
 
             var nextDirection = NextDirection(direction, Location.DoorsClockDirection);
