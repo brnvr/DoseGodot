@@ -8,6 +8,7 @@ namespace Dose.Core.Quests
 {
     public class FindItemQuest(ItemContext itemContext) : Quest<FindItemQuestArgs>
     {
+        public override string Name => $"Find {ItemContext.DisplayName}";
         public ItemContext ItemContext { get; } = itemContext;
         public INotificator? Notificator { get; init; }
 
@@ -24,11 +25,6 @@ namespace Dose.Core.Quests
         protected override bool HasCompleted(FindItemQuestArgs args)
         {
             return ItemContext == args.ItemContext;
-        }
-
-        protected override void OnComplete(FindItemQuestArgs args)
-        {
-            Notificator?.Notify($"Completed quest: Find {ItemContext.DisplayName}", 2f);
         }
     }
 }

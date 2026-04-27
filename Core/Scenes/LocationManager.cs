@@ -135,7 +135,7 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, ControlPlane),
+				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, ControlPlane, location.Type == LocationType.Corridor),
 			};
 
 			foreach (var builder in builders)

@@ -1,6 +1,5 @@
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
-using Dose.Core.Library.Common;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Numbers;
@@ -33,7 +32,8 @@ namespace Dose.Core.Scenes
         [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
         public ILocation? Location { get; private set; }
         public IDoor? LinkedDoor { get; private set; }
-        public IActorContext? Context { get; private set; }
+        IActorContext? IActor.Context => Context;
+        public DoorContext? Context { get; private set; }
         public DoorState State { get; private set; }
         public IReadOnlyDictionary<DoorState, string> DisplayNameForState { get; } = new Dictionary<DoorState, string>
         {
@@ -51,7 +51,6 @@ namespace Dose.Core.Scenes
             
             _yRotationStart = _mesh.Rotation.Y;
         }
-
 
         public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? location, ClockDirection openDirection)
         {

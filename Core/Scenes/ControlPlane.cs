@@ -23,7 +23,7 @@ namespace Dose.Core.Scenes
             InteractivityController = new InteractivityController(ui);
             PauseController = new PauseController(ui);
             DoorNumberController = new DoorNumberController();
-            QuestBookController = new QuestBookController(ui);
+            QuestBookController = new QuestBookController(player.QuestBook, ui);
 
             if (PauseController != null)
             {

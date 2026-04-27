@@ -7,6 +7,7 @@ namespace Dose.Core.Quests
 {
     public class TalkToNpcQuest(NpcContext npcContext) : Quest<TalkToNpcQuestArgs>
     {
+        public override string Name => $"Talk to {NpcContext.DisplayName}";
         public NpcContext NpcContext { get; } = npcContext;
 
         public override bool Equals(Quest<TalkToNpcQuestArgs>? other)
@@ -22,11 +23,6 @@ namespace Dose.Core.Quests
         protected override bool HasCompleted(TalkToNpcQuestArgs args)
         {
             return NpcContext == args.NpcContext;
-        }
-
-        protected override void OnComplete(TalkToNpcQuestArgs args)
-        {
-            GD.Print($"Completed quest: Talk to {NpcContext.DisplayName}");
         }
     }
 }

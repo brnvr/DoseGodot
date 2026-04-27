@@ -6,6 +6,7 @@ namespace Dose.Core.Quests
 {
     public class FindRoomQuest(int roomNumber) : Quest<FindRoomQuestArgs>
     {
+        public override string Name => $"Find room {RoomNumber}";
         public int RoomNumber { get; } = roomNumber;
 
         public override bool Equals(Quest<FindRoomQuestArgs>? other)
@@ -21,11 +22,6 @@ namespace Dose.Core.Quests
         protected override bool HasCompleted(FindRoomQuestArgs args)
         {
             return RoomNumber == args.RoomNumber;
-        }
-
-        protected override void OnComplete(FindRoomQuestArgs args)
-        {
-            GD.Print($"Completed quest: Find room {RoomNumber}");
         }
     }
 }

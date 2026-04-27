@@ -55,9 +55,9 @@ namespace Dose.Core.Scenes
 				])
 			).LoadContexts();
 
+			controlPlane.Initialize(ui, player, locationManager);
 			locationManager.Initialize(controlPlane, player, itemPool, npcPool);
 			player.Initialize(controlPlane);
-			controlPlane.Initialize(ui, player, locationManager);
 
 			AudioCollector.InitializeESpeak();
 		}

@@ -13,13 +13,15 @@ namespace Dose.Core.Library.Locations
         IBuildableLocation location,
         PackedScene doorScene,
         int blockSize,
-        IControlPlane controlPlane
+        IControlPlane controlPlane,
+        bool shouldSetDoorNumber
     ) : LocationBuilder(location)
     {
         public int BlockSize { get; } = blockSize;
         public PackedScene DoorScene { get; } = doorScene;
         public IControlPlane ControlPlane { get; } = controlPlane;
         public ILocationManager LocationManager { get; } = locationManager;
+        public bool ShouldSetDoorNumber { get; } = shouldSetDoorNumber;
         
         protected override void OnBuildCell(Vector2I position)
         {
@@ -51,11 +53,9 @@ namespace Dose.Core.Library.Locations
 
             var door = (Node3D)DoorScene.Instantiate();
 
-            if (Location is Node buildableLocation)
+            if (Location is IBuildableLocation buildableLocation)
             {
-                //TODO: this should be handled by the location itself, not the provider
-                buildableLocation.AddChild(door);
-                //buildableLocation.OnBuild(door);
+                buildableLocation.OnBuild(door);
             }
 
             door.Position = position;
@@ -63,9 +63,14 @@ namespace Dose.Core.Library.Locations
 
             if (door is IDoor initializableDoor)
             {
+                if (ShouldSetDoorNumber && ControlPlane.DoorNumberController == null)
+                {
+                    GD.PushWarning($"{nameof(ControlPlane.DoorNumberController)} is null. Won't set door number.");
+                }
+                
                 var context = new DoorContext
                 {
-                    Number = ControlPlane.DoorNumberController?.PopRandomNumber()
+                    Number = ShouldSetDoorNumber ? ControlPlane.DoorNumberController?.PopRandomNumber() : null
                 };
 
                 initializableDoor.Initialize(context, LocationManager, Location, ClockOpposite(Location.DoorsClockDirection));

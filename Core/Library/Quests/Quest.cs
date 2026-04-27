@@ -1,9 +1,13 @@
 using System;
 using System.Collections;
+using Godot;
 
 namespace Dose.Core.Library.Quests
 {
-    public abstract class Quest {}
+    public abstract class Quest
+    {
+        public abstract string Name { get; }
+    }
 
     public abstract class Quest<TArgs> : Quest, IEquatable<Quest<TArgs>>
     {
@@ -21,7 +25,11 @@ namespace Dose.Core.Library.Quests
         }
 
         protected abstract bool HasCompleted(TArgs args);
-        protected abstract void OnComplete(TArgs args);
+
+        protected virtual void OnComplete(TArgs args)
+        {
+            GD.Print($"Completed quest: {Name}");
+        }
 
         public override bool Equals(object? obj)
         {
