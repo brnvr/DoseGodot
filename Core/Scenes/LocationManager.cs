@@ -20,6 +20,8 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
+		readonly static Mesh _stairsUpMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/StairsUp.glb");
+		readonly static Mesh _stairsDownMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/StairsDown.glb");
 
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
@@ -134,7 +136,7 @@ namespace Dose.Core.Scenes
 
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, BLOCK_SIZE, "WallMeshInstance"),
+				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, _stairsUpMesh, _stairsDownMesh, BLOCK_SIZE, "WallMeshInstance"),
 				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, ControlPlane, location.Type == LocationType.Corridor),
 			};
 

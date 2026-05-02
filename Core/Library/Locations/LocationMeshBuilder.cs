@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,13 +8,26 @@ using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh doorwayMesh, int blockSize, string? meshInstanceName = null) : LocationBuilder(location)
+    public class LocationMeshBuilder(
+        IBuildableLocation location,
+        Mesh wallMesh,
+        Mesh doorwayMesh,
+        Mesh stairsUpMesh,
+        Mesh stairsDownMesh,
+        int blockSize,
+        string? meshInstanceName = null
+    ) : LocationBuilder(location)
     {
         readonly SurfaceTool _surfaceTool = new();
+        readonly FrozenDictionary<MapCellType, Mesh> _meshMap = new Dictionary<MapCellType, Mesh>
+        {
+            { MapCellType.Solid, wallMesh },
+            { MapCellType.Doorway, doorwayMesh },
+            { MapCellType.Upstairs, stairsUpMesh },
+            { MapCellType.Downstairs, stairsDownMesh }
+        }.ToFrozenDictionary();
 
         public int BlockSize { get; } = blockSize;
-        public Mesh WallMesh { get; } = wallMesh;
-        public Mesh DoorwayMesh { get; } = doorwayMesh;
         public string? MeshInstanceName { get; } = meshInstanceName;
         //public MeshInstance3D? Result { get; private set; }
 
@@ -66,10 +80,11 @@ namespace Dose.Core.Library.Locations
                 return;
             }
 
-            var mesh = wall.Type == MapCellType.Doorway ? DoorwayMesh : (wall.Type == MapCellType.Solid ? WallMesh : null);
+            var mesh = _meshMap.GetValueOrDefault(wall.Type);
 
             if (mesh == null)
             {
+                GD.PushWarning($"Found no mesh mapping for wall type {wall.Type}");
                 return;
             }
 
