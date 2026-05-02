@@ -19,7 +19,7 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
-		readonly static Mesh _wallWithOpeningMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/WallWithOpening.glb");
+		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
 
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
@@ -134,7 +134,7 @@ namespace Dose.Core.Scenes
 
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationMeshBuilder(location, _wallMesh, _wallWithOpeningMesh, BLOCK_SIZE, "WallMeshInstance"),
+				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, BLOCK_SIZE, "WallMeshInstance"),
 				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, ControlPlane, location.Type == LocationType.Corridor),
 			};
 

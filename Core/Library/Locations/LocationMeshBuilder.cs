@@ -7,13 +7,13 @@ using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh wallWithOpeningMesh, int blockSize, string? meshInstanceName = null) : LocationBuilder(location)
+    public class LocationMeshBuilder(IBuildableLocation location, Mesh wallMesh, Mesh doorwayMesh, int blockSize, string? meshInstanceName = null) : LocationBuilder(location)
     {
         readonly SurfaceTool _surfaceTool = new();
 
         public int BlockSize { get; } = blockSize;
         public Mesh WallMesh { get; } = wallMesh;
-        public Mesh WallWithOpeningMesh { get; } = wallWithOpeningMesh;
+        public Mesh DoorwayMesh { get; } = doorwayMesh;
         public string? MeshInstanceName { get; } = meshInstanceName;
         //public MeshInstance3D? Result { get; private set; }
 
@@ -66,7 +66,7 @@ namespace Dose.Core.Library.Locations
                 return;
             }
 
-            var mesh = wall.Type == MapCellType.Doorway ? WallWithOpeningMesh : (wall.Type == MapCellType.Solid ? WallMesh : null);
+            var mesh = wall.Type == MapCellType.Doorway ? DoorwayMesh : (wall.Type == MapCellType.Solid ? WallMesh : null);
 
             if (mesh == null)
             {
