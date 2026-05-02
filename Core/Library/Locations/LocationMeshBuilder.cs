@@ -66,7 +66,12 @@ namespace Dose.Core.Library.Locations
                 return;
             }
 
-            var mesh = wall.DoorType != MapCellDoorType.None ? WallWithOpeningMesh : WallMesh;
+            var mesh = wall.Type == MapCellType.Doorway ? WallWithOpeningMesh : (wall.Type == MapCellType.Solid ? WallMesh : null);
+
+            if (mesh == null)
+            {
+                return;
+            }
 
             var centerPosition = MoveTo(point, direction, 0.5f);
             var wallPosition = new Vector3((centerPosition.X - Location.Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Location.Map.VerticalCells / 2) * BlockSize);

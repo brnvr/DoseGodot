@@ -16,7 +16,8 @@ namespace Dose.Core.Library.Locations
         int verticalCells,
         Probability probabilityToExtendCorridor,
         Probability probabilityToBifurcate,
-        Probability probabilityToBuildDoors
+        Probability probabilityToBuildDoors,
+        Probability probabilityToBuildStairs
     ) : IMapGenerator
     {
         const int CORRIDOR_CHUNK_LENGTH_CELLS = 5;
@@ -29,6 +30,7 @@ namespace Dose.Core.Library.Locations
         public Probability ProbabilityToExtendCorridor { get; } = probabilityToExtendCorridor;
         public Probability ProbabilityToBifurcate { get; } = probabilityToBifurcate;
         public Probability ProbabilityToBuildDoors { get; } = probabilityToBuildDoors;
+        public Probability ProbabilityToBuildStairs { get; } = probabilityToBuildStairs;
 
         public Map GenerateMap()
         {
@@ -161,7 +163,7 @@ namespace Dose.Core.Library.Locations
         static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
         {
             var wallDirection = wallDirections.First();
-            var wall = new MapCellWall(null, MapCellDoorType.None);
+            var wall = new MapCellWall(null, MapCellType.Solid);
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -172,7 +174,22 @@ namespace Dose.Core.Library.Locations
             }
 
             return BuildCellWalls(newCell, remainingWallDirections);
-        } 
+        }
+
+        MapCellType DecideMapCellType(bool hasDoor)
+        {
+            if (hasDoor)
+            {
+                return MapCellType.Doorway;
+            }
+
+            if (new RandomDecider(ProbabilityToBuildStairs).Roll())
+            {
+                return new RandomSelector<MapCellType>([MapCellType.Upstairs, MapCellType.Downstairs]).Pick();
+            }
+
+            return MapCellType.Solid;
+        }
 
         MapCell BuildCellWalls(MapCell cell, CardinalDirection direction, bool hasDoors0, bool hasDoors1, int iteration, IEnumerable<CardinalDirection> wallDirections)
         {
@@ -183,8 +200,7 @@ namespace Dose.Core.Library.Locations
             var buildOrientation = OrientationFromDirection(direction);
             var wallOrientation = OrientationFromDirection(wallDirection);
             var hasDoor = (buildOrientation != wallOrientation) && ((shouldBuildDoors0 && _directions0.Contains(wallDirection)) || (shouldBuildDoors1 && _directions1.Contains(wallDirection)));
-            var doorType = hasDoor ? MapCellDoorType.Open : MapCellDoorType.None;
-            var wall = new MapCellWall(null, doorType);
+            var wall = new MapCellWall(null, DecideMapCellType(hasDoor));
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);

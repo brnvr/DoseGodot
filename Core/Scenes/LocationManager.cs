@@ -228,7 +228,8 @@ namespace Dose.Core.Scenes
 				verticalCells: 500,
 				probabilityToExtendCorridor: new Probability(0.7),
 				probabilityToBifurcate: new Probability(0.25),
-				probabilityToBuildDoors: new Probability(0.5)
+				probabilityToBuildDoors: new Probability(0.5),
+				probabilityToBuildStairs: new Probability(0.25)
 			);
         }
 

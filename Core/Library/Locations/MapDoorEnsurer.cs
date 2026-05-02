@@ -1,4 +1,5 @@
 using System.Linq;
+using Godot;
 using static Dose.Core.Library.GeoPositioning;
 using static Dose.Core.Library.Locations.MapCellWall;
 
@@ -15,7 +16,7 @@ namespace Dose.Core.Library.Locations
             var wallWithDoor = AllDirections()
                 .SelectMany(dir => allCells
                     .Select(cell => cell.GetWall(dir))
-                    .Where(w => w?.DoorType != MapCellDoorType.None))
+                    .Where(w => w?.Type == MapCellType.Doorway))
                 .FirstOrDefault();
 
             if (wallWithDoor == null)
@@ -23,19 +24,23 @@ namespace Dose.Core.Library.Locations
                 var wall = AllDirections()
                     .Where(dir => allCells.First().GetWall(dir) != null)
                     .Select(dir => allCells.First().GetWall(dir))
-                    .First();
+                    .FirstOrDefault();
                     
-                if (wall != null)
+                if (wall == null)
                 {
-                    wall.DoorType = MapCellDoorType.Open;
+                    GD.PushWarning("No walls found. Can't ensure a door a minimum door number of 1.");
+                    return;
                 }
+                
+                wall.Type = MapCellType.Doorway;
             }
             else
             {
-                if (!allCells.Any(cell => AllDirections().Any(dir => cell.GetWall(dir)?.DoorType != MapCellDoorType.Locked)))
-                {
-                    wallWithDoor.DoorType = MapCellDoorType.Open;
-                }
+                // TODO: Update ensurer logic
+                // if (!allCells.Any(cell => AllDirections().Any(dir => cell.GetWall(dir)?.DoorType != MapCellDoorType.Locked)))
+                // {
+                //     wallWithDoor.DoorType = MapCellDoorType.Open;
+                // }
             }
         }
     }

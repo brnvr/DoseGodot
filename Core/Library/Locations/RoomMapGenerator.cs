@@ -36,8 +36,8 @@ namespace Dose.Core.Library.Locations
                 return;
 
             var shouldBuildDoor = new RandomDecider(ProbabilityToBuildDoor).Roll();
-            var doorType = shouldBuildDoor ? MapCellDoorType.Open : MapCellDoorType.None;
-            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(null, doorType));
+            var type = shouldBuildDoor ? MapCellType.Doorway : MapCellType.Solid;
+            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(null, type));
 
             map.Set(point, cell);
 

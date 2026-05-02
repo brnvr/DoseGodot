@@ -32,7 +32,7 @@ namespace Dose.Core.Library.Locations
 
             var cell = Location.Map.Get(position);
     
-            foreach (var direction in AllDirections().Where(direction => cell.GetWall(direction) != null && cell.GetWall(direction)?.DoorType != MapCellDoorType.None))
+            foreach (var direction in AllDirections().Where(direction => cell.GetWall(direction) != null && cell.GetWall(direction)?.Type == MapCellType.Doorway))
             {
                 AddDoor(position, direction);
             }
