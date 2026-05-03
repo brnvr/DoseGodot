@@ -1,71 +1,75 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dose.Core.Library.Locations;
 using Godot;
 
-class LocationQueue(ILocationCreator ILocationCreator, int maxLocationsPerType)
+class LocationQueue(int maxLocationsPerType, Dictionary<string, Func<ClockDirection, ILocation?>> categoryFuncMap)
 {
-    readonly Dictionary<(LocationType, ClockDirection), ConcurrentQueue<ILocation>> _nextLocations = [];
+    readonly Dictionary<(string, ClockDirection), ConcurrentQueue<ILocation>> _nextLocations = [];
+    readonly FrozenDictionary<string, Func<ClockDirection, ILocation?>> categoryFuncMap = categoryFuncMap.ToFrozenDictionary();
 
     public bool IsInitialized { get; private set; } = false;
     public int MaxLocationsPerType { get; } = maxLocationsPerType;
-    public ILocationCreator ILocationCreator { get; } = ILocationCreator;
+    
 
-    public void Initialize()
+    public LocationQueue Initialize()
     {
         if (IsInitialized)
         {
             GD.PushError("LocationQueue has already been initialized.");
         }
 
-        foreach (var type in Enum.GetValues<LocationType>())
+        foreach (var category in categoryFuncMap.Keys)
         {
             foreach (var direction in Enum.GetValues<ClockDirection>())
             {
-                _nextLocations[(type, direction)] = new ConcurrentQueue<ILocation>();
+                _nextLocations[(category, direction)] = new ConcurrentQueue<ILocation>();
 
-                while (_nextLocations.TryGetValue((type, direction), out ConcurrentQueue<ILocation>? value) && value.Count < MaxLocationsPerType)
+                while (_nextLocations.TryGetValue((category, direction), out ConcurrentQueue<ILocation>? value) && value.Count < MaxLocationsPerType)
                 {
-                    var newLocation = ILocationCreator.CreateLocation(type, direction);
+                    var newLocation = categoryFuncMap[category](direction);
 
                     if (newLocation == null)
                     {
-                        GD.PushError($"Failed to create location of type {type} and direction {direction} during LocationQueue initialization.");
+                        GD.PushError($"Failed to create location for category {category} and direction {direction} during LocationQueue initialization.");
                         continue;
                     }
 
-                    _nextLocations[(type, direction)].Enqueue(newLocation);
+                    _nextLocations[(category, direction)].Enqueue(newLocation);
                 }
             }
         }
 
         IsInitialized = true;
+
+        return this;
     }
 
-    public bool IsEmpty(LocationType type, ClockDirection direction)
+    public bool IsEmpty(string category, ClockDirection direction)
     {
-        return _nextLocations.TryGetValue((type, direction), out ConcurrentQueue<ILocation>? queue) && queue.IsEmpty;
+        return _nextLocations.TryGetValue((category, direction), out ConcurrentQueue<ILocation>? queue) && queue.IsEmpty;
     }
 
-    public ILocation? PopNextLocation(LocationType type, ClockDirection direction)
+    public ILocation? PopNextLocation(string category, ClockDirection direction)
     {
-        var queue = _nextLocations[(type, direction)];
+        var queue = _nextLocations[(category, direction)];
 
         if (queue.IsEmpty)
         {
-            GD.Print($"No pre-generated locations of type {type} and direction {direction} are available. Generating one on the fly...");
-            return ILocationCreator.CreateLocation(type, direction);
+            GD.Print($"No pre-generated locations for category {category} and direction {direction} are available. Generating one on the fly...");
+            return categoryFuncMap[category](direction);
         }
 
-        _ = Refill(type, direction);
+        _ = Refill(category, direction);
 
         queue.TryDequeue(out var nextLocation);
 
         if (nextLocation == null)
         {
-            GD.PushError($"Failed to dequeue next location of type {type} and direction {direction}.");
+            GD.PushError($"Failed to dequeue next location for category {category} and direction {direction}.");
         }
 
         return nextLocation;
@@ -85,20 +89,20 @@ class LocationQueue(ILocationCreator ILocationCreator, int maxLocationsPerType)
         }
     }
 
-    async Task Refill(LocationType type, ClockDirection direction)
+    async Task Refill(string category, ClockDirection direction)
     {
         await Task.Run(async () =>
         {
             //await Task.Delay(5000);
-            var newLocation = ILocationCreator.CreateLocation(type, direction);
+            var newLocation = categoryFuncMap[category](direction);
 
             if (newLocation == null)
             {
-                GD.PushError($"Failed to create location of type {type} and direction {direction}.");
+                GD.PushError($"Failed to create location of type {category} and direction {direction}.");
                 return;
             }
 
-            _nextLocations[(type, direction)].Enqueue(newLocation);
+            _nextLocations[(category, direction)].Enqueue(newLocation);
         });
     }
 }

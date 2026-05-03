@@ -238,7 +238,7 @@ namespace Dose.Core.Scenes
                 local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
             }
 
-            _controlPlane?.LocationController?.UpdateLocation(door, null);
+            _controlPlane?.LocationController?.UpdateLocation(door);
 
             if (local != null && door.Linked is Door linkedDoorNode)
             {
@@ -579,19 +579,38 @@ namespace Dose.Core.Scenes
 
         public void UseStairs(IStairs stairs)
         {
-            Transform3D? local = null;
+            _moveState = MoveState.Locked;
+            _interactionState = InteractionState.Locked;
 
-            if (stairs is Stairs stairsNode)
+            _ = FadeTransition.Instance?.Fade(() =>
             {
-                local = stairsNode.GlobalTransform.AffineInverse() * GlobalTransform;
-            }
+                _controlPlane?.LocationController?.UpdateLocation(stairs);
 
-            _controlPlane?.LocationController?.UpdateLocation(stairs, LocationType.Corridor);
+                if (stairs is Stairs stairsNode && stairsNode.Linked is Stairs linked)
+                {
+                    var targetTransform = linked.GlobalTransform;
 
-            if (local != null && stairs.Linked is Door linkedDoorNode)
-            {
-                GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
-            }
+                    // "South" → usually forward → -Z
+                    Vector3 offset = targetTransform.Basis.Z * 2f;
+
+                    // Keep same height or align with stairs
+                    Vector3 newPosition = targetTransform.Origin + offset;
+
+                    GlobalTransform = new Transform3D(
+                        targetTransform.Basis, // match rotation of stairs
+                        newPosition
+                    );
+
+                    if (_head != null)
+                    {
+                        var localBasis = linked.GlobalTransform.Basis.Inverse() * linked.GlobalTransform.Basis;
+                        _head.Rotation = (localBasis * Basis.FromEuler(new Vector3(0, Mathf.Pi, 0))).GetEuler();
+                    }
+
+                    _moveState = MoveState.Free;
+                    _interactionState = InteractionState.Curious;
+                }
+            }, 2);
         }
     }
 }

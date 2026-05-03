@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://uikj2e5802ap"]
+[gd_scene load_steps=7 format=3 uid="uid://uikj2e5802ap"]
 
 [ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Core/Scenes/Main.cs" id="1_v1gob"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Configuration/Scenes/Player.tscn" id="2_jw32o"]
 [ext_resource type="PackedScene" uid="uid://bcg5l5tvuje77" path="res://Configuration/Scenes/LocationManager.tscn" id="3_50glp"]
 [ext_resource type="PackedScene" uid="uid://bm0d2mvnxfs2i" path="res://Configuration/Scenes/UI.tscn" id="5_bmxlf"]
+[ext_resource type="PackedScene" uid="uid://d0bi54vo2i5ak" path="res://Configuration/Scenes/FadeTransition.tscn" id="6_4e7gm"]
 [ext_resource type="PackedScene" uid="uid://dbv25pethrcnn" path="res://Configuration/Scenes/ControlPlane.tscn" id="6_4kpch"]
 
 [node name="Main" type="Node3D"]
@@ -19,3 +20,5 @@ transform = Transform3D(0.70710677, 0.49999997, 0.49999997, 0, 0.70710677, -0.70
 [node name="UI" parent="." instance=ExtResource("5_bmxlf")]
 
 [node name="ControlPlane" parent="." instance=ExtResource("6_4kpch")]
+
+[node name="FadeTransition" parent="." instance=ExtResource("6_4e7gm")]

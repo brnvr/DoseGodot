@@ -10,11 +10,15 @@ using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.ActorArgs;
+using Dose.Core.Library.Location;
 namespace Dose.Core.Scenes
 {
-	public partial class LocationManager : Node, ILocationManager, ILocationCreator
+	public partial class LocationManager : Node, ILocationManager
 	{
 		const int BLOCK_SIZE = 4;
+		const string ROOM_CATEGORY = "room";
+		const string CORRIDOR_CATEGORY = "corridor";
+		const string CORRIDOR_WITH_STAIRS_ENSURED_CATEGORY = "corridorWithStairsEnsured";
 
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
@@ -24,9 +28,9 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
 
 		ILocation? _currentLocation;
-		LocationQueue? _locationQueue;
 		ActorPool<ItemContext>? _itemPool;
 		ActorPool<NpcContext>? _npcPool;
+		LocationQueue? _locationQueue;
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
@@ -46,40 +50,48 @@ namespace Dose.Core.Scenes
 			ControlPlane = controlPlane;
 			_itemPool = itemPool;
 			_npcPool = npcPool;
-			_locationQueue = new LocationQueue(this, 2);
+			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
+			{
+				{ ROOM_CATEGORY, CreateRoom },
+				{ CORRIDOR_CATEGORY, direction => CreateCorridor(direction) },
+				{ CORRIDOR_WITH_STAIRS_ENSURED_CATEGORY, direction => CreateCorridor(direction, true) }
+			}).Initialize();
 
-			_locationQueue.Initialize();
-
-			CurrentLocation = _locationQueue.PopNextLocation(LocationType.Corridor, ClockDirection.Clockwise);
+			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
 
 			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvailableContexts.ToList()[0]));
 
             return this;
         }
 
-		LocationType GetNextLocationType()
+		string GetNextLocationCategory(IPortal portal)
 		{
 			if (_currentLocation == null)
-				return LocationType.Room;
+				return ROOM_CATEGORY;
+
+			if (portal is IStairs)
+				return CORRIDOR_WITH_STAIRS_ENSURED_CATEGORY;
 
 			if (_currentLocation is not Location currentLocation)
-				return LocationType.Room;
+				return ROOM_CATEGORY;
 
 			if (currentLocation.Type == LocationType.Corridor)
-				return LocationType.Room;
+				return ROOM_CATEGORY;
 
-			var locationsTypes = new WeightedList<LocationType> {
-				{ LocationType.Room, 3 },
-				{ LocationType.Corridor, 1 }
+			var categories = new WeightedList<string>
+			{
+				{ ROOM_CATEGORY, 3 },
+				{ CORRIDOR_CATEGORY, 1 }
 			};
 
-			var selector = new RandomSelector<LocationType>(locationsTypes);
+			var selector = new RandomSelector<string>(categories);
 
 			return selector.Pick();
 		}
 
-		public ILocation? GoToNextLocation(LocationType type)
+		public ILocation? GoToNextLocation(IPortal portal)
 		{
+			var category = GetNextLocationCategory(portal);
 			var clockDirection = _currentLocation is null ? ClockDirection.Clockwise : ClockOpposite(_currentLocation.DoorsClockDirection);
 
 			if (_locationQueue == null)
@@ -88,19 +100,14 @@ namespace Dose.Core.Scenes
 				return null;
 			}
 
-			CurrentLocation = _locationQueue.PopNextLocation(type, clockDirection);
+			if (category == null) return null;
+
+			CurrentLocation = _locationQueue.PopNextLocation(category, clockDirection);
 
 			return CurrentLocation;
 		}
 
-		public ILocation? GoToNextLocation()
-        {
-			var type = GetNextLocationType();
-			
-			return GoToNextLocation(type);
-        }
-
-		Location? CreateLocation(LocationType type, ClockDirection clockDirection)
+		Location? CreateRoom(ClockDirection clockDirection)
 		{
 			if (ControlPlane == null)
             {
@@ -108,15 +115,29 @@ namespace Dose.Core.Scenes
                 return null;
             }
 
-			IMapGenerator mapGenerator = type switch
-			{
-				LocationType.Room => GenerateRoomMap(),
-				LocationType.Corridor => GenerateCorridorMap(),
-				_ => throw new Exception($"Unimplemented ${nameof(LocationType)}: {type}")
+			IMapGenerator mapGenerator = GenerateRoomMap();
 
-			};
+			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, LocationType.Room);
 
-			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, type);
+			BuildLocation(location);
+			PopulateLocation(location);
+		
+			//location.CreateFlippedBack();
+
+			return location;
+		}
+
+		Location? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairs = false)
+		{
+			if (ControlPlane == null)
+            {
+				GD.PushError($"{nameof(LocationManager)} has no defined {nameof(IControlPlane)}.");
+                return null;
+            }
+
+			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairs);
+
+			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, LocationType.Corridor);
 
 			BuildLocation(location);
 			PopulateLocation(location);
@@ -253,11 +274,5 @@ namespace Dose.Core.Scenes
 				ShouldEnsureStairs = shouldEnsureStairs
 			};
         }
-
-        ILocation? ILocationCreator.CreateLocation(LocationType type, ClockDirection doorsClockDirection)
-        {
-            return CreateLocation(type, doorsClockDirection);
-        }
-
     }
 }

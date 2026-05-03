@@ -81,8 +81,10 @@ namespace Dose.Core.Scenes
         void Clear(int keepLevels, Location? previous)
         {
             var doors = GetChildren().OfType<Door>();
+            var stairs = GetChildren().OfType<Stairs>();
 
             Clear(doors, keepLevels, previous);
+            Clear(stairs, keepLevels, previous);
         }
 
         void Clear(IEnumerable<IPortal> portals, int keepLevels, Location? previous)
