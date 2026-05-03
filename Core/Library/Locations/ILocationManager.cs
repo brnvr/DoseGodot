@@ -4,5 +4,6 @@ namespace Dose.Core.Library.Locations
     {
         ILocation? CurrentLocation { get; set; }
         ILocation? GoToNextLocation();
+        ILocation? GoToNextLocation(LocationType type);
     }
 }

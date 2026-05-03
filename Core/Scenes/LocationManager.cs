@@ -16,12 +16,12 @@ namespace Dose.Core.Scenes
 	{
 		const int BLOCK_SIZE = 4;
 
-		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
-		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
-		readonly static Mesh _stairsUpMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/StairsUp.glb");
-		readonly static Mesh _stairsDownMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/StairsDown.glb");
+		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
+		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
+		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
+		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
 
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
@@ -78,16 +78,9 @@ namespace Dose.Core.Scenes
 			return selector.Pick();
 		}
 
-		public ILocation? GoToNextLocation()
-        {
-			var type = GetNextLocationType();
+		public ILocation? GoToNextLocation(LocationType type)
+		{
 			var clockDirection = _currentLocation is null ? ClockDirection.Clockwise : ClockOpposite(_currentLocation.DoorsClockDirection);
-		
-			if (_locationQueue == null)
-			{
-				GD.PushError($"{nameof(LocationManager)} is not initialized. Can't go to next location.");
-				return null;
-			}
 
 			if (_locationQueue == null)
 			{
@@ -98,6 +91,13 @@ namespace Dose.Core.Scenes
 			CurrentLocation = _locationQueue.PopNextLocation(type, clockDirection);
 
 			return CurrentLocation;
+		}
+
+		public ILocation? GoToNextLocation()
+        {
+			var type = GetNextLocationType();
+			
+			return GoToNextLocation(type);
         }
 
 		Location? CreateLocation(LocationType type, ClockDirection clockDirection)
@@ -134,10 +134,26 @@ namespace Dose.Core.Scenes
 				return;
             }
 
+			var doorNumberController = location.Type == LocationType.Corridor ? ControlPlane.DoorNumberController : null;
+
+			var doorArgs = new DoorArgs
+			{
+				Location = location,
+				LocationManager = this,
+				OpenDirection = ClockOpposite(location.DoorsClockDirection)
+			};
+
+			var stairsArgs = new StairsArgs
+			{
+				Location = location
+			};
+
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, _stairsUpMesh, _stairsDownMesh, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationDoorsProvider(this, location, _doorScene, BLOCK_SIZE, ControlPlane, location.Type == LocationType.Corridor),
+				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, BLOCK_SIZE, "WallMeshInstance"),
+				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorArgs, doorNumberController),
+				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, stairsArgs),
+				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, stairsArgs),
 			};
 
 			foreach (var builder in builders)
@@ -223,7 +239,7 @@ namespace Dose.Core.Scenes
 			);
         }
 
-        static CorridorMapGenerator GenerateCorridorMap()
+        static CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairs)
         {
             return new CorridorMapGenerator(
 				horizontalCells: 500,
@@ -231,8 +247,11 @@ namespace Dose.Core.Scenes
 				probabilityToExtendCorridor: new Probability(0.7),
 				probabilityToBifurcate: new Probability(0.25),
 				probabilityToBuildDoors: new Probability(0.5),
-				probabilityToBuildStairs: new Probability(0.25)
-			);
+				probabilityToBuildStairs: new Probability(0.1)
+			)
+			{
+				ShouldEnsureStairs = shouldEnsureStairs
+			};
         }
 
         ILocation? ILocationCreator.CreateLocation(LocationType type, ClockDirection doorsClockDirection)

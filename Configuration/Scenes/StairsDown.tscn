@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://b41cqpawn8l2t"]
+
+[ext_resource type="PackedScene" uid="uid://dexpnn6l4w3kp" path="res://Media/3DAssets/Environment/StairsDown.glb" id="1_rgbbu"]
+[ext_resource type="Script" uid="uid://w2nm60wastq0" path="res://Core/Scenes/StairsDown.cs" id="2_jal4a"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rgbbu"]
+
+[node name="StairsDown" instance=ExtResource("1_rgbbu")]
+script = ExtResource("2_jal4a")
+
+[node name="Stairs" parent="." index="0"]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
+
+[node name="Body" type="StaticBody3D" parent="." index="1"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body" index="0"]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 2, -2)
+shape = SubResource("BoxShape3D_rgbbu")

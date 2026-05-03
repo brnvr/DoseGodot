@@ -1,3 +1,4 @@
+using Dose.Core.Library.Location;
 using Dose.Core.Library.Locations;
 
 namespace Dose.Core.Library.Control
@@ -6,28 +7,28 @@ namespace Dose.Core.Library.Control
     {
         public ILocationManager LocationManager { get; } = locationManager;
 
-        public void UpdateLocation(IDoor door)
+        public void UpdateLocation<TPortal>(TPortal portal, LocationType? type) where TPortal : IPortal
         {
-            if (door.LinkedDoor is null)
+            if (portal.Linked is null)
             {
-                var location = LocationManager.GoToNextLocation();
+                var location = type is null ? LocationManager.GoToNextLocation() : LocationManager.GoToNextLocation((LocationType)type);
     
                 if (location != null)
                 {
-                    var otherDoor = location.SelectRandomDoor();
+                    var other = location.SelectRandomPortal<TPortal>();
                 
-                    if (otherDoor != null)
+                    if (other != null)
                     {
-                        door.LinkDoor(otherDoor);
+                        portal.Link(other);
                     }
                 }
             }
             else
             {
-                LocationManager.CurrentLocation = door.LinkedDoor.Location;
+                LocationManager.CurrentLocation = portal.Linked.Location;
             }
 
-            door.LinkedDoor?.Location?.Clear(3);
+            portal.Linked?.Location?.Clear(3);
         }
     }
 }

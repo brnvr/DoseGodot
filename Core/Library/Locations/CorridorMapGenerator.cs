@@ -27,6 +27,7 @@ namespace Dose.Core.Library.Locations
 
         public int HorizontalCells { get; } = horizontalCells;
         public int VerticalCells { get; } = verticalCells;
+        public bool ShouldEnsureStairs { get; init; } = false;
         public Probability ProbabilityToExtendCorridor { get; } = probabilityToExtendCorridor;
         public Probability ProbabilityToBifurcate { get; } = probabilityToBifurcate;
         public Probability ProbabilityToBuildDoors { get; } = probabilityToBuildDoors;
@@ -39,7 +40,12 @@ namespace Dose.Core.Library.Locations
             var selectedDirection = new RandomSelector<CardinalDirection>(AllDirections()).Pick();
             GenerateCorridor(map, startingPoint, selectedDirection);
 
-            new MapDoorEnsurer(map).EnsureAtLeastOne();
+            new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
+
+            if (ShouldEnsureStairs)
+            {
+                new MapEnsurer(map, MapCellType.Downstairs, MapCellType.Upstairs).EnsureAtLeastOne();
+            }
 
             return map;
         }

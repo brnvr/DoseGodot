@@ -16,7 +16,7 @@ using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener, IActionExecuter
+    public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener, IActionExecuter, IStairsUser
     {
         enum MoveState
         {
@@ -238,9 +238,9 @@ namespace Dose.Core.Scenes
                 local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
             }
 
-            _controlPlane?.LocationController?.UpdateLocation(door);
+            _controlPlane?.LocationController?.UpdateLocation(door, null);
 
-            if (local != null && door.LinkedDoor is Door linkedDoorNode)
+            if (local != null && door.Linked is Door linkedDoorNode)
             {
                 GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
 
@@ -575,6 +575,23 @@ namespace Dose.Core.Scenes
         {
             _autoMoveParameters = parameters;
             _moveState = MoveState.Auto;
+        }
+
+        public void UseStairs(IStairs stairs)
+        {
+            Transform3D? local = null;
+
+            if (stairs is Stairs stairsNode)
+            {
+                local = stairsNode.GlobalTransform.AffineInverse() * GlobalTransform;
+            }
+
+            _controlPlane?.LocationController?.UpdateLocation(stairs, LocationType.Corridor);
+
+            if (local != null && stairs.Linked is Door linkedDoorNode)
+            {
+                GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
+            }
         }
     }
 }

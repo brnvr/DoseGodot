@@ -1,6 +1,8 @@
+using Dose.Core.ActorArgs;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
+using Dose.Core.Library.Location;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Numbers;
 using Godot;
@@ -17,7 +19,7 @@ namespace Dose.Core.Scenes
         Closing
     }
 
-    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>
+    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>, IInitializableActor<DoorContext, DoorArgs>
     {
         const double MAX_OPENING = Math.PI / 2;
 
@@ -31,7 +33,7 @@ namespace Dose.Core.Scenes
 
         [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
         public ILocation? Location { get; private set; }
-        public IDoor? LinkedDoor { get; private set; }
+        public IDoor? Linked { get; private set; }
         IActorContext? IActor.Context => Context;
         public DoorContext? Context { get; private set; }
         public DoorState State { get; private set; }
@@ -43,6 +45,9 @@ namespace Dose.Core.Scenes
           { DoorState.Closing, "open" },
         };
 
+        IPortal? IPortal.Linked => Linked;
+
+
         public override void _Ready()
         {
             _mesh = GetNode<MeshInstance3D>("Mesh");
@@ -52,35 +57,25 @@ namespace Dose.Core.Scenes
             _yRotationStart = _mesh.Rotation.Y;
         }
 
-        public void Initialize(DoorContext context, ILocationManager locationManager, ILocation? location, ClockDirection openDirection)
+        public void Link(Door other)
         {
-            _opening = 0;
-            State = DoorState.Closed;
-            Context = context;
-            Location = location;
-            OpenDirection = openDirection;
-            _locationManager = locationManager;
-        }
-
-        public void LinkDoor(IDoor other)
-        {
-            if (LinkedDoor == other)
+            if (Linked == other)
             {
                 return;
             }
-            else if (LinkedDoor != null)
+            else if (Linked != null)
             {
-                GD.PushError($"{nameof(Door)}.{nameof(LinkedDoor)} has already been set.");
+                GD.PushError($"{nameof(Door)}.{nameof(Linked)} has already been set.");
                 return;
             }
 
-            LinkedDoor = other;
-            other.LinkDoor(this);
+            Linked = other;
+            other.Link(this);
         }
 
-        public void UnlinkDoor()
+        public void Unlink()
         {
-            LinkedDoor = null;
+            Linked = null;
         }
 
         public IInteraction<Player> GetDefaultInteraction(Player interactor)
@@ -221,5 +216,18 @@ namespace Dose.Core.Scenes
 
             _collisionShape.Disabled = true;
         }
+
+        void IPortal.Link(IPortal other) => Link((Door)other);
+
+        public void Initialize(DoorContext context, DoorArgs args)
+        {
+            _opening = 0;
+            State = DoorState.Closed;
+            Context = context;
+            Location = args.Location;
+            OpenDirection = args.OpenDirection;
+            _locationManager = args.LocationManager;
+        }
+
     }
 }

@@ -1,7 +1,10 @@
+using Dose.Core.Library.Location;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Randomness;
 using Godot;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using static Dose.Core.Library.GodotUtils;
 
@@ -56,12 +59,19 @@ namespace Dose.Core.Scenes
             AddChild(inverted);
         }
 
-        public IDoor SelectRandomDoor()
+        public TPortal SelectRandomPortal<TPortal>() where TPortal : IPortal
         {
-            var doors = GetChildren().OfType<Door>();
+            var portals = GetChildren().OfType<TPortal>();
 
-            return new RandomSelector<Door>(doors).Pick();
+            return new RandomSelector<TPortal>(portals).Pick();
         }
+
+        // public IDoor SelectRandomDoor()
+        // {
+        //     var doors = GetChildren().OfType<Door>();
+
+        //     return new RandomSelector<Door>(doors).Pick();
+        // }
 
         public void Clear(int keepLevels)
         {
@@ -72,9 +82,14 @@ namespace Dose.Core.Scenes
         {
             var doors = GetChildren().OfType<Door>();
 
-            foreach (var door in doors)
+            Clear(doors, keepLevels, previous);
+        }
+
+        void Clear(IEnumerable<IPortal> portals, int keepLevels, Location? previous)
+        {
+            foreach (var portal in portals)
             {
-                var otherLocation = door.LinkedDoor?.Location;
+                var otherLocation = portal.Linked?.Location;
                 
                 if (otherLocation is Location _otherLocation && _otherLocation != previous)
                 {
@@ -82,7 +97,7 @@ namespace Dose.Core.Scenes
 
                     if (keepLevels <= 0)
                     {
-                        door.UnlinkDoor();
+                        portal.Unlink();
                         _otherLocation.QueueFree();
                     }
                 }

@@ -21,7 +21,7 @@ namespace Dose.Core.Library.Locations
 
             GenerateWall(map, startingPoint, CardinalDirection.East);
 
-            new MapDoorEnsurer(map).EnsureAtLeastOne();
+            new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
 
             return map;
         }

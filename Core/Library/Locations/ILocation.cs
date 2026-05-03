@@ -1,3 +1,4 @@
+using Dose.Core.Library.Location;
 using Godot;
 
 namespace Dose.Core.Library.Locations
@@ -5,7 +6,7 @@ namespace Dose.Core.Library.Locations
     public interface ILocation
     {
         public Map? Map { get; }
-        IDoor SelectRandomDoor();
+        TPortal SelectRandomPortal<TPortal>() where TPortal : IPortal;
         void Clear(int keepLevels);
         public ClockDirection DoorsClockDirection { get; }
     }

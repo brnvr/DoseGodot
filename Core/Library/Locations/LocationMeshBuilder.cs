@@ -12,19 +12,15 @@ namespace Dose.Core.Library.Locations
         IBuildableLocation location,
         Mesh wallMesh,
         Mesh doorwayMesh,
-        Mesh stairsUpMesh,
-        Mesh stairsDownMesh,
         int blockSize,
         string? meshInstanceName = null
     ) : LocationBuilder(location)
     {
         readonly SurfaceTool _surfaceTool = new();
-        readonly FrozenDictionary<MapCellType, Mesh> _meshMap = new Dictionary<MapCellType, Mesh>
+        readonly FrozenDictionary<MapCellType, Mesh?> _meshMap = new Dictionary<MapCellType, Mesh?>
         {
             { MapCellType.Solid, wallMesh },
-            { MapCellType.Doorway, doorwayMesh },
-            { MapCellType.Upstairs, stairsUpMesh },
-            { MapCellType.Downstairs, stairsDownMesh }
+            { MapCellType.Doorway, doorwayMesh }
         }.ToFrozenDictionary();
 
         public int BlockSize { get; } = blockSize;
@@ -84,7 +80,6 @@ namespace Dose.Core.Library.Locations
 
             if (mesh == null)
             {
-                GD.PushWarning($"Found no mesh mapping for wall type {wall.Type}");
                 return;
             }
 

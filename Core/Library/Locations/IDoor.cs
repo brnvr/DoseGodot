@@ -1,14 +1,12 @@
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Common;
+using Dose.Core.Library.Location;
 using Godot;
 
 namespace Dose.Core.Library.Locations
 {
-    public interface IDoor
+    public interface IDoor : IPortal
     {
-        ILocation? Location { get; }
-        IDoor? LinkedDoor { get; }
         ClockDirection OpenDirection { get; }
-        void LinkDoor(IDoor other);
-        void Initialize(DoorContext context, ILocationManager locationManager, ILocation location, ClockDirection openDirection);
     }
 }

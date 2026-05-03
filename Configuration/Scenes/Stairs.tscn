@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://bqqwwhgjo4eck"]
+
+[ext_resource type="PackedScene" uid="uid://blqpjq6uxfgy" path="res://Media/3DAssets/Environment/Wall.glb" id="1_utou2"]
+[ext_resource type="Script" uid="uid://hx4tf1nfvk4x" path="res://Core/Scenes/Stairs.cs" id="2_t3dlj"]
+
+[node name="Stairs" instance=ExtResource("1_utou2")]
+script = ExtResource("2_t3dlj")
+
+[node name="Wall" parent="." index="0"]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
