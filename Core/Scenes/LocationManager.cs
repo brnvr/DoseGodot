@@ -18,7 +18,8 @@ namespace Dose.Core.Scenes
 		const int BLOCK_SIZE = 4;
 		const string ROOM_CATEGORY = "room";
 		const string CORRIDOR_CATEGORY = "corridor";
-		const string CORRIDOR_WITH_STAIRS_ENSURED_CATEGORY = "corridorWithStairsEnsured";
+		const string CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY = "corridorWithStairsUpEnsured";
+		const string CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY = "corridorWithStairsDownEnsured";
 
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
@@ -54,7 +55,8 @@ namespace Dose.Core.Scenes
 			{
 				{ ROOM_CATEGORY, CreateRoom },
 				{ CORRIDOR_CATEGORY, direction => CreateCorridor(direction) },
-				{ CORRIDOR_WITH_STAIRS_ENSURED_CATEGORY, direction => CreateCorridor(direction, true) }
+				{ CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsUp: true) },
+				{ CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsDown: true) }
 			}).Initialize();
 
 			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
@@ -69,8 +71,15 @@ namespace Dose.Core.Scenes
 			if (_currentLocation == null)
 				return ROOM_CATEGORY;
 
-			if (portal is IStairs)
-				return CORRIDOR_WITH_STAIRS_ENSURED_CATEGORY;
+			if (portal is IStairs stairs)
+			{
+				if (stairs.Direction == StairsDirection.Up)
+					return CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY;
+
+				if (stairs.Direction == StairsDirection.Down)
+					return CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY;
+			}
+				
 
 			if (_currentLocation is not Location currentLocation)
 				return ROOM_CATEGORY;
@@ -127,7 +136,7 @@ namespace Dose.Core.Scenes
 			return location;
 		}
 
-		Location? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairs = false)
+		Location? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairsUp = false, bool shouldEnsureStairsDown = false)
 		{
 			if (ControlPlane == null)
             {
@@ -135,7 +144,7 @@ namespace Dose.Core.Scenes
                 return null;
             }
 
-			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairs);
+			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairsUp, shouldEnsureStairsDown);
 
 			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, LocationType.Corridor);
 
@@ -260,7 +269,7 @@ namespace Dose.Core.Scenes
 			);
         }
 
-        static CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairs)
+        static CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairsUp, bool shouldEnsureStairsDown)
         {
             return new CorridorMapGenerator(
 				horizontalCells: 500,
@@ -271,8 +280,24 @@ namespace Dose.Core.Scenes
 				probabilityToBuildStairs: new Probability(0.1)
 			)
 			{
-				ShouldEnsureStairs = shouldEnsureStairs
+				ShouldEnsureStairsUp = shouldEnsureStairsUp,
+				ShouldEnsureStairsDown = shouldEnsureStairsDown
 			};
+        }
+
+        public bool PortalPredicate(IPortal portal, IPortal linkedPortal)
+        {
+            if (portal is not IStairs stairs)
+			{
+				return true;
+			}
+
+			if (linkedPortal is not IStairs linkedStairs)
+			{
+				return true;
+			}
+
+			return stairs.Direction != linkedStairs.Direction;
         }
     }
 }

@@ -7,12 +7,12 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Stairs : Node3D, IActor<Player>, IStairs, IInitializableActor<StairsContext, StairsArgs>
+    public abstract partial class Stairs : Node3D, IActor<Player>, IStairs, IInitializableActor<StairsContext, StairsArgs>
     {
+        public abstract StairsDirection Direction { get; }   
         public IStairs? Linked { get; private set; }
         public ILocation? Location { get; private set; }
         public StairsContext? Context { get; private set; }
-        public StairsDirection? Direction { get; private set; }
 
         IActorContext? IActor.Context => Context;
 

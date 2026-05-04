@@ -15,7 +15,7 @@ namespace Dose.Core.Library.Control
     
                 if (location != null)
                 {
-                    var other = location.SelectRandomPortal<TPortal>();
+                    var other = location.SelectRandomPortal<TPortal>(linkedPortal => LocationManager.PortalPredicate(portal, linkedPortal));
                 
                     if (other != null)
                     {

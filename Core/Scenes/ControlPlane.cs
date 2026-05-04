@@ -1,4 +1,5 @@
 using Dose.Core.Library.Control;
+using Dose.Core.Library.Locations;
 using Dose.Core.Library.Quests;
 using Godot;
 

@@ -59,9 +59,14 @@ namespace Dose.Core.Scenes
             AddChild(inverted);
         }
 
-        public TPortal SelectRandomPortal<TPortal>() where TPortal : IPortal
+        public TPortal SelectRandomPortal<TPortal>(Func<TPortal, bool>? predicate = null) where TPortal : IPortal
         {
             var portals = GetChildren().OfType<TPortal>();
+
+            if (predicate != null)
+            {
+                portals = portals.Where(predicate);
+            }
 
             return new RandomSelector<TPortal>(portals).Pick();
         }

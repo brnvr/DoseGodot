@@ -27,7 +27,8 @@ namespace Dose.Core.Library.Locations
 
         public int HorizontalCells { get; } = horizontalCells;
         public int VerticalCells { get; } = verticalCells;
-        public bool ShouldEnsureStairs { get; init; } = false;
+        public bool ShouldEnsureStairsUp { get; init; } = false;
+        public bool ShouldEnsureStairsDown { get; init; } = false;
         public Probability ProbabilityToExtendCorridor { get; } = probabilityToExtendCorridor;
         public Probability ProbabilityToBifurcate { get; } = probabilityToBifurcate;
         public Probability ProbabilityToBuildDoors { get; } = probabilityToBuildDoors;
@@ -42,9 +43,14 @@ namespace Dose.Core.Library.Locations
 
             new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
 
-            if (ShouldEnsureStairs)
+            if (ShouldEnsureStairsUp)
             {
-                new MapEnsurer(map, MapCellType.Downstairs, MapCellType.Upstairs).EnsureAtLeastOne();
+                new MapEnsurer(map, MapCellType.Upstairs).EnsureAtLeastOne();
+            }
+
+            if (ShouldEnsureStairsDown)
+            {
+                new MapEnsurer(map, MapCellType.Downstairs).EnsureAtLeastOne();
             }
 
             return map;
