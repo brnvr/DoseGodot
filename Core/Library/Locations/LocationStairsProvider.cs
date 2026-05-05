@@ -8,10 +8,12 @@ namespace Dose.Core.Library.Locations
         IBuildableLocation location,
         PackedScene stairsScene,
         int blockSize,
+        Vector2 offset,
         TArgs initializationArgs
     ) : LocationSceneProvider<TInitializable, StairsContext, TArgs>(location, stairsScene, initializationArgs)
         where TInitializable : IInitializableActor<StairsContext, TArgs>
     {
+        public Vector2 Offset { get; } = offset;
         public int BlockSize { get; } = blockSize;
 
         protected override StairsContext BuildContext()
@@ -28,7 +30,7 @@ namespace Dose.Core.Library.Locations
 
             var nextDirection = NextDirection(direction, ClockDirection.Clockwise);
 
-            var pointDir = MoveTo(point, direction, .5f);
+            var pointDir = MoveTo(MoveTo(point, direction, Offset.Y), nextDirection, Offset.X);
 
             return new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
         }

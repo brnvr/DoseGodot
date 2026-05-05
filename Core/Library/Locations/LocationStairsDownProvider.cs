@@ -8,8 +8,9 @@ namespace Dose.Core.Library.Locations
         IBuildableLocation location,
         PackedScene stairsScene,
         int blockSize,
+        Vector2 offset,
         TArgs initializationArgs
-    ) : LocationStairsProvider<TInitializable, TArgs>(location, stairsScene, blockSize, initializationArgs)
+    ) : LocationStairsProvider<TInitializable, TArgs>(location, stairsScene, blockSize, offset, initializationArgs)
         where TInitializable : IInitializableActor<StairsContext, TArgs>
     {
         protected override bool WallPredicate(MapCellWall wall)

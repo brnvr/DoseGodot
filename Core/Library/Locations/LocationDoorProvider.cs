@@ -10,11 +10,13 @@ namespace Dose.Core.Library.Locations
         IBuildableLocation location,
         PackedScene doorScene,
         int blockSize,
+        Vector2 offset,
         TArgs initializationArgs,
         DoorNumberController? doorNumberController
     ) : LocationSceneProvider<TInitializable, DoorContext, TArgs>(location, doorScene, initializationArgs)
         where TInitializable : IInitializableActor<DoorContext, TArgs>
     {
+        public Vector2 Offset { get; } = offset;
         public int BlockSize { get; } = blockSize;
         public DoorNumberController? DoorNumberController { get; } = doorNumberController;
 
@@ -34,7 +36,7 @@ namespace Dose.Core.Library.Locations
             }
 
             var nextDirection = NextDirection(direction, Location.DoorsClockDirection);
-            var pointDir = MoveTo(MoveTo(point, direction, 0.5f), nextDirection, -0.11275f);
+            var pointDir = MoveTo(MoveTo(point, direction, Offset.Y), nextDirection, Offset.X);
 
             return new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
         }

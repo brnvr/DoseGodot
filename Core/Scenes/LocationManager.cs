@@ -178,12 +178,15 @@ namespace Dose.Core.Scenes
 				Location = location
 			};
 
+			var doorOffset = new Vector2(-0.11275f, .5f);
+			var stairsOffset = new Vector2(0, .5f);
+
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorArgs, doorNumberController),
-				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, stairsArgs),
-				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, stairsArgs),
+				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorOffset, doorArgs, doorNumberController),
+				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, stairsOffset, stairsArgs),
+				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, stairsOffset, stairsArgs),
 			};
 
 			foreach (var builder in builders)
