@@ -24,7 +24,7 @@ namespace Dose.Core.Library.Locations
         {
             return new DoorContext
             {
-                Number = DoorNumberController?.PullNumber()
+                Number = DoorNumberController?.PullNumber(237)
             };
         }
 
@@ -35,7 +35,7 @@ namespace Dose.Core.Library.Locations
                 return Vector3.Zero;
             }
 
-            var nextDirection = NextDirection(direction, Location.DoorsClockDirection);
+            var nextDirection = NextDirection(direction, Location.DoorClockDirection);
             var pointDir = MoveTo(MoveTo(point, direction, Offset.Y), nextDirection, Offset.X);
 
             return new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
@@ -43,7 +43,7 @@ namespace Dose.Core.Library.Locations
 
         protected override float GetRotation(Vector2I point, CardinalDirection direction)
         {
-            var nextDirection = NextDirection(direction, Location.DoorsClockDirection);
+            var nextDirection = NextDirection(direction, Location.DoorClockDirection);
 
             return DirectionToRadians(nextDirection);
         }
@@ -69,7 +69,7 @@ namespace Dose.Core.Library.Locations
             }
             
 
-            if (door.Context.Number == null || !DoorNumberController.PredefinedDoors.TryGetValue((int)door.Context.Number, out IDoor? linkedDoor))
+            if (door.Context?.Number == null || !DoorNumberController.GetPredefinedDoors().TryGetValue((int)door.Context.Number, out IDoor? linkedDoor))
             {
                 return node;
             }

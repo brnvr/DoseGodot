@@ -8,6 +8,6 @@ namespace Dose.Core.Library.Locations
     {
         TPortal SelectRandomPortal<TPortal>(Func<TPortal, bool>? predicate = null) where TPortal : IPortal;
         void Clear(int keepLevels);
-        ClockDirection DoorsClockDirection { get; }
+        ClockDirection DoorClockDirection { get; }
     }
 }

@@ -19,7 +19,7 @@ namespace Dose.Core.Scenes
 
         public abstract LocationType? Type { get; }
         public abstract int BlockSize { get; }
-        public abstract ClockDirection DoorsClockDirection { get; }
+        public abstract ClockDirection DoorClockDirection { get; }
 
         public void CreateFlippedBack(string nodeName="WallMeshInstance")
         {

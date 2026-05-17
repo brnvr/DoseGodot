@@ -43,6 +43,14 @@ namespace Dose.Core.Scenes
         {
             CurrentLocation?.Clear(-1);
 			_locationQueue?.Free();
+
+			if (ControlPlane?.DoorNumberController != null)
+			{
+				foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
+				{
+					customRoomCtx.Location.Clear(-1);
+				}
+			}
         }
 
 		public LocationManager Initialize(IControlPlane controlPlane, Player player, ActorPool<ItemContext> itemPool, ActorPool<NpcContext> npcPool)
@@ -60,6 +68,20 @@ namespace Dose.Core.Scenes
 			}).Initialize();
 
 			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
+
+			if (ControlPlane?.DoorNumberController != null)
+			{
+				foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
+				{
+					if (customRoomCtx.Location is not CustomRoom customRoom)
+					{
+						GD.PushWarning($"{customRoomCtx.Location} is not of type {nameof(CustomRoom)} and will not be initialized.");
+						continue;
+					}
+
+					customRoom.Initialize(BLOCK_SIZE, this);
+				}
+			}
 
 			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvailableContexts.ToList()[0]));
 
@@ -101,7 +123,7 @@ namespace Dose.Core.Scenes
 		public ILocation? GoToNextLocation(IPortal portal)
 		{
 			var category = GetNextLocationCategory(portal);
-			var clockDirection = _currentLocation is null ? ClockDirection.Clockwise : ClockOpposite(_currentLocation.DoorsClockDirection);
+			var clockDirection = _currentLocation is null ? ClockDirection.Clockwise : ClockOpposite(_currentLocation.DoorClockDirection);
 
 			if (_locationQueue == null)
 			{
@@ -170,7 +192,7 @@ namespace Dose.Core.Scenes
 			{
 				Location = location,
 				LocationManager = this,
-				OpenDirection = ClockOpposite(location.DoorsClockDirection)
+				OpenDirection = ClockOpposite(location.DoorClockDirection)
 			};
 
 			var stairsArgs = new StairsArgs
@@ -277,9 +299,9 @@ namespace Dose.Core.Scenes
             return new CorridorMapGenerator(
 				horizontalCells: 500,
 				verticalCells: 500,
-				probabilityToExtendCorridor: new Probability(0.7),
-				probabilityToBifurcate: new Probability(0.25),
-				probabilityToBuildDoors: new Probability(0.5),
+				probabilityToExtendCorridor: new Probability(0.5),
+				probabilityToBifurcate: new Probability(0.15),
+				probabilityToBuildDoors: new Probability(0.4),
 				probabilityToBuildStairs: new Probability(0.1)
 			)
 			{
