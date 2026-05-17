@@ -49,12 +49,12 @@ namespace Dose.Core.Library.Locations
 
         protected abstract float GetRotation(Vector2I point, CardinalDirection direction);
 
-        void OnBuildWall(Vector2I point, CardinalDirection direction)
+        protected virtual Node3D? OnBuildWall(Vector2I point, CardinalDirection direction)
         {
             if (Location.Map == null)
             {
                 GD.PushError($"{nameof(Location)} doesn't have a defined ${nameof(Location.Map)}.");
-                return;
+                return default;
             }
 
             var node = (Node3D)Scene.Instantiate();
@@ -67,10 +67,12 @@ namespace Dose.Core.Library.Locations
             if (node is not TInitializable initializable)
             {
                 GD.PushWarning($"Instance of {Scene.ResourcePath} is not of type {nameof(TInitializable)}. The node will not be initialized.");
-                return;
+                return default;
             }
 
             initializable.Initialize(BuildContext(), InitializationArgs);
+
+            return node;
         }
     }
 }

@@ -7,11 +7,15 @@ using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Configuration.Dialogues;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
+using Dose.Core.Library.Locations;
+using Dose.Core.Library.Configuration.Locations;
 
 namespace Dose.Core.Scenes
 {
     public partial class Main : Node3D
 	{
+		readonly CustomRoomPool? _customRoomPool;
+
 		public override void _Ready()
 		{
             var light = new DirectionalLight3D
@@ -55,11 +59,29 @@ namespace Dose.Core.Scenes
 				])
 			).LoadContexts();
 
-			controlPlane.Initialize(ui, player, locationManager);
+			var customRoomPool = new CustomRoomPool(
+				configPath: "Configuration/Locations/CustomRooms",
+				configConverter: new CustomRoomConfigConverter(),
+				contextBuilder: new CustomRoomContextBuilder()
+			).LoadContexts();
+
+			controlPlane.Initialize(ui, player, locationManager, customRoomPool);
 			locationManager.Initialize(controlPlane, player, itemPool, npcPool);
 			player.Initialize(controlPlane);
 
 			AudioCollector.InitializeESpeak();
 		}
+
+        // public override void _ExitTree()
+        // {
+		// 	var controlPlane = GetNode<ControlPlane>("ControlPlane");
+
+		// 	if (controlPlane.DoorNumberController == null) return;
+
+		// 	foreach (var kvp in controlPlane.DoorNumberController.PredefinedDoors)
+		// 	{
+		// 		kvp.Value.Location
+		// 	}
+        // }
 	}
 }

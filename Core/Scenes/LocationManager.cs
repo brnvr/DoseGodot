@@ -24,7 +24,7 @@ namespace Dose.Core.Scenes
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
-		readonly static PackedScene _locationScene = GD.Load<PackedScene>("res://Configuration/Scenes/Location.tscn");
+		readonly static PackedScene _buildableLocationScne = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
 		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
 		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
 
@@ -81,10 +81,10 @@ namespace Dose.Core.Scenes
 			}
 				
 
-			if (_currentLocation is not Location currentLocation)
+			if (_currentLocation is not BuildableLocation currentLocation)
 				return ROOM_CATEGORY;
 
-			if (currentLocation.Type == LocationType.Corridor)
+			if (currentLocation.Type == Location.LocationType.Corridor)
 				return ROOM_CATEGORY;
 
 			var categories = new WeightedList<string>
@@ -116,7 +116,7 @@ namespace Dose.Core.Scenes
 			return CurrentLocation;
 		}
 
-		Location? CreateRoom(ClockDirection clockDirection)
+		BuildableLocation? CreateRoom(ClockDirection clockDirection)
 		{
 			if (ControlPlane == null)
             {
@@ -126,7 +126,7 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateRoomMap();
 
-			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, LocationType.Room);
+			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, Location.LocationType.Room);
 
 			BuildLocation(location);
 			PopulateLocation(location);
@@ -136,7 +136,7 @@ namespace Dose.Core.Scenes
 			return location;
 		}
 
-		Location? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairsUp = false, bool shouldEnsureStairsDown = false)
+		BuildableLocation? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairsUp = false, bool shouldEnsureStairsDown = false)
 		{
 			if (ControlPlane == null)
             {
@@ -146,7 +146,7 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairsUp, shouldEnsureStairsDown);
 
-			var location = _locationScene.Instantiate<Location>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, LocationType.Corridor);
+			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, Location.LocationType.Corridor);
 
 			BuildLocation(location);
 			PopulateLocation(location);
@@ -156,7 +156,7 @@ namespace Dose.Core.Scenes
 			return location;
 		}
 
-		void BuildLocation(Location location)
+		void BuildLocation(BuildableLocation location)
 		{
 			if (ControlPlane == null)
             {
@@ -164,7 +164,7 @@ namespace Dose.Core.Scenes
 				return;
             }
 
-			var doorNumberController = location.Type == LocationType.Corridor ? ControlPlane.DoorNumberController : null;
+			var doorNumberController = location.Type == Location.LocationType.Corridor ? ControlPlane.DoorNumberController : null;
 
 			var doorArgs = new DoorArgs
 			{
@@ -195,7 +195,7 @@ namespace Dose.Core.Scenes
 			}
 		}
 
-		void PopulateLocation(Location location)
+		void PopulateLocation(BuildableLocation location)
 		{
 			if (_itemPool == null)
 			{

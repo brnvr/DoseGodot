@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dose.Core.Library.Locations;
 using Dose.Core.Library.Randomness;
 using Godot;
 
@@ -10,14 +11,16 @@ namespace Dose.Core.Library.Control
     {
         const int DOOR_COUNT = 999;
 
+        IEnumerable<int> _availableNumbers = [];
         bool _isPlayerRoomNumberAvailable = true;
 
         public int PlayerRoomNumber { get; private set; }
-        IEnumerable<int> _availableNumbers = [];
+        public Dictionary<int, IDoor> PredefinedDoors { get; }
 
-        public DoorNumberController(int? playerRoomNumber)
+        public DoorNumberController(int? playerRoomNumber, Dictionary<int, IDoor> predefinedDoors)
         {
             Reset(playerRoomNumber);
+            PredefinedDoors = predefinedDoors;
         }
 
         public void Reset(int? playerRoomNumber)
@@ -41,7 +44,7 @@ namespace Dose.Core.Library.Control
             _availableNumbers = Enumerable.Range(1, DOOR_COUNT).Except([PlayerRoomNumber]);
         }
 
-        public int PopPlayerRoomNumber()
+        public int PullPlayerRoomNumber()
         {
             if (!_isPlayerRoomNumberAvailable)
             {
@@ -54,13 +57,13 @@ namespace Dose.Core.Library.Control
             return PlayerRoomNumber;
         }
 
-        public int PopRandomNumber()
+        public int PullNumber()
         {
             if (!_availableNumbers.Any())
             {
                 if (_isPlayerRoomNumberAvailable)
                 {
-                    return PopPlayerRoomNumber();
+                    return PullPlayerRoomNumber();
                 }
 
                 GD.PushError("No available door numbers.");

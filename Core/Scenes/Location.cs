@@ -3,7 +3,6 @@ using Dose.Core.Library.Locations;
 using Dose.Core.Library.Randomness;
 using Godot;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using static Dose.Core.Library.GodotUtils;
@@ -11,35 +10,16 @@ using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Location : Node3D, IBuildableLocation
+    public abstract partial class Location : Node3D, ILocation
     {
-        public Map? Map { get; private set; }
-        public LocationType? Type { get; private set; }
-        public int BlockSize { get; private set; }
-        public IMapGenerator? MapGenerator { get; private set; }
-        public ClockDirection DoorsClockDirection { get; private set; } = ClockDirection.Clockwise;
-
-        public void OnBuild(Node node)
+        public enum LocationType
         {
-            CallDeferred(Node.MethodName.AddChild, node);
+            Room, Corridor
         }
 
-        public Location Initialize(IMapGenerator mapGenerator, int blockSize, ClockDirection doorsClockDirection, LocationType type)
-        {
-            Type = type;
-            MapGenerator = mapGenerator;
-            BlockSize = blockSize;
-            DoorsClockDirection = doorsClockDirection;
-            
-            if (Map != null)
-            {
-                throw new Exception("Location has already been initiated");
-            }
-
-            Map = MapGenerator.GenerateMap();
-
-            return this;
-        }
+        public abstract LocationType? Type { get; }
+        public abstract int BlockSize { get; }
+        public abstract ClockDirection DoorsClockDirection { get; }
 
         public void CreateFlippedBack(string nodeName="WallMeshInstance")
         {
@@ -70,13 +50,6 @@ namespace Dose.Core.Scenes
 
             return new RandomSelector<TPortal>(portals).Pick();
         }
-
-        // public IDoor SelectRandomDoor()
-        // {
-        //     var doors = GetChildren().OfType<Door>();
-
-        //     return new RandomSelector<Door>(doors).Pick();
-        // }
 
         public void Clear(int keepLevels)
         {

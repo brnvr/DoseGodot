@@ -9,7 +9,7 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public class ItemContextBuilder(Dictionary<string, IActionPerformer> actionPerformerMap) : IActorContextBuilder
+    public class ItemContextBuilder(Dictionary<string, IActionPerformer> actionPerformerMap) : IContextBuilder<IActorContext>
     {
         public Dictionary<string, IActionPerformer> ActionPerformerMap { get; } = actionPerformerMap;
 
@@ -36,7 +36,7 @@ namespace Dose.Core.Library.Actors
             };
         }
 
-        IActorContext IActorContextBuilder.BuildContext(YamlConfig config)
+        IActorContext IContextBuilder<IActorContext>.BuildContext(YamlConfig config)
         {
             return BuildContext((ItemConfig)config);
         }

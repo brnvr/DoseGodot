@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Configuration.Dialogues;
@@ -10,7 +11,7 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IActorContextBuilder
+    public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IContextBuilder<IActorContext>
     {
         public DialogueConfigConverter DialogueConfigConverter = new(actions.ToDictionary(a => a.Key, a => a.DialogueNodeConverter));
         public DialogueBuilder DialogueBuilder = new(
@@ -38,7 +39,7 @@ namespace Dose.Core.Library.Actors
             };
         }
 
-        IActorContext IActorContextBuilder.BuildContext(YamlConfig config)
+        IActorContext IContextBuilder<IActorContext>.BuildContext(YamlConfig config)
         {
             return BuildContext((NpcConfig)config);
         }

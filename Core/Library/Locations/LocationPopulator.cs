@@ -9,12 +9,12 @@ using Godot;
 namespace Dose.Core.Library.Locations
 {
     public abstract class LocationPopulator(
-        ILocation location,
+        IBuildableLocation location,
         Probability probabilityPopulate,
         int blockSize
     )
     {
-        public ILocation Location { get; } = location;
+        public IBuildableLocation Location { get; } = location;
         public Probability ProbabilityPopulate { get; } = probabilityPopulate;
         public int BlockSize { get; } = blockSize;
 

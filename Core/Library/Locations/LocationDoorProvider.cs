@@ -24,7 +24,7 @@ namespace Dose.Core.Library.Locations
         {
             return new DoorContext
             {
-                Number = DoorNumberController?.PopRandomNumber()
+                Number = DoorNumberController?.PullNumber()
             };
         }
 
@@ -51,6 +51,32 @@ namespace Dose.Core.Library.Locations
         protected override bool WallPredicate(MapCellWall wall)
         {
             return wall.Type == MapCellType.Doorway;
+        }
+
+        protected override Node3D? OnBuildWall(Vector2I point, CardinalDirection direction)
+        {
+            var node = base.OnBuildWall(point, direction);
+
+            if (DoorNumberController == null)
+            {
+                return node;
+            }
+
+            if (node is not IDoor door)
+            {
+                GD.PushWarning($"{nameof(OnBuildWall)} didn't return an object of type {nameof(IDoor)}. Skipping door linking...");
+                return node;
+            }
+            
+
+            if (door.Context.Number == null || !DoorNumberController.PredefinedDoors.TryGetValue((int)door.Context.Number, out IDoor? linkedDoor))
+            {
+                return node;
+            }
+            
+            door.Link(linkedDoor);
+
+            return node;
         }
     }
 }

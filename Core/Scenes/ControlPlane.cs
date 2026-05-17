@@ -1,6 +1,6 @@
+using System.Linq;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.Locations;
-using Dose.Core.Library.Quests;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -16,14 +16,15 @@ namespace Dose.Core.Scenes
         public QuestBookController? QuestBookController { get; private set; }
 
 
-        public ControlPlane Initialize(UI ui, Player player, LocationManager locationManager)
+        public ControlPlane Initialize(UI ui, Player player, LocationManager locationManager, CustomRoomPool customRoomPool)
         {
             LocationController = new LocationController(locationManager);
             DialogueController = new DialogueController(ui);
             InventoryController = new InventoryController(player.Inventory, ui, ui);
             InteractivityController = new InteractivityController(ui);
             PauseController = new PauseController(ui);
-            DoorNumberController = new DoorNumberController(13);
+            DoorNumberController = new DoorNumberController(13, customRoomPool.AvailableContexts
+                .ToDictionary(ctx => ctx.RoomNumber, ctx => ctx.Door));
             QuestBookController = new QuestBookController(player.QuestBook, ui);
 
             if (PauseController != null)

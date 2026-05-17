@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Godot;
 using YamlDotNet.Serialization;
@@ -11,7 +12,7 @@ namespace Dose.Core.Library.Actors
         string configPath,
         PackedScene actorScene,
         YamlConfigConverter configConverter,
-        IActorContextBuilder contextBuilder
+        IContextBuilder<IActorContext> contextBuilder
     ) where TActorContext : IActorContext
     {
         readonly List<TActorContext> _availableContexts = [];
@@ -19,7 +20,7 @@ namespace Dose.Core.Library.Actors
         public PackedScene ActorScene { get; } = actorScene;
         public string ConfigPath { get; } = configPath;
         public YamlConfigConverter ConfigConverter { get; } = configConverter;
-        public IActorContextBuilder ContextBuilder { get; } = contextBuilder;
+        public IContextBuilder<IActorContext> ContextBuilder { get; } = contextBuilder;
         public List<TActorContext> AvailableContexts => [.._availableContexts];
 
         public ActorPool<TActorContext> LoadContexts()
