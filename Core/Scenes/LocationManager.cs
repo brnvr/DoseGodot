@@ -112,10 +112,10 @@ namespace Dose.Core.Scenes
 			return selector.Pick();
 		}
 
-		public ILocation? GoToNextLocation(IPortal portal)
+		public ILocation? BuildNextLocation(IPortal portal)
 		{
 			var category = GetNextLocationCategory(portal);
-			var clockDirection = _currentLocation is null ? ClockDirection.Clockwise : ClockOpposite(_currentLocation.DoorClockDirection);
+			var clockDirection = _currentLocation is IBuildableLocation buildable? ClockOpposite(buildable.DoorClockDirection) : ClockDirection.Clockwise;
 
 			if (_locationQueue == null)
 			{

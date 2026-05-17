@@ -9,13 +9,12 @@ namespace Dose.Core.Scenes
     public partial class BuildableLocation : Location, IBuildableLocation
     {
         LocationType? _type;
-        ClockDirection _doorClockDirection = ClockDirection.Clockwise;
 
         public Map? Map { get; private set; }
         public override LocationType? Type { get => _type; }
         public int BlockSize { get; private set; }
         public IMapGenerator? MapGenerator { get; private set; }
-        public override ClockDirection DoorClockDirection { get => _doorClockDirection; }
+        public ClockDirection DoorClockDirection { get; private set; }
 
         public void OnBuild(Node node)
         {
@@ -27,7 +26,7 @@ namespace Dose.Core.Scenes
             _type = type;
             MapGenerator = mapGenerator;
             BlockSize = blockSize;
-            _doorClockDirection = doorClockDirection;
+            DoorClockDirection = doorClockDirection;
             
             if (Map != null)
             {

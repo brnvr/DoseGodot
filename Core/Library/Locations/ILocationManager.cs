@@ -6,7 +6,7 @@ namespace Dose.Core.Library.Locations
     public interface ILocationManager
     {
         ILocation? CurrentLocation { get; set; }
-        ILocation? GoToNextLocation(IPortal portal);
+        ILocation? BuildNextLocation(IPortal portal);
         bool PortalPredicate(IPortal portal, IPortal linkedPortal);
     }
 }

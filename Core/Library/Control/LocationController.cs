@@ -11,7 +11,7 @@ namespace Dose.Core.Library.Control
         {
             if (portal.Linked is null)
             {
-                var location = LocationManager.GoToNextLocation(portal);
+                var location = LocationManager.BuildNextLocation(portal);
     
                 if (location != null)
                 {

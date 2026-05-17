@@ -11,7 +11,6 @@ namespace Dose.Core.Scenes
         ClockDirection _doorClockDirection = ClockDirection.Clockwise;
 
         public override LocationType? Type { get => LocationType.Room; }
-        public override ClockDirection DoorClockDirection { get => _doorClockDirection; }
 
         public CustomRoom Initialize(ILocationManager locationManager)
         {
@@ -26,7 +25,7 @@ namespace Dose.Core.Scenes
                 door.Initialize(new DoorContext(), new DoorArgs
                 {
                     Location = this,
-                    OpenDirection = DoorClockDirection,
+                    OpenDirection = ClockDirection.Clockwise,
                     LocationManager = locationManager
                 });
             }
