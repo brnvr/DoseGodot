@@ -9,6 +9,7 @@ using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Configuration.Locations;
+using Dose.Core.Loaders;
 
 namespace Dose.Core.Scenes
 {
@@ -65,7 +66,7 @@ namespace Dose.Core.Scenes
 				contextBuilder: new CustomRoomContextBuilder()
 			).LoadContexts();
 
-			controlPlane.Initialize(ui, player, locationManager, customRoomPool);
+			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader());
 			locationManager.Initialize(controlPlane, player, itemPool, npcPool);
 			player.Initialize(controlPlane);
 

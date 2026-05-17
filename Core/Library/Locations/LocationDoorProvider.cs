@@ -12,13 +12,15 @@ namespace Dose.Core.Library.Locations
         int blockSize,
         Vector2 offset,
         TArgs initializationArgs,
-        DoorNumberController? doorNumberController
+        DoorNumberController? doorNumberController,
+        CustomRoomController? customRoomController
     ) : LocationSceneProvider<TInitializable, DoorContext, TArgs>(location, doorScene, initializationArgs)
         where TInitializable : IInitializableActor<DoorContext, TArgs>
     {
         public Vector2 Offset { get; } = offset;
         public int BlockSize { get; } = blockSize;
         public DoorNumberController? DoorNumberController { get; } = doorNumberController;
+        public CustomRoomController? CustomRoomController { get; } = customRoomController;
 
         protected override DoorContext BuildContext()
         {
@@ -68,11 +70,23 @@ namespace Dose.Core.Library.Locations
                 return node;
             }
             
-
-            if (door.Context?.Number == null || !DoorNumberController.GetPredefinedDoors().TryGetValue((int)door.Context.Number, out IDoor? linkedDoor))
+            if (CustomRoomController == null)
             {
                 return node;
             }
+
+            if (door.Context?.Number == null || !CustomRoomController.TryLoadCustomRoom((int)door.Context.Number, out ILocation? customRoom))
+            {
+                return node;
+            }
+
+            if (customRoom is null)
+            {
+                GD.PushWarning($"{nameof(customRoom)} was not loaded correctly and will not be accessible.");
+                return node;
+            }
+
+            var linkedDoor = customRoom.SelectRandomPortal<IDoor>();
             
             door.Link(linkedDoor);
 

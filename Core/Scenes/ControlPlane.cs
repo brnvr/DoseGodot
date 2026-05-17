@@ -1,6 +1,6 @@
-using System.Linq;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.Locations;
+using Dose.Core.Loaders;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -14,17 +14,25 @@ namespace Dose.Core.Scenes
         public PauseController? PauseController { get; private set; }
         public DoorNumberController? DoorNumberController { get; private set; }
         public QuestBookController? QuestBookController { get; private set; }
+        public CustomRoomController? CustomRoomController { get; private set; }
 
 
-        public ControlPlane Initialize(UI ui, Player player, LocationManager locationManager, CustomRoomPool customRoomPool)
+        public ControlPlane Initialize(
+            UI ui,
+            Player player,
+            LocationManager locationManager,
+            CustomRoomPool customRoomPool,
+            CustomRoomLoader customRoomLoader
+        )
         {
             LocationController = new LocationController(locationManager);
             DialogueController = new DialogueController(ui);
             InventoryController = new InventoryController(player.Inventory, ui, ui);
             InteractivityController = new InteractivityController(ui);
             PauseController = new PauseController(ui);
-            DoorNumberController = new DoorNumberController(13, customRoomPool);
+            DoorNumberController = new DoorNumberController(13);
             QuestBookController = new QuestBookController(player.QuestBook, ui);
+            CustomRoomController = new CustomRoomController(customRoomPool, customRoomLoader, locationManager, new LocationLoadRegistry());
 
             if (PauseController != null)
             {
@@ -64,5 +72,9 @@ namespace Dose.Core.Scenes
             base._Process(delta);
         }
 
+        public override void _ExitTree()
+        {
+            CustomRoomController?.LoadRegistry.Clear();
+        }
     }
 }

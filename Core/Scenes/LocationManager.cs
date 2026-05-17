@@ -43,14 +43,6 @@ namespace Dose.Core.Scenes
         {
             CurrentLocation?.Clear(-1);
 			_locationQueue?.Free();
-
-			if (ControlPlane?.DoorNumberController != null)
-			{
-				foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
-				{
-					customRoomCtx.Location.Clear(-1);
-				}
-			}
         }
 
 		public LocationManager Initialize(IControlPlane controlPlane, Player player, ActorPool<ItemContext> itemPool, ActorPool<NpcContext> npcPool)
@@ -69,19 +61,19 @@ namespace Dose.Core.Scenes
 
 			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
 
-			if (ControlPlane?.DoorNumberController != null)
-			{
-				foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
-				{
-					if (customRoomCtx.Location is not CustomRoom customRoom)
-					{
-						GD.PushWarning($"{customRoomCtx.Location} is not of type {nameof(CustomRoom)} and will not be initialized.");
-						continue;
-					}
+			// if (ControlPlane?.DoorNumberController != null)
+			// {
+			// 	foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
+			// 	{
+			// 		if (customRoomCtx.Location is not CustomRoom customRoom)
+			// 		{
+			// 			GD.PushWarning($"{customRoomCtx.Location} is not of type {nameof(CustomRoom)} and will not be initialized.");
+			// 			continue;
+			// 		}
 
-					customRoom.Initialize(BLOCK_SIZE, this);
-				}
-			}
+			// 		customRoom.Initialize(BLOCK_SIZE, this);
+			// 	}
+			// }
 
 			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvailableContexts.ToList()[0]));
 
@@ -206,7 +198,7 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorOffset, doorArgs, doorNumberController),
+				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorOffset, doorArgs, doorNumberController, ControlPlane.CustomRoomController),
 				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, stairsOffset, stairsArgs),
 				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, stairsOffset, stairsArgs),
 			};

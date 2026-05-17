@@ -6,5 +6,6 @@ namespace Dose.Core.Library.Locations
     {
         public Map? Map { get; }
         public void OnBuild(Node node);
+        ClockDirection DoorClockDirection { get; }
     }
 }
