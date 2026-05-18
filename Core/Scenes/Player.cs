@@ -235,13 +235,20 @@ namespace Dose.Core.Scenes
                 if (collision.GetCollider() is RigidBody3D body)
                 {
                     body.LinearDamp = 15f;
-                    body.ApplyCentralImpulse(-collision.GetNormal() * 20f);
+
+                    Vector3 push = -collision.GetNormal();
+                    push.Y = 0;
+                    push = push.Normalized();
+
+                    body.ApplyCentralImpulse(push * 20f);
                 }
             }
         }
 
         public void OnDoorOpened(IDoor door)
         {
+            _interactionState = InteractionState.Locked;
+
             Transform3D? local = null;
 
             if (door is Door doorNode)
@@ -263,7 +270,11 @@ namespace Dose.Core.Scenes
                     var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
                     var parameters = new AutoMoveParameters(targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign, 5f);
 
-                    parameters.Completed += (sender, e) => linkedDoorNode.TryClose();
+                    parameters.Completed += (sender, e) => {
+                        linkedDoorNode.TryClose();
+
+                        _interactionState = InteractionState.Curious;
+                    };
 
                     AutoMoveTo(parameters);
                 };
