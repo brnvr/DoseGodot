@@ -227,20 +227,26 @@ namespace Dose.Core.Scenes
             }
             
             MoveAndSlide();
+            Push(20f);
+        }
 
+        void Push(float impulse, bool ignoreY = true)
+        {
             for (int i = 0; i < GetSlideCollisionCount(); i++)
             {
                 KinematicCollision3D collision = GetSlideCollision(i);
 
                 if (collision.GetCollider() is RigidBody3D body)
                 {
-                    body.LinearDamp = 15f;
-
                     Vector3 push = -collision.GetNormal();
-                    push.Y = 0;
-                    push = push.Normalized();
+                    
+                    if (ignoreY)
+                    {
+                        push.Y = 0;
+                        push = push.Normalized();
+                    }
 
-                    body.ApplyCentralImpulse(push * 20f);
+                    body.ApplyCentralImpulse(push * impulse);
                 }
             }
         }

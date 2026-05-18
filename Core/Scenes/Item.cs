@@ -11,6 +11,11 @@ namespace Dose.Core.Scenes
         public ItemContext? Context { get; private set; }
         IActorContext? IActor.Context => Context;
 
+        public override void _Ready()
+        {
+            LinearDamp = 15f;
+        }
+
         public void Initialize(ItemContext context, ItemArgs args)
         {
             Context = context;
