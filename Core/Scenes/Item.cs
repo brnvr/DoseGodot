@@ -6,7 +6,7 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Item : Node3D, IActor<Player>, IInitializableActor<ItemContext, ItemArgs>, IItem
+    public partial class Item : RigidBody3D, IActor<Player>, IInitializableActor<ItemContext, ItemArgs>, IItem
     {
         public ItemContext? Context { get; private set; }
         IActorContext? IActor.Context => Context;

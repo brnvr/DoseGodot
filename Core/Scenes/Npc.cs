@@ -10,7 +10,7 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Node3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>, ILookable
+    public partial class Npc : RigidBody3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>, ILookable
     {
         MeshInstance3D? _mesh;
 

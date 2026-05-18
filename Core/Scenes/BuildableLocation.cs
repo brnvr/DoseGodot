@@ -4,8 +4,6 @@ using System;
 
 namespace Dose.Core.Scenes
 {
-    
-
     public partial class BuildableLocation : Location, IBuildableLocation
     {
         LocationType? _type;

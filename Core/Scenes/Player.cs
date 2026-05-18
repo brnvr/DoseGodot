@@ -227,6 +227,17 @@ namespace Dose.Core.Scenes
             }
             
             MoveAndSlide();
+
+            for (int i = 0; i < GetSlideCollisionCount(); i++)
+            {
+                KinematicCollision3D collision = GetSlideCollision(i);
+
+                if (collision.GetCollider() is RigidBody3D body)
+                {
+                    body.LinearDamp = 15f;
+                    body.ApplyCentralImpulse(-collision.GetNormal() * 20f);
+                }
+            }
         }
 
         public void OnDoorOpened(IDoor door)

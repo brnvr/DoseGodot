@@ -32,7 +32,7 @@ namespace Dose.Core.Library.Locations
             var availablePositions = Location.Map.GetFilledPositions().Except(populatedPositions).ToList();
             var decider = new RandomDecider(ProbabilityPopulate);
 
-            while (decider.Roll())
+            while (availablePositions.Count > 0 && decider.Roll())
             {
                 var positionSelector = new RandomSelector<Vector2I>(availablePositions);
                 var position = positionSelector.Pick();
@@ -47,11 +47,6 @@ namespace Dose.Core.Library.Locations
                 }
 
                 actors.Add(actor);
-
-                if (availablePositions.Count == 0)
-                {
-                    return actors;
-                }
             }
 
             return actors;
