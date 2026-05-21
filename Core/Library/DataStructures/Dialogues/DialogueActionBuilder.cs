@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration.Dialogues;
-using Dose.Core.Scenes;
 
 namespace Dose.Core.Library.DataStructures.Dialogues
 {

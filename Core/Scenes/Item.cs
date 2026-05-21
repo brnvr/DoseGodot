@@ -2,6 +2,7 @@ using System;
 using Dose.Core.ActorArgs;
 using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Interactivity;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -48,6 +49,5 @@ namespace Dose.Core.Scenes
                 return this;
             }
         }
-
     }
 }

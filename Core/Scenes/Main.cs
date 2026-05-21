@@ -10,13 +10,12 @@ using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Configuration.Locations;
 using Dose.Core.Loaders;
+using Dose.Core.Library.GameEvents;
 
 namespace Dose.Core.Scenes
 {
     public partial class Main : Node3D
 	{
-		readonly CustomRoomPool? _customRoomPool;
-
 		public override void _Ready()
 		{
             var light = new DirectionalLight3D
@@ -30,6 +29,12 @@ namespace Dose.Core.Scenes
 			var player = GetNode<Player>("Player");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager");
+
+			List<IGameEvent<Npc>> npcEvents = [
+				new DisappearOnDistanceEvent<Npc>(player, 10)
+			];
+
+			List<IGameEvent<Location>> locationEvents = [];
 
 			var itemPool = new ActorPool<ItemContext>(
 				configPath: "Configuration/Actors/Items",
@@ -67,7 +72,7 @@ namespace Dose.Core.Scenes
 			).LoadContexts();
 
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader());
-			locationManager.Initialize(controlPlane, player, itemPool, npcPool);
+			locationManager.Initialize(controlPlane, player, itemPool, npcPool, npcEvents, locationEvents);
 			player.Initialize(controlPlane);
 
 			AudioCollector.InitializeESpeak();

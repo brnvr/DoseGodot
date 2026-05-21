@@ -11,8 +11,11 @@ using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.ActorArgs;
 using Dose.Core.Library.Location;
+using Dose.Core.Library.GameEvents;
+using System.Linq;
 namespace Dose.Core.Scenes
 {
+
 	public partial class LocationManager : Node, ILocationManager
 	{
 		const int BLOCK_SIZE = 4;
@@ -21,6 +24,8 @@ namespace Dose.Core.Scenes
 		const string CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY = "corridorWithStairsUpEnsured";
 		const string CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY = "corridorWithStairsDownEnsured";
 
+		readonly static Probability _probabilityToSetNpcEvent = new(0.25);
+		readonly static Probability _probabilityToSetLocationEvent = new (0.25);
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
@@ -32,6 +37,8 @@ namespace Dose.Core.Scenes
 		ActorPool<ItemContext>? _itemPool;
 		ActorPool<NpcContext>? _npcPool;
 		LocationQueue? _locationQueue;
+		IEnumerable<IGameEvent<Npc>>? _npcEvents;
+		IEnumerable<IGameEvent<Location>>? _locationEvents;
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
@@ -45,12 +52,21 @@ namespace Dose.Core.Scenes
 			_locationQueue?.Free();
         }
 
-		public LocationManager Initialize(IControlPlane controlPlane, Player player, ActorPool<ItemContext> itemPool, ActorPool<NpcContext> npcPool)
+		public LocationManager Initialize(
+			IControlPlane controlPlane,
+			Player player,
+			ActorPool<ItemContext> itemPool,
+			ActorPool<NpcContext> npcPool,
+			IEnumerable<IGameEvent<Npc>> npcEvents,
+			IEnumerable<IGameEvent<Location>> locationEvents
+		)
         {
 			Player = player;
 			ControlPlane = controlPlane;
 			_itemPool = itemPool;
 			_npcPool = npcPool;
+			_npcEvents = npcEvents;
+			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
 			{
 				{ ROOM_CATEGORY, CreateRoom },
@@ -140,7 +156,13 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateRoomMap();
 
-			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, Location.LocationType.Room);
+			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(
+				mapGenerator,
+				BLOCK_SIZE,
+				clockDirection,
+				Location.LocationType.Room,
+				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
+			);
 
 			BuildLocation(location);
 			PopulateLocation(location);
@@ -160,7 +182,13 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairsUp, shouldEnsureStairsDown);
 
-			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(mapGenerator, BLOCK_SIZE, clockDirection, Location.LocationType.Corridor);
+			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(
+				mapGenerator,
+				BLOCK_SIZE,
+				clockDirection,
+				Location.LocationType.Corridor,
+				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
+			);
 
 			BuildLocation(location);
 			PopulateLocation(location);
@@ -209,6 +237,25 @@ namespace Dose.Core.Scenes
 			}
 		}
 
+        static T? PickRandom<T>(IEnumerable<T>? values, Probability probability)
+		{
+			if (values == null || !values.Any())
+			{
+				return default;
+			}
+
+			var shouldSelectEvent = new RandomDecider(probability).Roll();
+
+			if (!shouldSelectEvent)
+			{
+				return default;
+			}
+
+			var selector = new RandomSelector<T>(values);
+
+			return selector.Pick();
+		}
+
 		void PopulateLocation(BuildableLocation location)
 		{
 			if (_itemPool == null)
@@ -229,7 +276,8 @@ namespace Dose.Core.Scenes
 			var itemArgs = new ItemArgs();
 			var npcArgs = new NpcArgs
 			{
-				Player = Player
+				Player = Player,
+				GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
 			};
 
 			var itemPopulator = new LocationPopulator<Item, ItemContext, ItemArgs>(

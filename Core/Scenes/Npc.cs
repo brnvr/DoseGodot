@@ -4,16 +4,18 @@ using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
+using Dose.Core.Library.GameEvents;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Randomness;
 using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : RigidBody3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>, ILookable
+    public partial class Npc : RigidBody3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>, ILookable, IDisappearable
     {
         MeshInstance3D? _mesh;
 
+        public IGameEvent<Npc>? GameEvent { get; private set; }
         public float EyeHeightProportion { get; private set; } = 0.9f;
         public ISpeaker? Speaker { get; private set; }
         public NpcContext? Context { get; private set; }
@@ -28,10 +30,18 @@ namespace Dose.Core.Scenes
             LinearDamp = 15f;
         }
 
+        public override void _Process(double delta)
+        {
+            if (GameEvent != null && GameEvent.ShouldTrigger(this))
+            {
+                GameEvent.OnTrigger(this);
+            } 
+        }
+
         public void Initialize(NpcContext context, NpcArgs args)
         {
             Context = context;
-
+            GameEvent = args.GameEvent;
             _mesh = GetNode<MeshInstance3D>("Mesh");
 
             UpdateTexture();
@@ -101,6 +111,11 @@ namespace Dose.Core.Scenes
             {
                 stdMat.AlbedoTexture = Context.Texture;
             }
+        }
+
+        public void Disappear()
+        {
+            QueueFree();
         }
     }
 }

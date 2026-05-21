@@ -1,3 +1,5 @@
+using Dose.Core.Library.Interactivity;
+
 namespace Dose.Core.Library.Actors
 {
     public interface IActor
