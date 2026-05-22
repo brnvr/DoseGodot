@@ -14,6 +14,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 Identifier = identifier,
                 DisplayName = GetOptional<string>(dict, "displayName") ?? identifier,
                 TexturePath = GetRequired<string>(dict, "texturePath"),
+                Rarity = GetRequired<string>(dict, "rarity"),
                 MaxQuantity = GetOptional<int?>(dict, "maxQuantity"),
                 Execute = GetOptional<List<object>>(dict, "execute", []).Select(o => {
                     var dict = (Dictionary<object, object?>)o;

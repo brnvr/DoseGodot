@@ -5,6 +5,7 @@ using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Interactivity;
+using Dose.Core.Scenes;
 using Godot;
 
 namespace Dose.Core.Library.Actors
@@ -19,6 +20,7 @@ namespace Dose.Core.Library.Actors
             {
                 Identifier = itemConfig.Identifier,
                 DisplayName = itemConfig.DisplayName,
+                Rarity = Enum.Parse<Rarity>(itemConfig.Rarity, true),
                 Texture = ResourceLoader.Load<Texture2D>(itemConfig.TexturePath),
                 MaxQuantity = itemConfig.MaxQuantity ?? -1,
                 Execute = itemConfig.Execute.Select(config => new Executable

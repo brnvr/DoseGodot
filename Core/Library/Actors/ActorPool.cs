@@ -37,6 +37,16 @@ namespace Dose.Core.Library.Actors
                 var dict = deserializer.Deserialize<Dictionary<string, object?>>(yaml);
                 var config = ConfigConverter.FromDict(dict);
                 var context = ContextBuilder.BuildContext(config);
+                
+                if (context is IHasRarity ctxWithRarity)
+                {
+                    for (var i = 0; i < (int)ctxWithRarity.Rarity; i++)
+                    {
+                        _availableContexts.Add((TActorContext)context);
+                    }
+
+                    continue;
+                }
 
                 _availableContexts.Add((TActorContext)context);
             }

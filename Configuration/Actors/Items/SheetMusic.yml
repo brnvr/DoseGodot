@@ -1,5 +1,6 @@
 ---
 identifier: sheet music
+rarity: VeryCommon
 texturePath: "res://Media/Textures/Placehoders/Item.png"
 execute:
   - action: movePlayer

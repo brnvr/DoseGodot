@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,7 @@ namespace Dose.Core.Library.Actors
             {
                 Identifier = npcConfig.Identifier,
                 DisplayName = npcConfig.DisplayName,
+                Rarity = Enum.Parse<Rarity>(npcConfig.Rarity, true),
                 Texture = ResourceLoader.Load<Texture2D>(npcConfig.TexturePath),
                 Voice = new Voice(npcConfig.Voice, 16000),
                 DialogueMap = GetDialogueMap(npcConfig),

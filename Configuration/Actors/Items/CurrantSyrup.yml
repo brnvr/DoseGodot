@@ -1,5 +1,6 @@
 ---
 identifier: currant syrup
+rarity: VeryCommon
 texturePath: "res://Media/Textures/Placehoders/Item.png"
 execute:
   - action: movePlayer

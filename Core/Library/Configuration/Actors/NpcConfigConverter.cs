@@ -12,6 +12,7 @@ namespace Dose.Core.Library.Configuration.Actors
             {
                 Identifier = identifier,
                 DisplayName = GetOptional<string>(dict, "displayName") ?? identifier,
+                Rarity = GetRequired<string>(dict, "rarity"),
                 TexturePath = GetRequired<string>(dict, "texturePath"),
                 Voice = GetRequired<string>(dict, "voice"),
                 DialoguesDir = GetRequired<string>(dict, "dialoguesDir"),
