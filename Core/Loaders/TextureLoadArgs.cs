@@ -1,7 +1,7 @@
 namespace Dose.Core.Loaders
 {
-    public class TextureLoadArgs
+    public class TextureLoadArgs(string path)
     {
-        public required string Path { get; init; }
+        public string Path { get; } = path;
     }
 }

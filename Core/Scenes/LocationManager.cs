@@ -274,10 +274,7 @@ namespace Dose.Core.Scenes
 				return null;
 			}
 
-			return new TextureLoader().Load(new TextureLoadArgs
-			{
-				Path = textureDefinition.TexturePath
-			});
+			return new TextureLoader().Load(new TextureLoadArgs(textureDefinition.TexturePath));
 		}
 
 		static T? PickRandom<T>(IEnumerable<T>? values)

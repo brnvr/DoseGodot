@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot;
 
 namespace Dose.Core.Library
@@ -33,6 +34,23 @@ namespace Dose.Core.Library
 
             parentNode = node;
             return true;
+        }
+
+        public static ImageTexture CreatePaletteTexture(List<Color> colors)
+        {
+            var image = Image.CreateEmpty(
+                colors.Count,
+                1,
+                false,
+                Image.Format.Rgba8
+            );
+
+            for (int i = 0; i < colors.Count; i++)
+            {
+                image.SetPixel(i, 0, colors[i]);
+            }
+
+            return ImageTexture.CreateFromImage(image);
         }
 
         public static bool TryGetParentNode<T>(Node node, out T? parentNode) where T : Node

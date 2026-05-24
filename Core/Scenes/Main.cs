@@ -33,12 +33,12 @@ namespace Dose.Core.Scenes
 				new DirectionalLight3D
 				{
 					RotationDegrees = new Vector3(0, 90, 0), 
-					LightEnergy = 0.5f
+					LightEnergy = 0.25f
 				},
 				new DirectionalLight3D
 				{
 					RotationDegrees = new Vector3(0, 270, 0), 
-					LightEnergy = 0.5f
+					LightEnergy = 0.25f
 				},
 			];
 
@@ -49,6 +49,7 @@ namespace Dose.Core.Scenes
 
 			var ui = GetNode<UI>("UI");
 			var player = GetNode<Player>("Player");
+			var postShader = GetNode<PostShader>("PostShader");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager");
 
@@ -57,6 +58,8 @@ namespace Dose.Core.Scenes
 			];
 
 			List<IGameEvent<Location>> locationEvents = [];
+
+			var palette = new JascPalLoader().Load(new JascPalLoaderArgs("Configuration/Palettes/miri16.pal"));
 
 			var wallTexturePool = new WeightedPool<TextureDefinition>
 			(
@@ -113,6 +116,7 @@ namespace Dose.Core.Scenes
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader());
 			locationManager.Initialize(controlPlane, player, itemPool, npcPool, wallTexturePool, npcEvents, locationEvents);
 			player.Initialize(controlPlane);
+			postShader.Initialize(palette);
 
 			AudioCollector.InitializeESpeak();
 		}

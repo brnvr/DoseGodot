@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://uikj2e5802ap"]
+[gd_scene load_steps=8 format=3 uid="uid://uikj2e5802ap"]
 
 [ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Core/Scenes/Main.cs" id="1_v1gob"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Configuration/Scenes/Player.tscn" id="2_jw32o"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://bm0d2mvnxfs2i" path="res://Configuration/Scenes/UI.tscn" id="5_bmxlf"]
 [ext_resource type="PackedScene" uid="uid://d0bi54vo2i5ak" path="res://Configuration/Scenes/FadeTransition.tscn" id="6_4e7gm"]
 [ext_resource type="PackedScene" uid="uid://dbv25pethrcnn" path="res://Configuration/Scenes/ControlPlane.tscn" id="6_4kpch"]
+[ext_resource type="PackedScene" uid="uid://cfslarur3nrih" path="res://Configuration/Scenes/PostShader.tscn" id="7_mbcki"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_v1gob")
@@ -19,3 +20,5 @@ script = ExtResource("1_v1gob")
 [node name="ControlPlane" parent="." instance=ExtResource("6_4kpch")]
 
 [node name="FadeTransition" parent="." instance=ExtResource("6_4e7gm")]
+
+[node name="PostShader" parent="." instance=ExtResource("7_mbcki")]
