@@ -13,6 +13,7 @@ using Dose.Core.ActorArgs;
 using Dose.Core.Library.Location;
 using Dose.Core.Library.GameEvents;
 using System.Linq;
+using Dose.Core.Loaders;
 namespace Dose.Core.Scenes
 {
 
@@ -26,8 +27,11 @@ namespace Dose.Core.Scenes
 
 		readonly static Probability _probabilityToSetNpcEvent = new(0.25);
 		readonly static Probability _probabilityToSetLocationEvent = new (0.25);
+		readonly static Texture2D _floorCeilingTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/Common/black.png");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
+		readonly static Mesh _floorMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Floor.glb");
+		readonly static Mesh _ceilingMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Ceiling.glb");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _buildableLocationScne = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
 		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
@@ -36,6 +40,7 @@ namespace Dose.Core.Scenes
 		ILocation? _currentLocation;
 		ActorPool<ItemContext>? _itemPool;
 		ActorPool<NpcContext>? _npcPool;
+		WeightedPool<TextureDefinition>? _wallTexturePool;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
@@ -57,6 +62,7 @@ namespace Dose.Core.Scenes
 			Player player,
 			ActorPool<ItemContext> itemPool,
 			ActorPool<NpcContext> npcPool,
+			WeightedPool<TextureDefinition> wallTexturePool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
 		)
@@ -65,6 +71,7 @@ namespace Dose.Core.Scenes
 			ControlPlane = controlPlane;
 			_itemPool = itemPool;
 			_npcPool = npcPool;
+			_wallTexturePool = wallTexturePool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
@@ -223,9 +230,19 @@ namespace Dose.Core.Scenes
 			var doorOffset = new Vector2(-0.11275f, .5f);
 			var stairsOffset = new Vector2(0, .5f);
 
+			var wallTexture = PickRandomTexture(_wallTexturePool?.GetWeightedList());
+
+			if (wallTexture is null)
+			{
+				GD.PushError("Wall texture could not be selected.");
+				return;
+			}
+
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationMeshBuilder(location, _wallMesh, _doorwayMesh, BLOCK_SIZE, "WallMeshInstance"),
+				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
+				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_floorCeilingTexture), BLOCK_SIZE, "FloorMeshInstance"),
+				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_floorCeilingTexture), BLOCK_SIZE, "CeilingMeshInstance"),
 				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorOffset, doorArgs, doorNumberController, ControlPlane.CustomRoomController),
 				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, stairsOffset, stairsArgs),
 				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, stairsOffset, stairsArgs),
@@ -235,6 +252,44 @@ namespace Dose.Core.Scenes
 			{
 				builder.Build();
 			}
+		}
+
+        static StandardMaterial3D CreateMaterial(Texture2D texture)
+		{
+			return new StandardMaterial3D
+			{
+				AlbedoTexture = texture,
+				ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
+				VertexColorUseAsAlbedo = false,
+				TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest
+			};
+		}
+
+		static Texture2D? PickRandomTexture(IEnumerable<TextureDefinition>? values)
+		{
+			var textureDefinition = PickRandom(values);
+
+			if (textureDefinition == null)
+			{
+				return null;
+			}
+
+			return new TextureLoader().Load(new TextureLoadArgs
+			{
+				Path = textureDefinition.TexturePath
+			});
+		}
+
+		static T? PickRandom<T>(IEnumerable<T>? values)
+		{
+			if (values == null || !values.Any())
+			{
+				return default;
+			}
+
+			var selector = new RandomSelector<T>(values);
+
+			return selector.Pick();
 		}
 
         static T? PickRandom<T>(IEnumerable<T>? values, Probability probability)
@@ -251,9 +306,7 @@ namespace Dose.Core.Scenes
 				return default;
 			}
 
-			var selector = new RandomSelector<T>(values);
-
-			return selector.Pick();
+			return PickRandom(values);
 		}
 
 		void PopulateLocation(BuildableLocation location)

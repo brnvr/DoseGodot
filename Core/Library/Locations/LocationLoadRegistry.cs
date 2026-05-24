@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
 namespace Dose.Core.Library.Locations
@@ -21,7 +20,14 @@ namespace Dose.Core.Library.Locations
                 
                 if (location is Node node)
                 {
-                    node.QueueFree();
+                    try
+                    {
+                        node.QueueFree();
+                    }
+                    catch
+                    {
+                        GD.Print($"Location {node.Name} has already been disposed.");
+                    }
                 }
             }
         }

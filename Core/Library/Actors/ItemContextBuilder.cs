@@ -10,11 +10,11 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public class ItemContextBuilder(Dictionary<string, IActionPerformer> actionPerformerMap) : IContextBuilder<IActorContext>
+    public class ItemContextBuilder(Dictionary<string, IActionPerformer> actionPerformerMap) : IObjectFromConfigBuilder<ItemContext>
     {
         public Dictionary<string, IActionPerformer> ActionPerformerMap { get; } = actionPerformerMap;
 
-        public ItemContext BuildContext(ItemConfig itemConfig)
+        public ItemContext Build(ItemConfig itemConfig)
         {
             return new ItemContext
             {
@@ -38,9 +38,9 @@ namespace Dose.Core.Library.Actors
             };
         }
 
-        IActorContext IContextBuilder<IActorContext>.BuildContext(YamlConfig config)
+        ItemContext IObjectFromConfigBuilder<ItemContext>.Build(YamlConfig config)
         {
-            return BuildContext((ItemConfig)config);
+            return Build((ItemConfig)config);
         }
     }
 }

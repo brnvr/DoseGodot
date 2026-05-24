@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
 using Godot;
@@ -61,7 +62,9 @@ namespace Dose.Core.Library.Locations
         Probability probabilityPopulate,
         TArgs args,
         int blockSize
-    ) : LocationPopulator(location, probabilityPopulate, blockSize) where TActor : class, IInitializableActor<TActorContext, TArgs>, new() where TActorContext : IActorContext
+    ) : LocationPopulator(location, probabilityPopulate, blockSize)
+    where TActor : class, IInitializableActor<TActorContext, TArgs>, new()
+    where TActorContext : IActorContext, IHasRarity
     {
         public new IBuildableLocation Location { get; } = location;
         public ActorPoolSelector<TActor, TActorContext, TArgs> Selector { get; } = selector;

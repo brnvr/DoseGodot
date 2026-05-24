@@ -8,7 +8,7 @@ namespace Dose.Core.Library.DataStructures
     {
         IEnumerable<T> Items { get; } = items;
 
-        public IEnumerable<T> Weight()
+        public WeightedList<T> Weight()
         {
             return new WeightedList<T>([.. Items.Select(item => (item, (int)item.Rarity))]);
         }

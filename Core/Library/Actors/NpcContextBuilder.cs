@@ -12,7 +12,7 @@ using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IContextBuilder<IActorContext>
+    public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IObjectFromConfigBuilder<NpcContext>
     {
         public DialogueConfigConverter DialogueConfigConverter = new(actions.ToDictionary(a => a.Key, a => a.DialogueNodeConverter));
         public DialogueBuilder DialogueBuilder = new(
@@ -27,7 +27,7 @@ namespace Dose.Core.Library.Actors
                 return speakNode.Args.Lines.First();
             });
 
-        public NpcContext BuildContext(NpcConfig npcConfig)
+        public NpcContext Build(NpcConfig npcConfig)
         {
             return new NpcContext
             {
@@ -41,9 +41,9 @@ namespace Dose.Core.Library.Actors
             };
         }
 
-        IActorContext IContextBuilder<IActorContext>.BuildContext(YamlConfig config)
+        NpcContext IObjectFromConfigBuilder<NpcContext>.Build(YamlConfig config)
         {
-            return BuildContext((NpcConfig)config);
+            return Build((NpcConfig)config);
         }
 
         Dictionary<string, IDialogue> GetDialogueMap(NpcConfig npcConfig)

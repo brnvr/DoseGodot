@@ -11,19 +11,41 @@ using Dose.Core.Library.Locations;
 using Dose.Core.Library.Configuration.Locations;
 using Dose.Core.Loaders;
 using Dose.Core.Library.GameEvents;
+using Dose.Core.Library.DataStructures;
+using System.IO;
 
 namespace Dose.Core.Scenes
 {
     public partial class Main : Node3D
 	{
+		const string TEXTURE_PATH = "Configuration/Textures";
 		public override void _Ready()
 		{
-            var light = new DirectionalLight3D
-            {
-                RotationDegrees = new Vector3(-45, 0, 0)
-            };
+            List<DirectionalLight3D> lights = [
+				new DirectionalLight3D
+				{
+					RotationDegrees = new Vector3(0, 0, 0)
+				},
+				new DirectionalLight3D
+				{
+					RotationDegrees = new Vector3(0, 180, 0)
+				},
+				new DirectionalLight3D
+				{
+					RotationDegrees = new Vector3(0, 90, 0), 
+					LightEnergy = 0.5f
+				},
+				new DirectionalLight3D
+				{
+					RotationDegrees = new Vector3(0, 270, 0), 
+					LightEnergy = 0.5f
+				},
+			];
 
-            AddChild(light);
+            foreach (var light in lights)
+			{
+				AddChild(light);
+			}
 
 			var ui = GetNode<UI>("UI");
 			var player = GetNode<Player>("Player");
@@ -36,7 +58,22 @@ namespace Dose.Core.Scenes
 
 			List<IGameEvent<Location>> locationEvents = [];
 
-			var itemPool = new ActorPool<ItemContext>(
+			var wallTexturePool = new WeightedPool<TextureDefinition>
+			(
+				configPath: Path.Join(TEXTURE_PATH, "Environment/Walls"),
+				builder: new TextureDefinitionBuilder(),
+				configConverter: new TextureConfigConverter()
+			).Load();
+
+			// var doorTexturePool = new WeightedPool<TextureDefinition>
+			// (
+			// 	configPath: Path.Join(TEXTURE_PATH, "Environment/Doors"),
+			// 	builder: new TextureDefinitionBuilder(),
+			// 	configConverter: new TextureConfigConverter()
+			// ).Load();
+
+			var itemPool = new ActorPool<ItemContext>
+			(
 				configPath: "Configuration/Actors/Items",
 				actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Item.tscn"),
 				configConverter: new ItemConfigConverter(),
@@ -45,9 +82,10 @@ namespace Dose.Core.Scenes
 					{ "movePlayer", new MovePlayerPerformer(player) },
 					{ "receive", new ReceivePerformer(player) }
 				})
-			).LoadContexts();
+			).Load();
 			
-			var npcPool = new ActorPool<NpcContext>(
+			var npcPool = new ActorPool<NpcContext>
+			(
 				configPath: "Configuration/Actors/Npcs",
 				actorScene: GD.Load<PackedScene>("res://Configuration/Scenes/Npc.tscn"),
 				configConverter: new NpcConfigConverter(),
@@ -63,16 +101,17 @@ namespace Dose.Core.Scenes
 					)),
 					new("displayOptions", new DisplayOptionsNodeConverter(), new DialogueOptionsBuilder())
 				])
-			).LoadContexts();
+			).Load();
 
-			var customRoomPool = new CustomRoomPool(
+			var customRoomPool = new Pool<CustomRoomContext?>
+			(
 				configPath: "Configuration/Locations/CustomRooms",
 				configConverter: new CustomRoomConfigConverter(),
-				contextBuilder: new CustomRoomContextBuilder()
-			).LoadContexts();
+				builder: new CustomRoomContextBuilder()
+			).Load();
 
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader());
-			locationManager.Initialize(controlPlane, player, itemPool, npcPool, npcEvents, locationEvents);
+			locationManager.Initialize(controlPlane, player, itemPool, npcPool, wallTexturePool, npcEvents, locationEvents);
 			player.Initialize(controlPlane);
 
 			AudioCollector.InitializeESpeak();

@@ -1,22 +1,23 @@
 using System.Collections.Generic;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Randomness;
 
 namespace Dose.Core.Library.Actors
 {
     public class ActorPoolSelector<TActor, TActorContext, TArgs>(ActorPool<TActorContext> source)
-        where TActor : class, IInitializableActor<TActorContext, TArgs>, new() where TActorContext : IActorContext
+        where TActor : class, IInitializableActor<TActorContext, TArgs>, new() where TActorContext : IActorContext, IHasRarity
     {
-        readonly List<TActorContext> _availableContexts = [.. source.AvailableContexts];
+        readonly List<TActorContext> _content = [.. source.Content];
         readonly Dictionary<TActorContext, int> _contextQuantities = [];
 
         public ActorPool<TActorContext> Source { get; } = source;
-        public List<TActorContext> AvailableContexts => [.. _availableContexts];
+        public List<TActorContext> Content => [.. _content];
         
         public TActor? Select(TArgs args)
         {
-            if (_availableContexts.Count == 0) return default;
+            if (Content.Count == 0) return default;
 
-            var selector = new RandomSelector<TActorContext>(_availableContexts);
+            var selector = new RandomSelector<TActorContext>(_content);
 
             var context = selector.Pick();
 
@@ -26,7 +27,7 @@ namespace Dose.Core.Library.Actors
 
                 if (quantity >= context.MaxQuantity)
                 {
-                    _availableContexts.Remove(context);
+                    _content.Remove(context);
                     return Select(args);
                 }
 

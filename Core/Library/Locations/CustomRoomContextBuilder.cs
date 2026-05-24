@@ -5,9 +5,9 @@ using Godot;
 
 namespace Dose.Core.Library.Locations
 {
-    public class CustomRoomContextBuilder : IContextBuilder<CustomRoomContext?>
+    public class CustomRoomContextBuilder : IObjectFromConfigBuilder<CustomRoomContext?>
     {
-        public CustomRoomContext? BuildContext(CustomRoomConfig config)
+        public CustomRoomContext? Build(CustomRoomConfig config)
         {
             var scene = GD.Load<PackedScene>(config.ScenePath);
 
@@ -18,9 +18,9 @@ namespace Dose.Core.Library.Locations
             };
         }
 
-        CustomRoomContext? IContextBuilder<CustomRoomContext?>.BuildContext(YamlConfig config)
+        CustomRoomContext? IObjectFromConfigBuilder<CustomRoomContext?>.Build(YamlConfig config)
         {
-            return BuildContext((CustomRoomConfig)config);
+            return Build((CustomRoomConfig)config);
         }
     }
 }

@@ -1,11 +1,13 @@
 using System.Linq;
 using Dose.Core.Library.Common;
+using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Locations;
+using Dose.Core.Scenes;
 
 namespace Dose.Core.Library.Control
 {
     public class CustomRoomController(
-        CustomRoomPool customRoomPool,
+        Pool<CustomRoomContext?> customRoomPool,
         ILoader<ILocation?, CustomRoomLoadArgs> customRoomLoader,
         ILocationManager locationManager,
         LocationLoadRegistry loadRegistry
@@ -14,13 +16,13 @@ namespace Dose.Core.Library.Control
         readonly object _lock = new();
 
         public LocationLoadRegistry LoadRegistry { get; } = loadRegistry;
-        public CustomRoomPool CustomRoomPool { get; } = customRoomPool;
+        public Pool<CustomRoomContext?> CustomRoomPool { get; } = customRoomPool;
         public ILoader<ILocation?, CustomRoomLoadArgs> CustomRoomLoader { get; } = customRoomLoader;
         public ILocationManager LocationManager { get; } = locationManager;
 
         public bool TryLoadCustomRoom(int number, out ILocation? customRoom)
         {
-            var ctx = CustomRoomPool.AvailableContexts.FirstOrDefault(c => c.RoomNumber == number);
+            var ctx = CustomRoomPool.Content.FirstOrDefault(c => c != null && c.RoomNumber == number);
 
             if (ctx == null)
             {

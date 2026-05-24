@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
+using Dose.Core.Library.DataStructures;
 using Godot;
-using YamlDotNet.Serialization;
 
 namespace Dose.Core.Library.Actors
 {
@@ -12,46 +9,14 @@ namespace Dose.Core.Library.Actors
         string configPath,
         PackedScene actorScene,
         YamlConfigConverter configConverter,
-        IContextBuilder<IActorContext> contextBuilder
-    ) where TActorContext : IActorContext
+        IObjectFromConfigBuilder<TActorContext> contextBuilder
+    ) : WeightedPool<TActorContext>(configPath, configConverter, contextBuilder) where TActorContext : IActorContext, IHasRarity
     {
-        readonly List<TActorContext> _availableContexts = [];
-
         public PackedScene ActorScene { get; } = actorScene;
-        public string ConfigPath { get; } = configPath;
-        public YamlConfigConverter ConfigConverter { get; } = configConverter;
-        public IContextBuilder<IActorContext> ContextBuilder { get; } = contextBuilder;
-        public List<TActorContext> AvailableContexts => [.._availableContexts];
 
-        public ActorPool<TActorContext> LoadContexts()
+        public new ActorPool<TActorContext> Load()
         {
-            _availableContexts.Clear();
-            var files = Directory.GetFiles(ConfigPath);
-            var deserializer = new DeserializerBuilder().Build();
-
-            foreach (var file in files)
-            {
-                Console.WriteLine($"Loading {file}...");
-
-                var yaml = File.ReadAllText(file);
-                var dict = deserializer.Deserialize<Dictionary<string, object?>>(yaml);
-                var config = ConfigConverter.FromDict(dict);
-                var context = ContextBuilder.BuildContext(config);
-                
-                if (context is IHasRarity ctxWithRarity)
-                {
-                    for (var i = 0; i < (int)ctxWithRarity.Rarity; i++)
-                    {
-                        _availableContexts.Add((TActorContext)context);
-                    }
-
-                    continue;
-                }
-
-                _availableContexts.Add((TActorContext)context);
-            }
-
-            return this;
+            return (ActorPool<TActorContext>)base.Load();
         }
     }
 }

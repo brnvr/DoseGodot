@@ -1,4 +1,5 @@
 using Dose.Core.Library.Control;
+using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Locations;
 using Dose.Core.Loaders;
 using Godot;
@@ -21,7 +22,7 @@ namespace Dose.Core.Scenes
             UI ui,
             Player player,
             LocationManager locationManager,
-            CustomRoomPool customRoomPool,
+            Pool<CustomRoomContext?> customRoomPool,
             CustomRoomLoader customRoomLoader
         )
         {

@@ -15,13 +15,16 @@ namespace Dose.Core.Library.Locations
 
         public Map GenerateMap()
         {
-            var size = new Random().Next(MinSize, MaxSize);
-            var map = new Map(size, size);
+            var width = new Random().Next(MinSize, MaxSize);
+            var height = new Random().Next(MinSize, MaxSize);
+            var map = new Map(width, height);
             var startingPoint = new Vector2I();
 
             GenerateWall(map, startingPoint, CardinalDirection.East);
 
             new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
+
+            FillEmptyCells(map, width, height);
 
             return map;
         }
@@ -54,6 +57,22 @@ namespace Dose.Core.Library.Locations
             var nextDirection = NextDirection(direction, ClockDirection.Clockwise);
 
             GenerateWall(map, point, nextDirection);
+        }
+
+        private static void FillEmptyCells(Map map, int width, int height)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                for (var y = 0; y < height; y++)
+                {
+                    var point = new Vector2I(x, y);
+
+                    if (!map.TryGet(point, out MapCell? cell) || cell == null)
+                    {
+                        map.Set(point, new MapCell());
+                    }
+                }
+            }
         }
     }
 }
