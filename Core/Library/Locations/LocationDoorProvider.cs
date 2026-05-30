@@ -55,6 +55,16 @@ namespace Dose.Core.Library.Locations
             return wall.Type == MapCellType.Doorway;
         }
 
+        // protected ILocationOccluder? BuildOccluder(Vector2I point, CardinalDirection direction)
+        // {
+        //     if (OccluderFactory == null) return null;
+
+        //     var occluder = OccluderFactory.Build(blockSize);
+
+        //     node.Position = GetPosition(point, direction);
+        //     node.RotateY(GetRotation(point, direction));
+        // }
+
         protected override Node3D? OnBuildWall(Vector2I point, CardinalDirection direction)
         {
             var node = base.OnBuildWall(point, direction);
@@ -89,6 +99,63 @@ namespace Dose.Core.Library.Locations
             var linkedDoor = customRoom.SelectRandomPortal<IDoor>();
             
             door.Link(linkedDoor);
+
+            return node;
+        }
+    }
+
+    public class LocationDoorProvider<TInitializable, TArgs, TLocationOccluder>(
+        IBuildableLocation location,
+        PackedScene doorScene,
+        LocationOccluderFactory<TLocationOccluder> occluderFactory,
+        int blockSize,
+        Vector2 offset,
+        TArgs initializationArgs,
+        DoorNumberController? doorNumberController,
+        CustomRoomController? customRoomController
+    ) : LocationDoorProvider<TInitializable, TArgs>(location, doorScene, blockSize, offset, initializationArgs, doorNumberController, customRoomController)
+        where TInitializable : IInitializableActor<DoorContext, TArgs>
+        where TLocationOccluder : Node3D, ILocationOccluder
+    {
+        public LocationOccluderFactory<TLocationOccluder> OccluderFactory { get; } = occluderFactory;
+
+        protected TLocationOccluder? BuildOccluder(Vector2I point, CardinalDirection direction)
+        {
+            if (Location.Map == null) return null;
+        
+            var occluder = OccluderFactory.Build(BlockSize);
+
+            if (occluder == null) return null;
+
+            var pointDir = MoveTo(point, direction, 0.5f);
+
+            occluder.Position = new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
+            occluder.RotateY(DirectionToRadians(NextDirection(direction, ClockDirection.Counterclockwise)));
+
+            return occluder;
+        }
+
+        protected override Node3D? OnBuildWall(Vector2I point, CardinalDirection direction)
+        {
+            var node = base.OnBuildWall(point, direction);
+
+            if (node is not ILocationOccluderAttachable receptor)
+            {
+                GD.PushWarning($"{nameof(node)} does not implement {nameof(ILocationOccluderAttachable)}. Skipping occluder association...");
+                return node;
+            }
+
+            var occluder = BuildOccluder(point, direction);
+
+            if (occluder == null)
+            {
+                GD.PushWarning($"{nameof(occluder)} is null. Skipping occluder association...");
+                return node;
+            }
+
+            receptor.AttachLocationOccluder(occluder);
+
+            Location.OnBuild(occluder);
 
             return node;
         }

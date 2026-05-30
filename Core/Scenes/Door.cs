@@ -18,7 +18,7 @@ namespace Dose.Core.Scenes
         Closing
     }
 
-    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>, IInitializableActor<DoorContext, DoorArgs>
+    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>, IInitializableActor<DoorContext, DoorArgs>, ILocationOccluderAttachable
     {
         const double MAX_OPENING = Math.PI / 2;
 
@@ -29,6 +29,7 @@ namespace Dose.Core.Scenes
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
         ILocationManager? _locationManager;
+        ILocationOccluder? _locationOccluder;
 
         [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
         public ILocation? Location { get; private set; }
@@ -228,5 +229,9 @@ namespace Dose.Core.Scenes
             _locationManager = args.LocationManager;
         }
 
+        public void AttachLocationOccluder(ILocationOccluder occluder)
+        {
+            _locationOccluder = occluder;
+        }
     }
 }

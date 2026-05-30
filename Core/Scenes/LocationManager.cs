@@ -221,15 +221,6 @@ namespace Dose.Core.Scenes
 				Location = location,
 				LocationManager = this,
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
-				LocationOccluderFactory = new LocationOccluderFactory<LocationOccluder>
-				(
-					_occluderScene,
-					_wallMesh,
-					_doorwayMesh,
-					_floorMesh,
-					_ceilingMesh,
-					CreateMaterial(_blackTexture)
-				)
 			};
 
 			var stairsArgs = new StairsArgs
@@ -244,13 +235,23 @@ namespace Dose.Core.Scenes
 				GD.PushError("Wall texture could not be selected.");
 				return;
 			}
+			
+			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
+			(
+				_occluderScene,
+				_wallMesh,
+				_doorwayMesh,
+				_floorMesh,
+				_ceilingMesh,
+				CreateMaterial(_blackTexture)
+			);
 
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
 				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
 				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
-				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, _doorOffset, doorArgs, doorNumberController, ControlPlane.CustomRoomController),
+				new LocationDoorProvider<Door, DoorArgs, LocationOccluder>(location, _doorScene, occluderFactory, BLOCK_SIZE, _doorOffset, doorArgs, ControlPlane.DoorNumberController, ControlPlane.CustomRoomController),
 				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
 				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
 			};
@@ -406,34 +407,5 @@ namespace Dose.Core.Scenes
 				ShouldEnsureStairsDown = shouldEnsureStairsDown
 			};
         }
-		
-		public void OnPortalAccessed(IPortal portal)
-		{
-			if (portal is Door door)
-			{
-				var occluder = _occluderScene.Instantiate<LocationOccluder>()
-					.Initialize(_wallMesh, _doorwayMesh, _floorMesh, _ceilingMesh, BLOCK_SIZE, CreateMaterial(_blackTexture));
-
-				occluder.Rotation = door.OpenDirection == ClockDirection.Clockwise ? door.Rotation : door.Rotation + new Vector3(0, Mathf.DegToRad(180), 0);
-				occluder.Position = door.Position + (door.OpenDirection == ClockDirection.Clockwise ? -1 : 1 ) * occluder.Transform.Basis.X * _doorOffset.X * BLOCK_SIZE;
-
-				AddChild(occluder);
-
-				if (Player != null)
-				{
-                    void handler(object? sender, Player.MovedToLocationArgs e)
-                    {
-                        if (e.Location == door.Location)
-                        {
-                            occluder.QueueFree();
-
-                            Player.MovedToLocation -= handler;
-                        }
-                    }
-
-                    Player.MovedToLocation += handler;
-				}
-			}
-		}
     }
 }

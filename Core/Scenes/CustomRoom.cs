@@ -26,8 +26,7 @@ namespace Dose.Core.Scenes
                 {
                     Location = this,
                     OpenDirection = ClockDirection.Clockwise,
-                    LocationManager = locationManager,
-                    LocationOccluderFactory = null // TODO: Instantiate LocationOccluderFactory
+                    LocationManager = locationManager
                 });
             }
 

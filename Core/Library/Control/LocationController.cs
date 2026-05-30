@@ -23,14 +23,12 @@ namespace Dose.Core.Library.Control
                     if (other != null)
                     {
                         portal.Link(other);
-                        LocationManager.OnPortalAccessed(other);
                     }
                 }
             }
             else
             {
                 LocationManager.CurrentLocation = portal.Linked.Location;
-                LocationManager.OnPortalAccessed(portal.Linked);
             }
 
             portal.Linked?.Location?.Clear(3);
