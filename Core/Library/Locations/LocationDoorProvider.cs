@@ -139,12 +139,6 @@ namespace Dose.Core.Library.Locations
         {
             var node = base.OnBuildWall(point, direction);
 
-            if (node is not ILocationOccluderAttachable receptor)
-            {
-                GD.PushWarning($"{nameof(node)} does not implement {nameof(ILocationOccluderAttachable)}. Skipping occluder association...");
-                return node;
-            }
-
             var occluder = BuildOccluder(point, direction);
 
             if (occluder == null)
@@ -152,8 +146,6 @@ namespace Dose.Core.Library.Locations
                 GD.PushWarning($"{nameof(occluder)} is null. Skipping occluder association...");
                 return node;
             }
-
-            receptor.AttachLocationOccluder(occluder);
 
             Location.OnBuild(occluder);
 

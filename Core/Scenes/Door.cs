@@ -18,7 +18,7 @@ namespace Dose.Core.Scenes
         Closing
     }
 
-    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>, IInitializableActor<DoorContext, DoorArgs>, ILocationOccluderAttachable
+    public partial class Door : Node3D, IDoor, IActor<Player>, IToggleable<DoorState>, IInitializableActor<DoorContext, DoorArgs>
     {
         const double MAX_OPENING = Math.PI / 2;
 
@@ -227,11 +227,6 @@ namespace Dose.Core.Scenes
             Location = args.Location;
             OpenDirection = args.OpenDirection;
             _locationManager = args.LocationManager;
-        }
-
-        public void AttachLocationOccluder(ILocationOccluder occluder)
-        {
-            _locationOccluder = occluder;
         }
     }
 }
