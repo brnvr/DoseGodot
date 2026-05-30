@@ -36,7 +36,7 @@ namespace Dose.Core.Library.Locations
             
             if (IsCollidable)
             {
-                //meshInstance.CreateTrimeshCollision();
+                meshInstance.CreateTrimeshCollision();
             }
 
             Location.OnBuild(meshInstance);
