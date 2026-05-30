@@ -1,6 +1,4 @@
-using Dose.Core.Library.Locations;
-
-namespace Dose.Core.Library.Location
+namespace Dose.Core.Library.Locations
 {
     public interface IPortal
     {

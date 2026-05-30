@@ -1,4 +1,3 @@
-using Dose.Core.Library.Location;
 using Dose.Core.Library.Locations;
 
 namespace Dose.Core.Library.Control
@@ -15,20 +14,27 @@ namespace Dose.Core.Library.Control
     
                 if (location != null)
                 {
-                    var other = location.SelectRandomPortal<TPortal>(linkedPortal => LocationManager.PortalPredicate(portal, linkedPortal));
+                    var other = location.SelectRandomPortal<TPortal>(linkedPortal => {
+                        if (portal is not IStairs stairs) return true;
+                        if (linkedPortal is not IStairs linkedStairs) return true;
+                        return stairs.Direction != linkedStairs.Direction;
+                    });
                 
                     if (other != null)
                     {
                         portal.Link(other);
+                        LocationManager.OnPortalAccessed(other);
                     }
                 }
             }
             else
             {
                 LocationManager.CurrentLocation = portal.Linked.Location;
+                LocationManager.OnPortalAccessed(portal.Linked);
             }
 
             portal.Linked?.Location?.Clear(3);
+            
         }
     }
 }

@@ -18,6 +18,11 @@ namespace Dose.Core.Scenes
 {
     public partial class Player : CharacterBody3D, ITalker, IPicker, IDoorOpener, IActionExecuter, IStairsUser
     {
+        public class MovedToLocationArgs(ILocation location)
+        {
+            public ILocation Location { get; } = location;
+        }
+
         enum MoveState
         {
             Locked,
@@ -60,7 +65,8 @@ namespace Dose.Core.Scenes
         public DialogueRunner? DialogueRunner { get; private set; }
         public Inventory Inventory { get; } = [];
         public QuestBook QuestBook { get; } = [];
-        public ItemContext? SelectedItem { get; protected set; }
+        public ItemContext? SelectedItem { get; private set; }
+        public EventHandler<MovedToLocationArgs>? MovedToLocation { get; set; }
 
         public override void _Ready()
         {
@@ -256,13 +262,14 @@ namespace Dose.Core.Scenes
             _interactionState = InteractionState.Locked;
 
             Transform3D? local = null;
-
+            
             if (door is Door doorNode)
             {
                 local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
             }
 
             _controlPlane?.LocationController?.UpdateLocation(door);
+            
 
             if (local != null && door.Linked is Door linkedDoorNode)
             {
@@ -280,6 +287,11 @@ namespace Dose.Core.Scenes
                         linkedDoorNode.TryClose();
 
                         _interactionState = InteractionState.Curious;
+
+                        if (door.Linked.Location != null)
+                        {
+                            MovedToLocation?.Invoke(this, new MovedToLocationArgs(door.Linked.Location));
+                        }
                     };
 
                     AutoMoveTo(parameters);

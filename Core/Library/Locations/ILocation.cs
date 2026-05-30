@@ -1,5 +1,4 @@
 using System;
-using Dose.Core.Library.Location;
 using Godot;
 
 namespace Dose.Core.Library.Locations

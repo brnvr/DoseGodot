@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Dose.Core.Library.Common;
 using Godot;
 
-namespace Dose.Core.Loaders
+namespace Dose.Core.Library.Loaders
 {
-    public class JascPalLoader : ILoader<List<Color>, JascPalLoaderArgs>
+    public class JascPalLoader(string path)
     {
-        public List<Color> Load(JascPalLoaderArgs loadArgs)
+        public string Path { get; } = path;
+    
+        public List<Color> Load()
         {
-            var lines = File.ReadAllLines(loadArgs.Path);
+            var lines = File.ReadAllLines(Path);
 
             if (lines[0] != "JASC-PAL")
                 throw new Exception("Invalid palette format.");

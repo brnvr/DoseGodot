@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bjwfm2kck6e55"]
+
+[ext_resource type="Script" uid="uid://c1fg8tyhus6u1" path="res://Core/Scenes/LocationOccluder.cs" id="1_vudno"]
+
+[node name="LocationOccluder" type="Node3D"]
+script = ExtResource("1_vudno")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]

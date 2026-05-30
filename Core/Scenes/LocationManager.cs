@@ -10,10 +10,8 @@ using static Dose.Core.Library.GeoPositioning;
 using System;
 using Dose.Core.Library.Actors;
 using Dose.Core.ActorArgs;
-using Dose.Core.Library.Location;
 using Dose.Core.Library.GameEvents;
 using System.Linq;
-using Dose.Core.Loaders;
 namespace Dose.Core.Scenes
 {
 
@@ -25,13 +23,16 @@ namespace Dose.Core.Scenes
 		const string CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY = "corridorWithStairsUpEnsured";
 		const string CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY = "corridorWithStairsDownEnsured";
 
+		readonly Vector2 _doorOffset = new(-0.11275f, .5f);
+		readonly Vector2 _stairsOffset = new(0, .5f);
 		readonly static Probability _probabilityToSetNpcEvent = new(0.25);
 		readonly static Probability _probabilityToSetLocationEvent = new (0.25);
-		readonly static Texture2D _floorCeilingTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/Common/black.png");
+		readonly static Texture2D _blackTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/Common/black.png");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
 		readonly static Mesh _floorMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Floor.glb");
 		readonly static Mesh _ceilingMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Ceiling.glb");
+		readonly static PackedScene _occluderScene = GD.Load<PackedScene>("res://Configuration/Scenes/LocationOccluder.tscn");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _buildableLocationScne = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
 		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
@@ -219,16 +220,22 @@ namespace Dose.Core.Scenes
 			{
 				Location = location,
 				LocationManager = this,
-				OpenDirection = ClockOpposite(location.DoorClockDirection)
+				OpenDirection = ClockOpposite(location.DoorClockDirection),
+				LocationOccluderFactory = new LocationOccluderFactory<LocationOccluder>
+				(
+					_occluderScene,
+					_wallMesh,
+					_doorwayMesh,
+					_floorMesh,
+					_ceilingMesh,
+					CreateMaterial(_blackTexture)
+				)
 			};
 
 			var stairsArgs = new StairsArgs
 			{
 				Location = location
 			};
-
-			var doorOffset = new Vector2(-0.11275f, .5f);
-			var stairsOffset = new Vector2(0, .5f);
 
 			var wallTexture = PickRandomTexture(_wallTexturePool?.GetWeightedList());
 
@@ -241,11 +248,11 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
-				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_floorCeilingTexture), BLOCK_SIZE, "FloorMeshInstance"),
-				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_floorCeilingTexture), BLOCK_SIZE, "CeilingMeshInstance"),
-				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, doorOffset, doorArgs, doorNumberController, ControlPlane.CustomRoomController),
-				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, stairsOffset, stairsArgs),
-				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, stairsOffset, stairsArgs),
+				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
+				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
+				new LocationDoorProvider<Door, DoorArgs>(location, _doorScene, BLOCK_SIZE, _doorOffset, doorArgs, doorNumberController, ControlPlane.CustomRoomController),
+				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
+				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
 			};
 
 			foreach (var builder in builders)
@@ -274,7 +281,7 @@ namespace Dose.Core.Scenes
 				return null;
 			}
 
-			return new TextureLoader().Load(new TextureLoadArgs(textureDefinition.TexturePath));
+			return GD.Load<Texture2D>(textureDefinition.TexturePath);
 		}
 
 		static T? PickRandom<T>(IEnumerable<T>? values)
@@ -378,7 +385,7 @@ namespace Dose.Core.Scenes
 		static RoomMapGenerator GenerateRoomMap()
         {
             return new RoomMapGenerator(
-				minSize: 5,
+				minSize: 2,
 				maxSize: 10,
 				probabilityToBuildDoor: new Probability(0.1)
 			);
@@ -399,20 +406,34 @@ namespace Dose.Core.Scenes
 				ShouldEnsureStairsDown = shouldEnsureStairsDown
 			};
         }
-
-        public bool PortalPredicate(IPortal portal, IPortal linkedPortal)
-        {
-            if (portal is not IStairs stairs)
+		
+		public void OnPortalAccessed(IPortal portal)
+		{
+			if (portal is Door door)
 			{
-				return true;
-			}
+				var occluder = _occluderScene.Instantiate<LocationOccluder>()
+					.Initialize(_wallMesh, _doorwayMesh, _floorMesh, _ceilingMesh, BLOCK_SIZE, CreateMaterial(_blackTexture));
 
-			if (linkedPortal is not IStairs linkedStairs)
-			{
-				return true;
-			}
+				occluder.Rotation = door.OpenDirection == ClockDirection.Clockwise ? door.Rotation : door.Rotation + new Vector3(0, Mathf.DegToRad(180), 0);
+				occluder.Position = door.Position + (door.OpenDirection == ClockDirection.Clockwise ? -1 : 1 ) * occluder.Transform.Basis.X * _doorOffset.X * BLOCK_SIZE;
 
-			return stairs.Direction != linkedStairs.Direction;
-        }
+				AddChild(occluder);
+
+				if (Player != null)
+				{
+                    void handler(object? sender, Player.MovedToLocationArgs e)
+                    {
+                        if (e.Location == door.Location)
+                        {
+                            occluder.QueueFree();
+
+                            Player.MovedToLocation -= handler;
+                        }
+                    }
+
+                    Player.MovedToLocation += handler;
+				}
+			}
+		}
     }
 }

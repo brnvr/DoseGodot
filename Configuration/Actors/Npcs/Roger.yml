@@ -1,0 +1,7 @@
+---
+identifier: Roger
+texturePath: res://Media/Textures/Npcs/Roger/Idle_000.png
+voice: mb-us2
+rarity: VeryCommon
+dialoguesDir: Configuration/Dialogues/Agnes
+availableDialogues: [SomeDialogue]

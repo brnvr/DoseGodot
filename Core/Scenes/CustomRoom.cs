@@ -5,7 +5,7 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class CustomRoom : Location
+    public partial class CustomRoom : Location, ICustomRoom
     {
         [Export]
         ClockDirection _doorClockDirection = ClockDirection.Clockwise;
@@ -26,11 +26,18 @@ namespace Dose.Core.Scenes
                 {
                     Location = this,
                     OpenDirection = ClockDirection.Clockwise,
-                    LocationManager = locationManager
+                    LocationManager = locationManager,
+                    LocationOccluderFactory = null // TODO: Instantiate LocationOccluderFactory
                 });
             }
 
             return this;
         }
+
+        ICustomRoom ICustomRoom.Initialize(ILocationManager locationManager)
+        {
+            return Initialize(locationManager);
+        }
+
     }
 }

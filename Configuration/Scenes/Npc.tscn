@@ -13,7 +13,7 @@ billboard_mode = 2
 
 [sub_resource type="QuadMesh" id="QuadMesh_iufkg"]
 material = SubResource("StandardMaterial3D_iufkg")
-size = Vector2(1, 2)
+size = Vector2(2, 2)
 center_offset = Vector3(0, 1, 0)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_b5x2e"]

@@ -1,26 +1,38 @@
 using System.Linq;
-using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Locations;
-using Dose.Core.Scenes;
+using Godot;
 
 namespace Dose.Core.Library.Control
 {
-    public class CustomRoomController(
+    public abstract class CustomRoomController(
         Pool<CustomRoomContext?> customRoomPool,
-        ILoader<ILocation?, CustomRoomLoadArgs> customRoomLoader,
         ILocationManager locationManager,
         LocationLoadRegistry loadRegistry
     )
     {
-        readonly object _lock = new();
-
+        public ILocationManager LocationManager { get; } = locationManager;
         public LocationLoadRegistry LoadRegistry { get; } = loadRegistry;
         public Pool<CustomRoomContext?> CustomRoomPool { get; } = customRoomPool;
-        public ILoader<ILocation?, CustomRoomLoadArgs> CustomRoomLoader { get; } = customRoomLoader;
-        public ILocationManager LocationManager { get; } = locationManager;
+    
+        public abstract bool TryLoadCustomRoom(int number, out ICustomRoom? customRoom);
+    }
 
-        public bool TryLoadCustomRoom(int number, out ILocation? customRoom)
+    public class CustomRoomController<TCustomRoom>
+    (
+        Pool<CustomRoomContext?> customRoomPool,
+        ILocationManager locationManager,
+        LocationLoadRegistry loadRegistry,
+        CustomRoomLoader<TCustomRoom> customRoomLoader
+    ) : CustomRoomController(customRoomPool, locationManager, loadRegistry) where TCustomRoom : Node, ICustomRoom
+    {
+        readonly object _lock = new();
+
+        
+        public CustomRoomLoader<TCustomRoom> CustomRoomLoader { get; } = customRoomLoader;
+        
+
+        public override bool TryLoadCustomRoom(int number, out ICustomRoom? customRoom)
         {
             var ctx = CustomRoomPool.Content.FirstOrDefault(c => c != null && c.RoomNumber == number);
 
@@ -30,11 +42,7 @@ namespace Dose.Core.Library.Control
                 return false;
             }
 
-            customRoom = CustomRoomLoader.Load(new CustomRoomLoadArgs
-            {
-                Scene = ctx.Scene,
-                LocationManager = LocationManager
-            });
+            customRoom = CustomRoomLoader.Load(ctx.Scene, LocationManager);
 
             if (customRoom != null)
             {

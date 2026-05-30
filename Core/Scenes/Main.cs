@@ -9,10 +9,10 @@ using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Configuration.Locations;
-using Dose.Core.Loaders;
 using Dose.Core.Library.GameEvents;
 using Dose.Core.Library.DataStructures;
 using System.IO;
+using Dose.Core.Library.Loaders;
 
 namespace Dose.Core.Scenes
 {
@@ -52,6 +52,7 @@ namespace Dose.Core.Scenes
 			var postShader = GetNode<PostShader>("PostShader");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager");
+			var locationOccluder = GetNode<LocationOccluder>("LocationOccluder");
 
 			List<IGameEvent<Npc>> npcEvents = [
 				new DisappearOnDistanceEvent<Npc>(player, 10)
@@ -59,7 +60,7 @@ namespace Dose.Core.Scenes
 
 			List<IGameEvent<Location>> locationEvents = [];
 
-			var palette = new JascPalLoader().Load(new JascPalLoaderArgs("Configuration/Palettes/miri16.pal"));
+			var palette = new JascPalLoader("Configuration/Palettes/miri16.pal").Load();
 
 			var wallTexturePool = new WeightedPool<TextureDefinition>
 			(
@@ -113,7 +114,7 @@ namespace Dose.Core.Scenes
 				builder: new CustomRoomContextBuilder()
 			).Load();
 
-			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader());
+			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader<CustomRoom>());
 			locationManager.Initialize(controlPlane, player, itemPool, npcPool, wallTexturePool, npcEvents, locationEvents);
 			player.Initialize(controlPlane);
 			postShader.Initialize(palette);

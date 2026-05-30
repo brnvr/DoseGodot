@@ -66,7 +66,7 @@ namespace Dose.Core.Library.Locations
 
             if (node is not IDoor door)
             {
-                GD.PushWarning($"{nameof(OnBuildWall)} didn't return an object of type {nameof(IDoor)}. Skipping door linking...");
+                GD.PushWarning($"{nameof(doorScene)} doesn't implement {nameof(IDoor)}. Skipping door linking...");
                 return node;
             }
             
@@ -75,7 +75,7 @@ namespace Dose.Core.Library.Locations
                 return node;
             }
 
-            if (door.Context?.Number == null || !CustomRoomController.TryLoadCustomRoom((int)door.Context.Number, out ILocation? customRoom))
+            if (door.Context?.Number == null || !CustomRoomController.TryLoadCustomRoom((int)door.Context.Number, out ICustomRoom? customRoom))
             {
                 return node;
             }

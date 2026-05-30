@@ -1,7 +1,6 @@
 using Dose.Core.Library.Control;
 using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Locations;
-using Dose.Core.Loaders;
 using Godot;
 
 namespace Dose.Core.Scenes
@@ -23,7 +22,7 @@ namespace Dose.Core.Scenes
             Player player,
             LocationManager locationManager,
             Pool<CustomRoomContext?> customRoomPool,
-            CustomRoomLoader customRoomLoader
+            CustomRoomLoader<CustomRoom> customRoomLoader
         )
         {
             LocationController = new LocationController(locationManager);
@@ -33,7 +32,7 @@ namespace Dose.Core.Scenes
             PauseController = new PauseController(ui);
             DoorNumberController = new DoorNumberController(13);
             QuestBookController = new QuestBookController(player.QuestBook, ui);
-            CustomRoomController = new CustomRoomController(customRoomPool, customRoomLoader, locationManager, new LocationLoadRegistry());
+            CustomRoomController = new CustomRoomController<CustomRoom>(customRoomPool, locationManager, new LocationLoadRegistry(), customRoomLoader);
 
             if (PauseController != null)
             {
