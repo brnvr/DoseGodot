@@ -150,6 +150,17 @@ namespace Dose.Core.Scenes
             
             return true;
         }
+
+        public override void _ExitTree()
+        {
+            if (_locationOccluder is Node node)
+            {
+                node.QueueFree();
+            }
+
+            base._ExitTree();
+        }
+
         
         public bool TryClose()
         {

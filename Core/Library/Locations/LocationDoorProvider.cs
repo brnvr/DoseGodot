@@ -1,5 +1,6 @@
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Control;
+using Dose.Core.Scenes;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
 using static Dose.Core.Library.Locations.MapCellWall;
@@ -119,7 +120,7 @@ namespace Dose.Core.Library.Locations
     {
         public LocationOccluderFactory<TLocationOccluder> OccluderFactory { get; } = occluderFactory;
 
-        protected TLocationOccluder? BuildOccluder(Vector2I point, CardinalDirection direction)
+        protected TLocationOccluder? BuildOccluder(ClockDirection openDirection)
         {
             if (Location.Map == null) return null;
         
@@ -127,10 +128,10 @@ namespace Dose.Core.Library.Locations
 
             if (occluder == null) return null;
 
-            var pointDir = MoveTo(point, direction, 0.5f);
+            //var pointDir = MoveTo(point, direction, 0.5f);
 
-            occluder.Position = new Vector3(pointDir.X - Location.Map.HorizontalCells / 2, 0, pointDir.Y - Location.Map.VerticalCells / 2) * BlockSize;
-            occluder.RotateY(DirectionToRadians(NextDirection(direction, ClockDirection.Counterclockwise)));
+            occluder.Position = new Vector3(-Offset.X * BlockSize, 0, 0);
+            occluder.RotateY(openDirection == ClockDirection.Counterclockwise ? Mathf.DegToRad(180) : 0);
 
             return occluder;
         }
@@ -139,7 +140,9 @@ namespace Dose.Core.Library.Locations
         {
             var node = base.OnBuildWall(point, direction);
 
-            var occluder = BuildOccluder(point, direction);
+            if (node is not IDoor door) return null;
+
+            var occluder = BuildOccluder(door.OpenDirection);
 
             if (occluder == null)
             {
@@ -147,7 +150,7 @@ namespace Dose.Core.Library.Locations
                 return node;
             }
 
-            Location.OnBuild(occluder);
+            node.CallDeferred(Node.MethodName.AddChild, occluder);
 
             return node;
         }
