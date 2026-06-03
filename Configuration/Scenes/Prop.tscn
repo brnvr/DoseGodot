@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=3 uid="uid://bep1e5d2jhol4"]
+
+[ext_resource type="Script" uid="uid://bhpex71d701u6" path="res://Core/Scenes/Item.cs" id="1_qbndv"]
+[ext_resource type="Texture2D" uid="uid://dinna5i27gyg8" path="res://Media/Textures/Placehoders/Item.png" id="2_lbuee"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
+transparency = 1
+shading_mode = 0
+albedo_texture = ExtResource("2_lbuee")
+texture_filter = 0
+texture_repeat = false
+billboard_mode = 2
+
+[sub_resource type="QuadMesh" id="QuadMesh_kl7so"]
+material = SubResource("StandardMaterial3D_iufkg")
+size = Vector2(1, 2)
+center_offset = Vector3(0, 1, 0)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_kjml4"]
+
+[node name="Prop" type="RigidBody3D"]
+gravity_scale = 0.0
+script = ExtResource("1_qbndv")
+
+[node name="MeshInstance" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_kl7so")
+
+[node name="CollisionShape" type="CollisionShape3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_kjml4")

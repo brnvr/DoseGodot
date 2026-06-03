@@ -1,3 +1,5 @@
+using Godot;
+
 namespace Dose.Core.Library.Actors
 {
     public class DoorContext : IActorContext
@@ -7,5 +9,6 @@ namespace Dose.Core.Library.Actors
         public int MaxQuantity => -1;
         public int? Number { get; init; }
         public string FormattedNumber => Number is null ? "" : ((int)Number).ToString().PadLeft(3, '0');
+        public Texture2D? Texture { get; }
     }
 }

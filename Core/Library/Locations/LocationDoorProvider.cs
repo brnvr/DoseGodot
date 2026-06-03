@@ -10,6 +10,7 @@ namespace Dose.Core.Library.Locations
     public class LocationDoorProvider<TInitializable, TArgs>(
         IBuildableLocation location,
         PackedScene doorScene,
+        bool shouldPullNumber,
         int blockSize,
         Vector2 offset,
         TArgs initializationArgs,
@@ -20,6 +21,7 @@ namespace Dose.Core.Library.Locations
     {
         public Vector2 Offset { get; } = offset;
         public int BlockSize { get; } = blockSize;
+        public bool ShouldPullNumber { get; } = shouldPullNumber;
         public DoorNumberController? DoorNumberController { get; } = doorNumberController;
         public CustomRoomController? CustomRoomController { get; } = customRoomController;
 
@@ -27,7 +29,7 @@ namespace Dose.Core.Library.Locations
         {
             return new DoorContext
             {
-                Number = DoorNumberController?.PullNumber(237)
+                Number = ShouldPullNumber ? DoorNumberController?.PullNumber(237) : null
             };
         }
 
@@ -109,12 +111,13 @@ namespace Dose.Core.Library.Locations
         IBuildableLocation location,
         PackedScene doorScene,
         LocationOccluderFactory<TLocationOccluder> occluderFactory,
+        bool shouldPullNumber,
         int blockSize,
         Vector2 offset,
         TArgs initializationArgs,
         DoorNumberController? doorNumberController,
         CustomRoomController? customRoomController
-    ) : LocationDoorProvider<TInitializable, TArgs>(location, doorScene, blockSize, offset, initializationArgs, doorNumberController, customRoomController)
+    ) : LocationDoorProvider<TInitializable, TArgs>(location, doorScene, shouldPullNumber, blockSize, offset, initializationArgs, doorNumberController, customRoomController)
         where TInitializable : IInitializableActor<DoorContext, TArgs>
         where TLocationOccluder : Node3D, ILocationOccluder
     {

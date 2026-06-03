@@ -11,24 +11,15 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : RigidBody3D, ITalkable, ISpeakable, INpc, IActor<Player>, IInitializableActor<NpcContext, NpcArgs>, ILookable, IDisappearable
+    public partial class Npc : Actor<NpcContext>, ITalkable, ISpeakable, INpc, IInitializableActor<NpcContext, NpcArgs>, ILookable, IDisappearable
     {
-        MeshInstance3D? _mesh;
-
         public IGameEvent<Npc>? GameEvent { get; private set; }
         public float EyeHeightProportion { get; private set; } = 0.9f;
         public ISpeaker? Speaker { get; private set; }
-        public NpcContext? Context { get; private set; }
+        public override NpcContext? Context { get ; protected set ; }
         public Node3D LookTarget => GetNode<Node3D>("LookTarget");
-        public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, _mesh?.GetAabb().Size.Y * EyeHeightProportion ?? 0, 0);
-        public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, _mesh?.GetAabb().Size.Y * .5f ?? 0, 0);
-
-        IActorContext? IActor.Context => Context;
-
-        public override void _Ready()
-        {
-            LinearDamp = 15f;
-        }
+        public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * EyeHeightProportion ?? 0, 0);
+        public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * .5f ?? 0, 0);
 
         public override void _Process(double delta)
         {
@@ -42,7 +33,7 @@ namespace Dose.Core.Scenes
         {
             Context = context;
             GameEvent = args.GameEvent;
-            _mesh = GetNode<MeshInstance3D>("Mesh");
+            MeshInstance = GetNode<MeshInstance3D>("Mesh");
 
             UpdateTexture();
 
@@ -74,7 +65,6 @@ namespace Dose.Core.Scenes
 
         }
 
-
         public IDialogue? GetDialogue()
         {
             if (Context == null)
@@ -86,31 +76,9 @@ namespace Dose.Core.Scenes
             return Context.DialogueMap[dialogueKey];
         }
 
-        public void OnInteract(IInteraction<Player> interaction)
-        {
-            interaction.Perform(this);
-        }
-
-        public IInteraction<Player> GetDefaultInteraction(Player interactor)
+        public override IInteraction<Player> GetDefaultInteraction(Player interactor)
         {
             return new TalkInteraction<Player>(interactor);
-        }
-
-        void UpdateTexture()
-        {
-            if (_mesh == null || Context == null)
-            {
-                GD.PushWarning($"{nameof(Npc)} not initialized. Skipping {nameof(UpdateTexture)}.");
-
-                return;
-            }
-
-            var material = _mesh.GetActiveMaterial(0);
-
-            if (material is StandardMaterial3D stdMat)
-            {
-                stdMat.AlbedoTexture = Context.Texture;
-            }
         }
 
         public void Disappear()

@@ -44,13 +44,13 @@ namespace Dose.Core.Library.Control
             }
         }
 
-        public int PullNumber(int preference = 0)
+        public int PullNumber(int prioritary = 0)
         {
             lock (_lock)
             {
-                if (preference < 0 || preference > DOOR_COUNT)
+                if (prioritary < 0 || prioritary > DOOR_COUNT)
                 {
-                    GD.PushError($"{nameof(preference)} must be an integer between 0 and {DOOR_COUNT}.");
+                    GD.PushError($"{nameof(prioritary)} must be an integer between 0 and {DOOR_COUNT}.");
                     return 0;
                 }
 
@@ -66,8 +66,8 @@ namespace Dose.Core.Library.Control
                     return PlayerRoomNumber;
                 }
 
-                var number = preference > 0 && _availableNumbers.Contains(preference) ?
-                preference :
+                var number = prioritary > 0 && _availableNumbers.Contains(prioritary) ?
+                prioritary :
                 new RandomSelector<int>(_availableNumbers.Except([PlayerRoomNumber])).Pick();
 
                 _availableNumbers = _availableNumbers.Except([number]);

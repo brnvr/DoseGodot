@@ -246,12 +246,14 @@ namespace Dose.Core.Scenes
 				CreateMaterial(_blackTexture)
 			);
 
+			var shouldPullNumber = location.Type == Location.LocationType.Corridor;
+
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
 				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
 				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
-				new LocationDoorProvider<Door, DoorArgs, LocationOccluder>(location, _doorScene, occluderFactory, BLOCK_SIZE, _doorOffset, doorArgs, ControlPlane.DoorNumberController, ControlPlane.CustomRoomController),
+				new LocationDoorProvider<Door, DoorArgs, LocationOccluder>(location, _doorScene, occluderFactory, shouldPullNumber, BLOCK_SIZE, _doorOffset, doorArgs, ControlPlane.DoorNumberController, ControlPlane.CustomRoomController),
 				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
 				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
 			};
