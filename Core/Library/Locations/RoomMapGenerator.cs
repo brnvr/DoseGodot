@@ -26,6 +26,8 @@ namespace Dose.Core.Library.Locations
 
             FillEmptyCells(map, width, height);
 
+            map.Set(map.Center, map.CenterCell.WithLampTexture(new Texture2D()));
+    
             return map;
         }
 

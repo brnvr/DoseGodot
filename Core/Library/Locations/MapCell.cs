@@ -1,10 +1,12 @@
 using System;
+using Godot;
 using static Dose.Core.Library.GeoPositioning;
 
 namespace Dose.Core.Library.Locations
 {
     public record MapCell
     {
+        public Texture2D? LampTexture { get; private set; }
         public MapCellWall? EastWall { get; private set; }
         public MapCellWall? WestWall { get; private set; }
         public MapCellWall? NorthWall { get; private set; }
@@ -12,8 +14,9 @@ namespace Dose.Core.Library.Locations
 
         public MapCell() { }
         
-        public MapCell(MapCellWall eastWall, MapCellWall westWall, MapCellWall northWall, MapCellWall southWall)
+        public MapCell(MapCellWall eastWall, MapCellWall westWall, MapCellWall northWall, MapCellWall southWall, Texture2D? lampTexture)
         {
+            LampTexture = lampTexture;
             EastWall = eastWall;
             WestWall = westWall;
             NorthWall = northWall;
@@ -33,13 +36,15 @@ namespace Dose.Core.Library.Locations
         }
 
         public MapCell WithWall(CardinalDirection direction, MapCellWall? wall) =>
-            direction switch
-            {
-                CardinalDirection.North => this with { NorthWall = wall },
-                CardinalDirection.South => this with { SouthWall = wall },
-                CardinalDirection.East  => this with { EastWall  = wall },
-                CardinalDirection.West  => this with { WestWall  = wall },
-                _ => throw new ArgumentOutOfRangeException(nameof(direction))
-            };
-        }
+        direction switch
+        {
+            CardinalDirection.North => this with { NorthWall = wall },
+            CardinalDirection.South => this with { SouthWall = wall },
+            CardinalDirection.East  => this with { EastWall  = wall },
+            CardinalDirection.West  => this with { WestWall  = wall },
+            _ => throw new ArgumentOutOfRangeException(nameof(direction))
+        };
+        
+        public MapCell WithLampTexture(Texture2D texture) => this with { LampTexture = texture };
+    }
 }

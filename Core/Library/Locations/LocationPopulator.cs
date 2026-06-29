@@ -95,7 +95,7 @@ namespace Dose.Core.Library.Locations
             if (nextActor is Node3D nextActorNode3D)
             {
                 nextActorNode3D.Position = new Vector3(
-                    position.X - Location.Map.HorizontalCells / 2, 0, position.Y - Location.Map.VerticalCells / 2) * BlockSize;
+                    position.X - Location.Map.CenterX, 0, position.Y - Location.Map.CenterY) * BlockSize;
             }
 
             return nextActor;

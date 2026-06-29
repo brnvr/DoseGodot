@@ -29,7 +29,6 @@ namespace Dose.Core.Scenes
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
         ILocationManager? _locationManager;
-        ILocationOccluder? _locationOccluder;
 
         [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
         public ILocation? Location { get; private set; }
@@ -149,16 +148,6 @@ namespace Dose.Core.Scenes
             if (disableCollision) DisableCollision();
             
             return true;
-        }
-
-        public override void _ExitTree()
-        {
-            if (_locationOccluder is Node node)
-            {
-                node.QueueFree();
-            }
-
-            base._ExitTree();
         }
 
         

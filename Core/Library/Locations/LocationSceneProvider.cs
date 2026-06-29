@@ -1,20 +1,17 @@
 using System;
-using System.Linq;
-using Dose.Core.Library.Actors;
 using Godot;
-using static Dose.Core.Library.GeoPositioning;
 
 namespace Dose.Core.Library.Locations
 {
-    public abstract class LocationSceneProvider<TInitializable, TContext, TArgs>(
+    public class LocationSceneProvider(
         IBuildableLocation location,
         PackedScene scene,
-        TArgs initializationArgs
-    ) : LocationBuilder(location) where TInitializable : IInitializableActor<TContext, TArgs>
+        ILocationSceneFactory factory
+    ) : LocationBuilder(location)
     {
         public new IBuildableLocation Location { get; } = location;
         public PackedScene Scene { get; } = scene;
-        public TArgs InitializationArgs { get; } = initializationArgs;
+        public ILocationSceneFactory Factory { get; } = factory;
         
         protected override void OnBuildCell(Vector2I position)
         {
@@ -23,56 +20,35 @@ namespace Dose.Core.Library.Locations
                 throw new Exception("Location doesn't have a defined Map.");
             }
 
-            var cell = Location.Map.Get(position);
-    
-            foreach (var direction in AllDirections().Where(direction =>
-            {
-                var wall = cell.GetWall(direction);
-
-                if (wall == null)
-                {
-                    return false;
-                }
-                
-                return WallPredicate(wall);
-            }))
-            {
-                OnBuildWall(position, direction);
-            }
+            Factory.Build(Location, Scene, position);  
         }
 
-        protected abstract bool WallPredicate(MapCellWall wall);
+        // protected abstract bool WallPredicate(MapCellWall wall);
 
-        protected abstract TContext BuildContext();
+        // protected abstract Vector3 GetPosition(Vector2I point, CardinalDirection direction);
 
-        protected abstract Vector3 GetPosition(Vector2I point, CardinalDirection direction);
+        // protected abstract float GetRotation(Vector2I point, CardinalDirection direction);
 
-        protected abstract float GetRotation(Vector2I point, CardinalDirection direction);
+        // protected abstract void InitializeNode(Node node);
 
-        protected virtual Node3D? OnBuildWall(Vector2I point, CardinalDirection direction)
-        {
-            if (Location.Map == null)
-            {
-                GD.PushError($"{nameof(Location)} doesn't have a defined ${nameof(Location.Map)}.");
-                return default;
-            }
+        // protected virtual Node3D? OnBuildWall(Vector2I point, CardinalDirection direction)
+        // {
+        //     if (Location.Map == null)
+        //     {
+        //         GD.PushError($"{nameof(Location)} doesn't have a defined ${nameof(Location.Map)}.");
+        //         return default;
+        //     }
 
-            var node = (Node3D)Scene.Instantiate();
+        //     var node = (Node3D)Scene.Instantiate();
 
-            Location.OnBuild(node);
+        //     Location.OnBuild(node);
 
-            node.Position = GetPosition(point, direction);
-            node.RotateY(GetRotation(point, direction));
+        //     node.Position = GetPosition(point, direction);
+        //     node.RotateY(GetRotation(point, direction));
 
-            if (node is not TInitializable initializable)
-            {
-                GD.PushWarning($"Instance of {Scene.ResourcePath} is not of type {nameof(TInitializable)}. The node will not be initialized.");
-                return default;
-            }
+        //     InitializeNode(node);
 
-            initializable.Initialize(BuildContext(), InitializationArgs);
-
-            return node;
-        }
+        //     return node;
+        // }
     }
 }

@@ -22,7 +22,7 @@ namespace Dose.Core.Library.Locations
                 return;
             }
     
-            var position = new Vector3((point.X - Location.Map.HorizontalCells / 2) * BlockSize, 0, (point.Y - Location.Map.VerticalCells / 2) * BlockSize);
+            var position = new Vector3((point.X - Location.Map.CenterX) * BlockSize, 0, (point.Y - Location.Map.CenterY) * BlockSize);
     
             var scale = new Vector3(BlockSize, BlockSize, BlockSize);
             var transform = new Transform3D(Basis.Identity.Scaled(scale), position);

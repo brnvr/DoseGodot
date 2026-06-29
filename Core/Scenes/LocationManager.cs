@@ -34,6 +34,7 @@ namespace Dose.Core.Scenes
 		readonly static Mesh _ceilingMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Ceiling.glb");
 		readonly static PackedScene _occluderScene = GD.Load<PackedScene>("res://Configuration/Scenes/LocationOccluder.tscn");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
+		readonly static PackedScene _lampScene = GD.Load<PackedScene>("res://Configuration/Scenes/Lamp.tscn");
 		readonly static PackedScene _buildableLocationScne = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
 		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
 		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
@@ -248,14 +249,54 @@ namespace Dose.Core.Scenes
 
 			var shouldPullNumber = location.Type == Location.LocationType.Corridor;
 
+			var doorContext = new DoorContext
+            {
+                Number = shouldPullNumber ? ControlPlane.DoorNumberController?.PullNumber(237) : null
+            };
+
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
 				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
 				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
-				new LocationDoorProvider<Door, DoorArgs, LocationOccluder>(location, _doorScene, occluderFactory, shouldPullNumber, BLOCK_SIZE, _doorOffset, doorArgs, ControlPlane.DoorNumberController, ControlPlane.CustomRoomController),
-				new LocationStairsUpProvider<Stairs, StairsArgs>(location, _stairsUpScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
-				new LocationStairsDownProvider<Stairs, StairsArgs>(location, _stairsDownScene, BLOCK_SIZE, _stairsOffset, stairsArgs),
+				new LocationSceneProvider
+				(
+					location,
+					_doorScene,
+					new LocationDoorSceneFactory<DoorArgs, LocationOccluder>
+					(
+						ControlPlane.DoorNumberController,
+						ControlPlane.CustomRoomController,
+						doorArgs,
+						occluderFactory,
+						BLOCK_SIZE,
+						_doorOffset,
+						shouldPullNumber
+					)
+				),
+				new LocationSceneProvider
+				(
+					location,
+					_stairsUpScene,
+					new LocationStairsUpSceneFactory<StairsArgs>
+					(
+						stairsArgs,
+						BLOCK_SIZE,
+						_stairsOffset
+					)
+				),
+				new LocationSceneProvider
+				(
+					location,
+					_stairsDownScene,
+					new LocationStairsDownSceneFactory<StairsArgs>
+					(
+						stairsArgs,
+						BLOCK_SIZE,
+						_stairsOffset
+					)
+				),
+				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory(BLOCK_SIZE))
 			};
 
 			foreach (var builder in builders)

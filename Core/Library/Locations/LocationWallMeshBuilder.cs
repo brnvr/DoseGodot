@@ -62,7 +62,7 @@ namespace Dose.Core.Library.Locations
             }
 
             var centerPosition = MoveTo(point, direction, 0.5f);
-            var wallPosition = new Vector3((centerPosition.X - Location.Map.HorizontalCells / 2) * BlockSize, 0, (centerPosition.Y - Location.Map.VerticalCells / 2) * BlockSize);
+            var wallPosition = new Vector3((centerPosition.X - Location.Map.CenterX) * BlockSize, 0, (centerPosition.Y - Location.Map.CenterY) * BlockSize);
 
             var scale = new Vector3(BlockSize, BlockSize, BlockSize);
 

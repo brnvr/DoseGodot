@@ -77,6 +77,13 @@ namespace Dose.Core.Library.Locations
         {
             var baseCell = BuildCellWalls(new MapCell(), direction, hasDoors0, hasDoors1, iteration, AllDirections());
 
+            var isMiddleOfChunk = iteration == CORRIDOR_CHUNK_LENGTH_CELLS/2;
+
+            if (isMiddleOfChunk)
+            {
+                baseCell = baseCell.WithLampTexture(new Texture2D());
+            }
+
             map.Set(point, baseCell);
             RemoveIntersectingWalls(map, point, AllDirections());
             
@@ -89,7 +96,7 @@ namespace Dose.Core.Library.Locations
             }
 
             var isEndOfChunk = iteration == CORRIDOR_CHUNK_LENGTH_CELLS-1;
-
+            
             if (isEndOfChunk)
             {
                 var shouldExtendCorridor = new RandomDecider(ProbabilityToExtendCorridor).Roll();
