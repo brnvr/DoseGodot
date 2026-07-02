@@ -6,7 +6,7 @@ namespace Dose.Core.Library.Locations
 {
     public record MapCell
     {
-        public Texture2D? LampTexture { get; private set; }
+        public bool HasLamp { get; private set; }
         public MapCellWall? EastWall { get; private set; }
         public MapCellWall? WestWall { get; private set; }
         public MapCellWall? NorthWall { get; private set; }
@@ -14,9 +14,9 @@ namespace Dose.Core.Library.Locations
 
         public MapCell() { }
         
-        public MapCell(MapCellWall eastWall, MapCellWall westWall, MapCellWall northWall, MapCellWall southWall, Texture2D? lampTexture)
+        public MapCell(MapCellWall eastWall, MapCellWall westWall, MapCellWall northWall, MapCellWall southWall, bool hasLamp)
         {
-            LampTexture = lampTexture;
+            HasLamp = hasLamp;
             EastWall = eastWall;
             WestWall = westWall;
             NorthWall = northWall;
@@ -45,6 +45,6 @@ namespace Dose.Core.Library.Locations
             _ => throw new ArgumentOutOfRangeException(nameof(direction))
         };
         
-        public MapCell WithLampTexture(Texture2D texture) => this with { LampTexture = texture };
+        public MapCell WithLamp() => this with { HasLamp = true };
     }
 }

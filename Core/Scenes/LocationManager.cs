@@ -43,6 +43,7 @@ namespace Dose.Core.Scenes
 		ActorPool<ItemContext>? _itemPool;
 		ActorPool<NpcContext>? _npcPool;
 		WeightedPool<TextureDefinition>? _wallTexturePool;
+		WeightedPool<TextureDefinition>? _lampTexturePool;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
@@ -65,6 +66,7 @@ namespace Dose.Core.Scenes
 			ActorPool<ItemContext> itemPool,
 			ActorPool<NpcContext> npcPool,
 			WeightedPool<TextureDefinition> wallTexturePool,
+			WeightedPool<TextureDefinition> lampTexturePool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
 		)
@@ -74,6 +76,7 @@ namespace Dose.Core.Scenes
 			_itemPool = itemPool;
 			_npcPool = npcPool;
 			_wallTexturePool = wallTexturePool;
+			_lampTexturePool = lampTexturePool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
@@ -249,6 +252,14 @@ namespace Dose.Core.Scenes
 				GD.PushError("Wall texture could not be selected.");
 				return;
 			}
+
+			var lampTexture = PickRandomTexture(_lampTexturePool?.GetWeightedList());
+
+			if (lampTexture is null)
+			{
+				GD.PushError("Lamp texture could not be selected.");
+				return;
+			}
 			
 			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
 			(
@@ -266,8 +277,6 @@ namespace Dose.Core.Scenes
             {
                 Number = shouldPullNumber ? ControlPlane.DoorNumberController?.PullNumber(237) : null
             };
-
-			
 
 			var builders = new List<LocationBuilder> 
 			{ 
@@ -289,29 +298,24 @@ namespace Dose.Core.Scenes
 						shouldPullNumber
 					)
 				),
-				new LocationSceneProvider
+				new LocationSceneProvider(location, _stairsUpScene, new LocationStairsUpSceneFactory<StairsArgs>
 				(
-					location,
-					_stairsUpScene,
-					new LocationStairsUpSceneFactory<StairsArgs>
-					(
-						stairsArgs,
-						BLOCK_SIZE,
-						_stairsOffset
-					)
-				),
-				new LocationSceneProvider
+					stairsArgs,
+					BLOCK_SIZE,
+					_stairsOffset
+				)),
+				new LocationSceneProvider(location, _stairsDownScene, new LocationStairsDownSceneFactory<StairsArgs>
 				(
-					location,
-					_stairsDownScene,
-					new LocationStairsDownSceneFactory<StairsArgs>
-					(
-						stairsArgs,
-						BLOCK_SIZE,
-						_stairsOffset
-					)
-				),
-				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory(BLOCK_SIZE, GetLampOffset(location)))
+					stairsArgs,
+					BLOCK_SIZE,
+					_stairsOffset
+				)),
+				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory
+				(
+					lampTexture,
+					BLOCK_SIZE,
+					GetLampOffset(location)
+				))
 			};
 
 			foreach (var builder in builders)

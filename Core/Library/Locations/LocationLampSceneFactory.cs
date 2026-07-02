@@ -2,10 +2,12 @@ using Godot;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationLampSceneFactory(int blockSize, Vector2 offset) : LocationBlockSceneFactory
+    public class LocationLampSceneFactory(Texture2D texture, int blockSize, Vector2 offset)
+    : LocationBlockSceneFactory
     {
         public Vector2 Offset { get; } = offset;
         public int BlockSize { get; } = blockSize;
+        public Texture2D Texture { get; } = texture;
 
         protected override Vector3 GetPosition(IBuildableLocation location, Vector2I point)
         {
@@ -24,12 +26,21 @@ namespace Dose.Core.Library.Locations
 
         protected override void InitializeNode(Node node)
         {
-            return;
+            var meshInstance = node.GetChild<MeshInstance3D>(0);
+
+            meshInstance.SetSurfaceOverrideMaterial(0, new StandardMaterial3D
+            {
+                AlbedoTexture = texture,
+                BillboardMode = BaseMaterial3D.BillboardModeEnum.FixedY,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            });
         }
 
         protected override bool Predicate(MapCell cell)
         {
-            return cell.LampTexture != null;
+            return cell.HasLamp;
         }
     }
 }

@@ -12,13 +12,11 @@ namespace Dose.Core.Library.Locations
             Downstairs
         }
 
-        public Texture2DArray? TextureArray { get; }
         public MapCellType Type { get; set; }
 
-        public MapCellWall(Texture2DArray? textureArray, MapCellType type)
+        public MapCellWall( MapCellType type)
         {
             Type = type;
-            TextureArray = textureArray;
         }
     }
 }

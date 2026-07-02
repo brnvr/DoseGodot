@@ -81,7 +81,7 @@ namespace Dose.Core.Library.Locations
 
             if (isMiddleOfChunk)
             {
-                baseCell = baseCell.WithLampTexture(new Texture2D());
+                baseCell = baseCell.WithLamp();
             }
 
             map.Set(point, baseCell);
@@ -182,7 +182,7 @@ namespace Dose.Core.Library.Locations
         static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
         {
             var wallDirection = wallDirections.First();
-            var wall = new MapCellWall(null, MapCellType.Solid);
+            var wall = new MapCellWall(MapCellType.Solid);
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -219,7 +219,7 @@ namespace Dose.Core.Library.Locations
             var buildOrientation = OrientationFromDirection(direction);
             var wallOrientation = OrientationFromDirection(wallDirection);
             var hasDoor = (buildOrientation != wallOrientation) && ((shouldBuildDoors0 && _directions0.Contains(wallDirection)) || (shouldBuildDoors1 && _directions1.Contains(wallDirection)));
-            var wall = new MapCellWall(null, DecideMapCellType(hasDoor));
+            var wall = new MapCellWall(DecideMapCellType(hasDoor));
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);

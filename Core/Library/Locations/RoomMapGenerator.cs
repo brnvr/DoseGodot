@@ -26,7 +26,7 @@ namespace Dose.Core.Library.Locations
 
             FillEmptyCells(map, width, height);
 
-            map.Set(map.Center, map.CenterCell.WithLampTexture(new Texture2D()));
+            map.Set(map.Center, map.CenterCell.WithLamp());
     
             return map;
         }
@@ -42,7 +42,7 @@ namespace Dose.Core.Library.Locations
 
             var shouldBuildDoor = new RandomDecider(ProbabilityToBuildDoor).Roll();
             var type = shouldBuildDoor ? MapCellType.Doorway : MapCellType.Solid;
-            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(null, type));
+            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(type));
 
             map.Set(point, cell);
 
