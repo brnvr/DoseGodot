@@ -207,6 +207,19 @@ namespace Dose.Core.Scenes
 			return location;
 		}
 
+		static Vector2 GetLampOffset(BuildableLocation location)
+		{
+			if (location.Type == Location.LocationType.Corridor || location.Map == null)
+			{
+				return Vector2.Zero;
+			}
+
+			var xOffset = location.Map.HorizontalCells % 2 == 0 ? -0.5f : 0f;
+			var yOffset = location.Map.VerticalCells % 2 == 0 ? -0.5f : 0f;
+
+			return new Vector2(xOffset, yOffset);
+		}
+
 		void BuildLocation(BuildableLocation location)
 		{
 			if (ControlPlane == null)
@@ -254,6 +267,8 @@ namespace Dose.Core.Scenes
                 Number = shouldPullNumber ? ControlPlane.DoorNumberController?.PullNumber(237) : null
             };
 
+			
+
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
@@ -296,7 +311,7 @@ namespace Dose.Core.Scenes
 						_stairsOffset
 					)
 				),
-				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory(BLOCK_SIZE))
+				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory(BLOCK_SIZE, GetLampOffset(location)))
 			};
 
 			foreach (var builder in builders)
