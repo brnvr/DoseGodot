@@ -28,14 +28,9 @@ namespace Dose.Core.Library.Locations
         {
             var meshInstance = node.GetChild<MeshInstance3D>(0);
 
-            meshInstance.SetSurfaceOverrideMaterial(0, new StandardMaterial3D
-            {
-                AlbedoTexture = texture,
-                BillboardMode = BaseMaterial3D.BillboardModeEnum.FixedY,
-                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-                TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest,
-                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            });
+            var material = GodotUtils.CreateBillboardMaterial(Texture);
+
+            meshInstance.SetSurfaceOverrideMaterial(0, material);
         }
 
         protected override bool Predicate(MapCell cell)

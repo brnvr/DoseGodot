@@ -76,12 +76,12 @@ namespace Dose.Core.Scenes
 				configConverter: new TextureConfigConverter()
 			).Load();
 
-			// var doorTexturePool = new WeightedPool<TextureDefinition>
-			// (
-			// 	configPath: Path.Join(TEXTURE_PATH, "Environment/Doors"),
-			// 	builder: new TextureDefinitionBuilder(),
-			// 	configConverter: new TextureConfigConverter()
-			// ).Load();
+			var doorTexturePool = new WeightedPool<TextureDefinition>
+			(
+				configPath: Path.Join(TEXTURE_PATH, "Environment/Doors"),
+				builder: new TextureDefinitionBuilder(),
+				configConverter: new TextureConfigConverter()
+			).Load();
 
 			var itemPool = new ActorPool<ItemContext>
 			(
@@ -122,7 +122,18 @@ namespace Dose.Core.Scenes
 			).Load();
 
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader<CustomRoom>());
-			locationManager.Initialize(controlPlane, player, itemPool, npcPool, wallTexturePool, lampTexturePool, npcEvents, locationEvents);
+			locationManager.Initialize
+			(
+				controlPlane,
+				player,
+				itemPool,
+				npcPool,
+				wallTexturePool,
+				doorTexturePool,
+				lampTexturePool,
+				npcEvents,
+				locationEvents
+			);
 			player.Initialize(controlPlane);
 			postShader.Initialize(palette);
 

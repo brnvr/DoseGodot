@@ -4,13 +4,14 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Dose.Core.Library.GodotUtils;
 
 
 namespace Dose.Core.Scenes
 {
     public abstract partial class Location : Node3D, ILocation
     {
+        public NavigationRegion3D NavigationRegion { get; } = new NavigationRegion3D();
+
         public enum LocationType
         {
             Room, Corridor
@@ -18,22 +19,11 @@ namespace Dose.Core.Scenes
 
         public abstract LocationType? Type { get; }
 
-        public void CreateFlippedBack(string nodeName="WallMeshInstance")
+        public override void _Ready()
         {
-            var _meshInstance = GetNode<MeshInstance3D>(nodeName);
+            AddChild(NavigationRegion);
 
-            if (_meshInstance == null)
-            {
-                GD.PushWarning($"{nodeName} node not found. Can't created flipped back.");
-                return;
-            }
-
-            var inverted = new MeshInstance3D
-            {
-                Mesh = FlipNormals(_meshInstance.Mesh)
-            };
-            
-            AddChild(inverted);
+            base._Ready();
         }
 
         public TPortal SelectRandomPortal<TPortal>(Func<TPortal, bool>? predicate = null) where TPortal : IPortal

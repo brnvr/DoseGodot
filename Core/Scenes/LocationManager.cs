@@ -12,6 +12,7 @@ using Dose.Core.Library.Actors;
 using Dose.Core.ActorArgs;
 using Dose.Core.Library.GameEvents;
 using System.Linq;
+using Dose.Core.Library;
 namespace Dose.Core.Scenes
 {
 
@@ -44,6 +45,7 @@ namespace Dose.Core.Scenes
 		ActorPool<NpcContext>? _npcPool;
 		WeightedPool<TextureDefinition>? _wallTexturePool;
 		WeightedPool<TextureDefinition>? _lampTexturePool;
+		WeightedPool<TextureDefinition>? _doorTexturePool;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
@@ -66,6 +68,7 @@ namespace Dose.Core.Scenes
 			ActorPool<ItemContext> itemPool,
 			ActorPool<NpcContext> npcPool,
 			WeightedPool<TextureDefinition> wallTexturePool,
+			WeightedPool<TextureDefinition> doorTexturePool,
 			WeightedPool<TextureDefinition> lampTexturePool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
@@ -76,6 +79,7 @@ namespace Dose.Core.Scenes
 			_itemPool = itemPool;
 			_npcPool = npcPool;
 			_wallTexturePool = wallTexturePool;
+			_doorTexturePool = doorTexturePool;
 			_lampTexturePool = lampTexturePool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
@@ -232,9 +236,18 @@ namespace Dose.Core.Scenes
             }
 
 			var doorNumberController = location.Type == Location.LocationType.Corridor ? ControlPlane.DoorNumberController : null;
+			
+			var doorTexture = PickRandomTexture(_doorTexturePool?.GetWeightedList());
+
+			if (doorTexture is null)
+			{
+				GD.PushError("Door texture could not be selected.");
+				return;
+			}
 
 			var doorArgs = new DoorArgs
 			{
+				Material = CreatePlainMaterial(doorTexture),
 				Location = location,
 				LocationManager = this,
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
@@ -268,7 +281,7 @@ namespace Dose.Core.Scenes
 				_doorwayMesh,
 				_floorMesh,
 				_ceilingMesh,
-				CreateMaterial(_blackTexture)
+				CreatePlainMaterial(_blackTexture)
 			);
 
 			var shouldPullNumber = location.Type == Location.LocationType.Corridor;
@@ -280,9 +293,9 @@ namespace Dose.Core.Scenes
 
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreateMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
-				new LocationBaseMeshBuilder(location, _floorMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
-				new LocationBaseMeshBuilder(location, _ceilingMesh, CreateMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
+				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreatePlainMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
+				new LocationBaseMeshBuilder(location, _floorMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
+				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
 				new LocationSceneProvider
 				(
 					location,
@@ -322,17 +335,6 @@ namespace Dose.Core.Scenes
 			{
 				builder.Build();
 			}
-		}
-
-        static StandardMaterial3D CreateMaterial(Texture2D texture)
-		{
-			return new StandardMaterial3D
-			{
-				AlbedoTexture = texture,
-				ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
-				VertexColorUseAsAlbedo = false,
-				TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest
-			};
 		}
 
 		static Texture2D? PickRandomTexture(IEnumerable<TextureDefinition>? values)

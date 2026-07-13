@@ -1,3 +1,4 @@
+using Dose.Core.Library;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
 using Godot;
@@ -33,14 +34,9 @@ namespace Dose.Core.Scenes
                 return;
             }
 
-            MeshInstance.SetSurfaceOverrideMaterial(0, new StandardMaterial3D
-            {
-                AlbedoTexture = Context.Texture,
-                BillboardMode = BaseMaterial3D.BillboardModeEnum.FixedY,
-                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
-                TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest,
-                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            });
+            var material = GodotUtils.CreateBillboardMaterial(Context.Texture);
+
+            MeshInstance.SetSurfaceOverrideMaterial(0, material);
         }
     }
 }

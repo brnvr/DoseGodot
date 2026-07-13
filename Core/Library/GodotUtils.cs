@@ -70,6 +70,29 @@ namespace Dose.Core.Library
             return false;
         }
 
+        public static StandardMaterial3D CreatePlainMaterial(Texture2D texture)
+		{
+			return new StandardMaterial3D
+			{
+				AlbedoTexture = texture,
+				ShadingMode = BaseMaterial3D.ShadingModeEnum.PerVertex,
+				VertexColorUseAsAlbedo = false,
+				TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest
+			};
+		}
+
+        public static StandardMaterial3D CreateBillboardMaterial(Texture2D? texture)
+        {
+            return new StandardMaterial3D
+            {
+                AlbedoTexture = texture,
+                BillboardMode = BaseMaterial3D.BillboardModeEnum.FixedY,
+                Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+                TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest,
+                ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            };
+        }
+
         public static Mesh? FlipNormals(Mesh original)
         {
             if (original is ArrayMesh arrayMesh)

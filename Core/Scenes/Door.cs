@@ -227,6 +227,11 @@ namespace Dose.Core.Scenes
             Location = args.Location;
             OpenDirection = args.OpenDirection;
             _locationManager = args.LocationManager;
+
+            if (args.Material != null)
+            {
+                _mesh?.SetSurfaceOverrideMaterial(0, args.Material);
+            }
         }
     }
 }

@@ -24,6 +24,7 @@ namespace Dose.Core.Scenes
 
                 door.Initialize(new DoorContext(), new DoorArgs
                 {
+                    Material = null,
                     Location = this,
                     OpenDirection = ClockDirection.Clockwise,
                     LocationManager = locationManager
