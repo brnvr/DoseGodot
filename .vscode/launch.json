@@ -9,7 +9,7 @@
             "request": "launch",
             "type": "coreclr",
             "preLaunchTask": "build",
-            "program": "D:/Program Files/Godot/Godot_v4.5.exe",
+            "program": "${config:godot.executablePath}",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "stopAtEntry": false,
