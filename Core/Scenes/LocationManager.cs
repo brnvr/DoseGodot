@@ -36,7 +36,7 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _occluderScene = GD.Load<PackedScene>("res://Configuration/Scenes/LocationOccluder.tscn");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _lampScene = GD.Load<PackedScene>("res://Configuration/Scenes/Lamp.tscn");
-		readonly static PackedScene _buildableLocationScne = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
+		readonly static PackedScene _buildableLocationScene = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
 		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
 		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
 
@@ -172,7 +172,7 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateRoomMap();
 
-			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(
+			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
 				BLOCK_SIZE,
 				clockDirection,
@@ -198,7 +198,7 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairsUp, shouldEnsureStairsDown);
 
-			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(
+			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
 				BLOCK_SIZE,
 				clockDirection,
@@ -294,8 +294,8 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreatePlainMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
-				new LocationBaseMeshBuilder(location, _floorMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
-				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
+				new LocationBaseMeshBuilder(location, _floorMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, true, "FloorMeshInstance"),
+				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, false, "CeilingMeshInstance"),
 				new LocationSceneProvider
 				(
 					location,
@@ -443,6 +443,22 @@ namespace Dose.Core.Scenes
             {
 				AddChild(locationNode);
             }
+
+			if (location is Location _location)
+			{
+				if (_location.NavigationRegion == null) {
+					_location.InitNavigationRegion();
+				}
+
+				var navMesh = _location.NavigationRegion?.NavigationMesh;
+
+				// GD.Print($"NavMesh exists: {navMesh != null}");
+
+				// if (navMesh != null)
+				// {
+				// 	GD.Print($"Vertices: {navMesh.GetVertices().Length}");
+				// }
+			}
 
 			_currentLocation = location;
         }

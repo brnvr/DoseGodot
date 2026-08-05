@@ -76,6 +76,7 @@ namespace Dose.Core.Scenes
             _view = GetNode<Camera3D>("Head/View");
             _rayCast = GetNode<RayCast3D>("Head/View/RayCast3D");
             _rayCast.TargetPosition = new Vector3(0, 0, -RAY_LENGTH);
+            GlobalPosition += Vector3.Up * 0.05f;
             
             Inventory.ItemAdded += (sender, e) =>
             {
@@ -217,23 +218,29 @@ namespace Dose.Core.Scenes
             if (_moveState != MoveState.Auto) return;
             if (_autoMoveParameters == null) return;
 
-            var distance = _autoMoveParameters.Position - GlobalPosition;
+            var targetPosition = _autoMoveParameters.Position;
+            var flatTarget = new Vector3(targetPosition.X, GlobalPosition.Y, targetPosition.Z);
+            var displacement = flatTarget - GlobalPosition;
+            var flatDisplacement = new Vector3(displacement.X, 0, displacement.Z);
+            var distance = flatDisplacement.Length();
 
-            Velocity = distance.Normalized() * _autoMoveParameters.Speed;
-
-            if (distance.Length() <= _autoMoveParameters.Speed * delta)
+            if (distance <= _autoMoveParameters.Speed * delta)
             {
-                var completedCallback = _autoMoveParameters.Completed;
+                GlobalPosition = new Vector3(targetPosition.X, GlobalPosition.Y, targetPosition.Z);
 
+                var completedCallback = _autoMoveParameters.Completed;
                 _moveState = MoveState.Free;
                 _autoMoveParameters = null;
-                completedCallback?.Invoke(_autoMoveParameters, new EventArgs());
+                completedCallback?.Invoke(this, EventArgs.Empty);
 
                 return;
             }
-            
+
+            Velocity = flatDisplacement.Normalized() * _autoMoveParameters.Speed;
+            Velocity = new Vector3(Velocity.X, 0, Velocity.Z);
+
             MoveAndSlide();
-            Push(20f);
+            Push(1f);
         }
 
         void Push(float impulse, bool ignoreY = true)
@@ -249,10 +256,14 @@ namespace Dose.Core.Scenes
                     if (ignoreY)
                     {
                         push.Y = 0;
-                        push = push.Normalized();
                     }
 
-                    body.ApplyCentralImpulse(push * impulse);
+                    if (push.Length() < 0.001f)
+                    {
+                        continue;
+                    }
+
+                    body.ApplyCentralImpulse(push.Normalized() * impulse);
                 }
             }
         }

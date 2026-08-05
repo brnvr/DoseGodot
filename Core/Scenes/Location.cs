@@ -10,7 +10,7 @@ namespace Dose.Core.Scenes
 {
     public abstract partial class Location : Node3D, ILocation
     {
-        public NavigationRegion3D NavigationRegion { get; } = new NavigationRegion3D();
+        public NavigationRegion3D? NavigationRegion { get; private set; }
 
         public enum LocationType
         {
@@ -19,11 +19,75 @@ namespace Dose.Core.Scenes
 
         public abstract LocationType? Type { get; }
 
-        public override void _Ready()
+        public override void _EnterTree()
         {
-            AddChild(NavigationRegion);
+            // static void FindAllCollisions(Node node)
+            // {
+            //     if (node is CollisionShape3D collisionShape)
+            //     {
+            //         GD.Print(
+            //             $"Collision: {(collisionShape.IsInsideTree() ? collisionShape.GetPath() : "<not in tree>")} | " +
+            //             $"Owner: {collisionShape.Owner?.Name ?? "NULL"} | " +
+            //             $"Shape: {collisionShape.Shape?.GetType().Name ?? "NULL"}"
+            //         );
+            //     }
 
-            base._Ready();
+            //     foreach (Node child in node.GetChildren())
+            //     {
+            //         FindAllCollisions(child);
+            //     }
+            // }
+            // var node = GetTree().Root.GetNode<Node>("Main");
+
+            // FindAllCollisions(node);
+            
+            base._EnterTree();
+        }
+
+        public Location InitNavigationRegion(string floorNodeName = "FloorMeshInstance")
+        {
+            var floorNode = FindChild(floorNodeName, owned: false);
+            
+            if (floorNode == null) 
+            {
+                GD.PushWarning($"Child not found: {floorNodeName}");
+                return this;
+            }
+
+            if (NavigationRegion != null)
+            {
+                GD.PushWarning($"{nameof(NavigationRegion)} has already been initialized.");
+                return this;
+            }
+    
+            NavigationRegion = new NavigationRegion3D
+            { 
+                NavigationMesh = new NavigationMesh
+                {
+                    GeometryParsedGeometryType = NavigationMesh.ParsedGeometryType.StaticColliders
+                }
+            };
+
+            AddChild(NavigationRegion);
+            
+            var sourceData = new NavigationMeshSourceGeometryData3D();
+
+            NavigationServer3D.ParseSourceGeometryData(
+                NavigationRegion.NavigationMesh,
+                sourceData,
+                floorNode
+            );
+
+            NavigationServer3D.BakeFromSourceGeometryData(
+                NavigationRegion.NavigationMesh,
+                sourceData
+            );
+
+                GD.Print($"Source has data: {sourceData.HasData()}");
+                GD.Print($"Source vertices: {sourceData.GetVertices().Count()}");
+                GD.Print($"Source indices: {sourceData.GetIndices().Count()}");
+
+            return this;
         }
 
         public TPortal SelectRandomPortal<TPortal>(Func<TPortal, bool>? predicate = null) where TPortal : IPortal
