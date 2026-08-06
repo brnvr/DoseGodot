@@ -37,7 +37,12 @@ namespace Dose.Core.Library.DataStructures.Dialogues
         {
             _currentUI = ui;
 
-            var menuOptions = Options.Select(o => new MenuOption(text: o.Text, onExit: () => Selected = null, onHover: () => Selected = o));
+            var menuOptions = Options.Select(o => new MenuOption(
+                text: o.Text,
+                onHover: () => Selected = o,
+                onExit: () => Selected = null,
+                onButtonDown: () => Selected = o
+            ));
 
             ui.DisplayMenu(menuOptions);
         }

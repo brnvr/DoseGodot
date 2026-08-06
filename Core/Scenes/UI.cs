@@ -85,6 +85,7 @@ namespace Dose.Core.Scenes
                 };
 
                 if (option.OnPressed != null) button.Pressed += option.OnPressed;
+                if (option.OnButtonDown != null) button.ButtonDown += option.OnButtonDown;
                 if (option.OnHover != null) button.MouseEntered += option.OnHover;
                 if (option.OnExit != null) button.MouseExited += option.OnExit;
                 menuBox.AddChild(button);

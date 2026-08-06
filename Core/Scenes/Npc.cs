@@ -28,8 +28,6 @@ namespace Dose.Core.Scenes
         bool _lockRotationBeforeFollow;
         bool _collisionDisabledForFollow;
 
-        Player? tempPlaer;
-
         public IGameEvent<Npc>? GameEvent { get; private set; }
         public float EyeHeightProportion { get; private set; } = 0.9f;
         public ISpeaker? Speaker { get; private set; }
@@ -48,11 +46,6 @@ namespace Dose.Core.Scenes
             if (GameEvent != null && GameEvent.ShouldTrigger(this))
             {
                 GameEvent.OnTrigger(this);
-            }
-
-            if (_following == null && tempPlaer != null && IsInsideTree())
-            {
-                BeginFollow(tempPlaer);
             }
         }
 
@@ -118,8 +111,6 @@ namespace Dose.Core.Scenes
             Speaker = new ESpeaker(Context.Voice, args.Player.ProgressDialogue);
             
             AddChild((Node)Speaker);
-
-            tempPlaer = args.Player;
         }
 
         public override void _ExitTree()

@@ -8,6 +8,7 @@ namespace Dose.Core.Scenes
          public override void _Ready()
         {
             // Ensure it covers the full screen
+            MouseFilter = MouseFilterEnum.Ignore;
             Size = GetViewportRect().Size;
         }
 
