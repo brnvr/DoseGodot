@@ -408,12 +408,35 @@ namespace Dose.Core.Scenes
 				npcPopulator
 			};
 
-			HashSet<Vector2I> populatedPositions = [];
+			var populatedPositions = GetReservedActorPositions(location);
 
 			foreach (var populator in populators)
 			{
 				populator.Populate(populatedPositions, out populatedPositions);
 			}
+		}
+
+		static HashSet<Vector2I> GetReservedActorPositions(BuildableLocation location)
+		{
+			if (location.Map == null)
+			{
+				return [];
+			}
+
+			return
+            [
+                .. location.Map.GetFilledPositions()
+					.Where(position => AllDirections().Any(direction =>
+					{
+						var wallType = location.Map.Get(position).GetWall(direction)?.Type;
+
+						return wallType == MapCellWall.MapCellType.Doorway ||
+							wallType == MapCellWall.MapCellType.Upstairs ||
+							wallType == MapCellWall.MapCellType.Downstairs;
+					}))
+,
+                location.Map.Center,
+            ];
 		}
 
 		void SetCurrentLocation(ILocation? location)
