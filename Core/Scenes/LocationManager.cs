@@ -91,7 +91,7 @@ namespace Dose.Core.Scenes
 				{ CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsDown: true) }
 			}).Initialize();
 
-			CurrentLocation = InitializeLocation(_locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise));
+			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
 
             return this;
         }
@@ -157,15 +157,9 @@ namespace Dose.Core.Scenes
 				return null;
 			}
 
-			var initializedLocation = InitializeLocation(nextLocation);
+			AttachLocation(nextLocation, visible: false);
 
-			if (initializedLocation is Node3D locationNode)
-			{
-				locationNode.Visible = false;
-				AddChild(locationNode);
-			}
-
-			return initializedLocation;
+			return nextLocation;
 		}
 
 		ILocation? CreateFrontierSafeLocation(string category, ClockDirection clockDirection, IPortal incomingPortal)
@@ -615,29 +609,29 @@ namespace Dose.Core.Scenes
                 RemoveChild(currentLocationNode);
             }
 
-			if (location is Node locationNode && locationNode.GetParent() != this)
-            {
-                AddChild(locationNode);
-            }
-
-			if (location is Node3D locationNode3D)
-			{
-				locationNode3D.Visible = true;
-			}
+			AttachLocation(location, visible: true);
 
 			_currentLocation = location;
         }
 
-		static ILocation? InitializeLocation(ILocation? location)
+		void AttachLocation(ILocation? location, bool visible)
 		{
-			if (location is not Location locationNode) return location;
-
-			if (locationNode.NavigationRegion == null)
+			if (location is not Node3D locationNode)
 			{
-				Callable.From(() => { locationNode.InitializeNavigationRegion(); }).CallDeferred();
+				return;
 			}
 
-			return location;
+			locationNode.Visible = visible;
+
+			if (locationNode.GetParent() != this)
+			{
+				AddChild(locationNode);
+			}
+
+			if (location is Location { NavigationRegion: null } concreteLocation)
+			{
+				concreteLocation.InitializeNavigationRegion();
+			}
 		}
 
 		static RoomMapGenerator GenerateRoomMap()

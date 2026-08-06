@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using Dose.Core.Library.Locations;
-using Godot;
 
 namespace Dose.Core.Library.Control
 {
@@ -9,7 +7,7 @@ namespace Dose.Core.Library.Control
         public int MaxLayers { get; } = maxLayers;
         public ILocationManager LocationManager { get; } = locationManager;
 
-        public async Task UpdateLocation<TPortal>(TPortal portal) where TPortal : IPortal
+        public void UpdateLocation<TPortal>(TPortal portal) where TPortal : IPortal
         {
             if (portal.Linked is null)
             {
@@ -17,14 +15,6 @@ namespace Dose.Core.Library.Control
     
                 if (location != null)
                 {
-                    if (location is Node locationNode && locationNode.IsInsideTree())
-                    {
-                        await locationNode.ToSignal(
-                            locationNode.GetTree(),
-                            SceneTree.SignalName.ProcessFrame
-                        );
-                    }
-
                     var other = location.SelectRandomPortal<TPortal>(linkedPortal => {
                         if (linkedPortal.Linked != null) return false;
                         if (portal is not IStairs stairs) return true;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -66,7 +65,6 @@ namespace Dose.Core.Scenes
         private float _mouseSensitivity = 0.1f;
         float _moveSpeed = 20f;
         AutoMoveParameters? _autoMoveParameters;
-        int _autoMoveBlockedFrames;
         Node3D? _head;
         Camera3D? _view;
         IActor<Player>? _currentTarget;
@@ -267,45 +265,12 @@ namespace Dose.Core.Scenes
                     flatTarget,
                     _autoMoveParameters.Speed * delta
                 );
-                _autoMoveBlockedFrames = 0;
 
                 return;
             }
 
-            var positionBeforeMove = GlobalPosition;
             MoveAndSlide();
             Push(1f);
-
-            if ((GlobalPosition - positionBeforeMove).LengthSquared() <= 0.000001f)
-            {
-                _autoMoveBlockedFrames++;
-
-                if (_autoMoveBlockedFrames == 5 || _autoMoveBlockedFrames % 60 == 0)
-                {
-                    GD.Print(
-                        $"Auto-move blocked: position={GlobalPosition}, " +
-                        $"target={targetPosition}, onFloor={IsOnFloor()}, velocity={Velocity}"
-                    );
-
-                    for (var i = 0; i < GetSlideCollisionCount(); i++)
-                    {
-                        var collision = GetSlideCollision(i);
-                        var collider = collision.GetCollider();
-                        var colliderName = collider is Node node
-                            ? node.GetPath().ToString()
-                            : collider?.ToString() ?? "null";
-
-                        GD.Print(
-                            $"Auto-move collision: collider={colliderName}, " +
-                            $"normal={collision.GetNormal()}, position={collision.GetPosition()}"
-                        );
-                    }
-                }
-            }
-            else
-            {
-                _autoMoveBlockedFrames = 0;
-            }
         }
 
         void Push(float impulse, bool ignoreY = true)
@@ -333,7 +298,7 @@ namespace Dose.Core.Scenes
             }
         }
 
-        public async void OnDoorOpened(IDoor door)
+        public void OnDoorOpened(IDoor door)
         {
             _moveState = MoveState.Locked;
             _interactionState = InteractionState.Locked;
@@ -347,7 +312,7 @@ namespace Dose.Core.Scenes
 
             if (_controlPlane?.LocationController != null)
             {
-                await _controlPlane.LocationController.UpdateLocation(door);
+                _controlPlane.LocationController.UpdateLocation(door);
             }
             
 
@@ -710,16 +675,10 @@ namespace Dose.Core.Scenes
         void AutoMoveTo(AutoMoveParameters parameters)
         {
             _autoMoveParameters = parameters;
-            _autoMoveBlockedFrames = 0;
             _moveState = MoveState.Auto;
         }
 
         public void UseStairs(IStairs stairs)
-        {
-            _ = UseStairsAsync(stairs);
-        }
-
-        async Task UseStairsAsync(IStairs stairs)
         {
             _moveState = MoveState.Locked;
             _interactionState = InteractionState.Locked;
@@ -731,11 +690,11 @@ namespace Dose.Core.Scenes
                 return;
             }
 
-            await FadeTransition.Instance.Fade(async () =>
+            _ = FadeTransition.Instance.Fade(() =>
             {
                 if (_controlPlane?.LocationController != null)
                 {
-                    await _controlPlane.LocationController.UpdateLocation(stairs);
+                    _controlPlane.LocationController.UpdateLocation(stairs);
                 }
 
                 if (stairs is Stairs stairsNode && stairsNode.Linked is Stairs linked)

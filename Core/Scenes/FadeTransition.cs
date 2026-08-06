@@ -42,11 +42,5 @@ namespace Dose.Core.Scenes
             await FadeIn(speed);
         }
 
-        public async Task Fade(Func<Task> midAction, float speed = 1f)
-        {
-            await FadeOut(speed);
-            await midAction();
-            await FadeIn(speed);
-        }
     }
 }
