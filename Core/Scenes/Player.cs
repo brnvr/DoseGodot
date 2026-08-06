@@ -41,10 +41,17 @@ namespace Dose.Core.Scenes
             QuestBookOpened
         }
 
-        class AutoMoveParameters(Vector3 position, float speed)
+        class AutoMoveParameters(
+            Vector3 position,
+            float speed,
+            float arrivalTolerance = 0,
+            bool snapToTarget = true
+        )
         {
             public float Speed { get; } = speed;
             public Vector3 Position { get; } = position;
+            public float ArrivalTolerance { get; } = arrivalTolerance;
+            public bool SnapToTarget { get; } = snapToTarget;
             public EventHandler? Completed { get; set; }
         }
        
@@ -55,6 +62,7 @@ namespace Dose.Core.Scenes
         private float _mouseSensitivity = 0.1f;
         float _moveSpeed = 20f;
         AutoMoveParameters? _autoMoveParameters;
+        int _autoMoveBlockedFrames;
         Node3D? _head;
         Camera3D? _view;
         IActor<Player>? _currentTarget;
@@ -224,9 +232,17 @@ namespace Dose.Core.Scenes
             var flatDisplacement = new Vector3(displacement.X, 0, displacement.Z);
             var distance = flatDisplacement.Length();
 
-            if (distance <= _autoMoveParameters.Speed * delta)
+            var arrivalDistance = Mathf.Max(
+                _autoMoveParameters.Speed * delta,
+                _autoMoveParameters.ArrivalTolerance
+            );
+
+            if (distance <= arrivalDistance)
             {
-                GlobalPosition = new Vector3(targetPosition.X, GlobalPosition.Y, targetPosition.Z);
+                if (_autoMoveParameters.SnapToTarget)
+                {
+                    GlobalPosition = new Vector3(targetPosition.X, GlobalPosition.Y, targetPosition.Z);
+                }
 
                 var completedCallback = _autoMoveParameters.Completed;
                 _moveState = MoveState.Free;
@@ -239,8 +255,40 @@ namespace Dose.Core.Scenes
             Velocity = flatDisplacement.Normalized() * _autoMoveParameters.Speed;
             Velocity = new Vector3(Velocity.X, 0, Velocity.Z);
 
+            var positionBeforeMove = GlobalPosition;
             MoveAndSlide();
             Push(1f);
+
+            if ((GlobalPosition - positionBeforeMove).LengthSquared() <= 0.000001f)
+            {
+                _autoMoveBlockedFrames++;
+
+                if (_autoMoveBlockedFrames == 5 || _autoMoveBlockedFrames % 60 == 0)
+                {
+                    GD.Print(
+                        $"Auto-move blocked: position={GlobalPosition}, " +
+                        $"target={targetPosition}, onFloor={IsOnFloor()}, velocity={Velocity}"
+                    );
+
+                    for (var i = 0; i < GetSlideCollisionCount(); i++)
+                    {
+                        var collision = GetSlideCollision(i);
+                        var collider = collision.GetCollider();
+                        var colliderName = collider is Node node
+                            ? node.GetPath().ToString()
+                            : collider?.ToString() ?? "null";
+
+                        GD.Print(
+                            $"Auto-move collision: collider={colliderName}, " +
+                            $"normal={collision.GetNormal()}, position={collision.GetPosition()}"
+                        );
+                    }
+                }
+            }
+            else
+            {
+                _autoMoveBlockedFrames = 0;
+            }
         }
 
         void Push(float impulse, bool ignoreY = true)
@@ -287,7 +335,12 @@ namespace Dose.Core.Scenes
                 GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
 
                 var targetPosition = linkedDoorNode.GetHingeCenter();
-                var parameters = new AutoMoveParameters(targetPosition, 5f);
+                var parameters = new AutoMoveParameters(
+                    targetPosition,
+                    5f,
+                    arrivalTolerance: 0.3f,
+                    snapToTarget: false
+                );
                 parameters.Completed += (sender, e) =>
                 {
                     //door.OpenDirection = ClockOpposite(door.OpenDirection);
@@ -625,6 +678,7 @@ namespace Dose.Core.Scenes
         void AutoMoveTo(AutoMoveParameters parameters)
         {
             _autoMoveParameters = parameters;
+            _autoMoveBlockedFrames = 0;
             _moveState = MoveState.Auto;
         }
 
