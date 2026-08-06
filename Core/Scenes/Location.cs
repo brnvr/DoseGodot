@@ -19,32 +19,7 @@ namespace Dose.Core.Scenes
 
         public abstract LocationType? Type { get; }
 
-        public override void _EnterTree()
-        {
-            // static void FindAllCollisions(Node node)
-            // {
-            //     if (node is CollisionShape3D collisionShape)
-            //     {
-            //         GD.Print(
-            //             $"Collision: {(collisionShape.IsInsideTree() ? collisionShape.GetPath() : "<not in tree>")} | " +
-            //             $"Owner: {collisionShape.Owner?.Name ?? "NULL"} | " +
-            //             $"Shape: {collisionShape.Shape?.GetType().Name ?? "NULL"}"
-            //         );
-            //     }
-
-            //     foreach (Node child in node.GetChildren())
-            //     {
-            //         FindAllCollisions(child);
-            //     }
-            // }
-            // var node = GetTree().Root.GetNode<Node>("Main");
-
-            // FindAllCollisions(node);
-            
-            base._EnterTree();
-        }
-
-        public Location InitNavigationRegion(string floorNodeName = "FloorMeshInstance")
+        public Location InitializeNavigationRegion(string floorNodeName = "FloorMeshInstance")
         {
             var floorNode = FindChild(floorNodeName, owned: false);
             

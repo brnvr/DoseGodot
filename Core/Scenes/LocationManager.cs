@@ -447,17 +447,8 @@ namespace Dose.Core.Scenes
 			if (location is Location _location)
 			{
 				if (_location.NavigationRegion == null) {
-					_location.InitNavigationRegion();
+					_location.InitializeNavigationRegion();
 				}
-
-				var navMesh = _location.NavigationRegion?.NavigationMesh;
-
-				// GD.Print($"NavMesh exists: {navMesh != null}");
-
-				// if (navMesh != null)
-				// {
-				// 	GD.Print($"Vertices: {navMesh.GetVertices().Length}");
-				// }
 			}
 
 			_currentLocation = location;

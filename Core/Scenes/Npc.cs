@@ -11,8 +11,18 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Npc : Actor<NpcContext>, ITalkable, ISpeakable, INpc, IInitializableActor<NpcContext, NpcArgs>, ILookable, IDisappearable
+    public partial class Npc : Actor<NpcContext>, IFollower<Player>, ITalkable, ISpeakable, INpc, IInitializableActor<NpcContext, NpcArgs>, ILookable, IDisappearable
     {
+        NavigationAgent3D _navigationAgent = new()
+        {
+            PathDesiredDistance = 0.5f,
+            TargetDesiredDistance = 1.5f
+        };
+        
+        Following<Player>? _following;
+
+        Player? tempPlaer;
+
         public IGameEvent<Npc>? GameEvent { get; private set; }
         public float EyeHeightProportion { get; private set; } = 0.9f;
         public ISpeaker? Speaker { get; private set; }
@@ -21,12 +31,22 @@ namespace Dose.Core.Scenes
         public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * EyeHeightProportion ?? 0, 0);
         public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * .5f ?? 0, 0);
 
+        public Npc()
+        {
+            AddChild(_navigationAgent);
+        }
+
         public override void _Process(double delta)
         {
             if (GameEvent != null && GameEvent.ShouldTrigger(this))
             {
                 GameEvent.OnTrigger(this);
-            } 
+            }
+
+            if (_following == null && tempPlaer != null && IsInsideTree())
+            {
+                BeginFollow(tempPlaer);
+            }
         }
 
         public void Initialize(NpcContext context, NpcArgs args)
@@ -52,6 +72,8 @@ namespace Dose.Core.Scenes
             Speaker = new ESpeaker(Context.Voice, args.Player.ProgressDialogue);
             
             AddChild((Node)Speaker);
+
+            tempPlaer = args.Player;
         }
 
         public override void _ExitTree()
@@ -84,6 +106,46 @@ namespace Dose.Core.Scenes
         public void Disappear()
         {
             QueueFree();
+        }
+
+        public void BeginFollow(Player target, float speed = 5f, float targetUpdateIntervalSeconds = 1f)
+        {
+            _following = new(this, target, speed, targetUpdateIntervalSeconds);
+            _following.Start(this);
+        }
+
+        public void EndFollow()
+        {
+            _following?.Stop();
+            _following = null;
+        }
+
+        public void Follow(Player target, float speed)
+        {
+            _navigationAgent.TargetPosition = target.GlobalPosition;
+            Vector3 nextPosition = _navigationAgent.GetNextPathPosition();
+            Vector3 direction = nextPosition - GlobalPosition;
+            direction.Y = 0;
+
+            if (!direction.IsZeroApprox())
+                direction = direction.Normalized();
+
+            LinearVelocity = new Vector3(
+                direction.X * speed,
+                LinearVelocity.Y,
+                direction.Z * speed
+            );
+        }
+
+        public void Stop()
+        {
+            LinearVelocity = new Vector3(0, LinearVelocity.Y, 0);
+        }
+
+        public bool HasReached(Player target)
+        {
+            return false;
+            return _navigationAgent.IsNavigationFinished();
         }
     }
 }
