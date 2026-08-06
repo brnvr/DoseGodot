@@ -46,13 +46,12 @@ namespace Dose.Core.Library.Common
 
         void Process()
         {
+            Follower.Follow(Target, Speed);
+
             if (Follower.HasReached(Target))
             {
                 Follower.Stop();
-                return;
             }
-
-            Follower.Follow(Target, Speed);
         }
     }
 }

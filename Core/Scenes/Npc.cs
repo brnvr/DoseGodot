@@ -16,10 +16,17 @@ namespace Dose.Core.Scenes
         NavigationAgent3D _navigationAgent = new()
         {
             PathDesiredDistance = 0.5f,
+            PathHeightOffset = 0.5f,
             TargetDesiredDistance = 1.5f
         };
         
         Following<Player>? _following;
+        Vector3? _lastNavigationTarget;
+        float _followSpeed;
+        uint _collisionLayerBeforeFollow;
+        uint _collisionMaskBeforeFollow;
+        bool _lockRotationBeforeFollow;
+        bool _collisionDisabledForFollow;
 
         Player? tempPlaer;
 
@@ -47,6 +54,45 @@ namespace Dose.Core.Scenes
             {
                 BeginFollow(tempPlaer);
             }
+        }
+
+        public override void _PhysicsProcess(double delta)
+        {
+            if (_following == null)
+            {
+                return;
+            }
+
+            var map = _navigationAgent.GetNavigationMap();
+
+            if (NavigationServer3D.MapGetIterationId(map) == 0)
+            {
+                Stop();
+                return;
+            }
+
+            if (_navigationAgent.IsNavigationFinished())
+            {
+                Stop();
+                return;
+            }
+
+            var nextPosition = _navigationAgent.GetNextPathPosition();
+            var direction = nextPosition - GlobalPosition;
+            direction.Y = 0;
+
+            if (direction.IsZeroApprox())
+            {
+                Stop();
+                return;
+            }
+
+            direction = direction.Normalized();
+            LinearVelocity = new Vector3(
+                direction.X * _followSpeed,
+                LinearVelocity.Y,
+                direction.Z * _followSpeed
+            );
         }
 
         public void Initialize(NpcContext context, NpcArgs args)
@@ -110,6 +156,19 @@ namespace Dose.Core.Scenes
 
         public void BeginFollow(Player target, float speed = 5f, float targetUpdateIntervalSeconds = 1f)
         {
+            if (!_collisionDisabledForFollow)
+            {
+                _collisionLayerBeforeFollow = CollisionLayer;
+                _collisionMaskBeforeFollow = CollisionMask;
+                _lockRotationBeforeFollow = LockRotation;
+
+                CollisionLayer = 0;
+                CollisionMask = 0;
+                LockRotation = true;
+                AngularVelocity = Vector3.Zero;
+                _collisionDisabledForFollow = true;
+            }
+
             _following = new(this, target, speed, targetUpdateIntervalSeconds);
             _following.Start(this);
         }
@@ -118,23 +177,29 @@ namespace Dose.Core.Scenes
         {
             _following?.Stop();
             _following = null;
+            _lastNavigationTarget = null;
+
+            if (_collisionDisabledForFollow)
+            {
+                CollisionLayer = _collisionLayerBeforeFollow;
+                CollisionMask = _collisionMaskBeforeFollow;
+                LockRotation = _lockRotationBeforeFollow;
+                AngularVelocity = Vector3.Zero;
+                _collisionDisabledForFollow = false;
+            }
         }
 
         public void Follow(Player target, float speed)
         {
+            _followSpeed = speed;
+
+            if (_lastNavigationTarget?.IsEqualApprox(target.GlobalPosition) == true)
+            {
+                return;
+            }
+
+            _lastNavigationTarget = target.GlobalPosition;
             _navigationAgent.TargetPosition = target.GlobalPosition;
-            Vector3 nextPosition = _navigationAgent.GetNextPathPosition();
-            Vector3 direction = nextPosition - GlobalPosition;
-            direction.Y = 0;
-
-            if (!direction.IsZeroApprox())
-                direction = direction.Normalized();
-
-            LinearVelocity = new Vector3(
-                direction.X * speed,
-                LinearVelocity.Y,
-                direction.Z * speed
-            );
         }
 
         public void Stop()
@@ -144,7 +209,6 @@ namespace Dose.Core.Scenes
 
         public bool HasReached(Player target)
         {
-            return false;
             return _navigationAgent.IsNavigationFinished();
         }
     }
