@@ -13,13 +13,7 @@ namespace Dose.Core.Scenes
 {
     public partial class Npc : Actor<NpcContext>, IFollower<Player>, ITalkable, ISpeakable, INpc, IInitializableActor<NpcContext, NpcArgs>, ILookable, IDisappearable
     {
-        NavigationAgent3D _navigationAgent = new()
-        {
-            PathDesiredDistance = 0.5f,
-            PathHeightOffset = 0.5f,
-            TargetDesiredDistance = 1.5f
-        };
-        
+        NavigationAgent3D? _navigationAgent;
         Following<Player>? _following;
         Vector3? _lastNavigationTarget;
         float _followSpeed;
@@ -27,6 +21,8 @@ namespace Dose.Core.Scenes
         uint _collisionMaskBeforeFollow;
         bool _lockRotationBeforeFollow;
         bool _collisionDisabledForFollow;
+
+        Player? tempPlaer;
 
         public IGameEvent<Npc>? GameEvent { get; private set; }
         public float EyeHeightProportion { get; private set; } = 0.9f;
@@ -36,10 +32,11 @@ namespace Dose.Core.Scenes
         public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * EyeHeightProportion ?? 0, 0);
         public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * .5f ?? 0, 0);
 
-        public Npc()
+        public override void _Ready()
         {
-            AddChild(_navigationAgent);
+            _navigationAgent = GetNode<NavigationAgent3D>("NavigationAgent");
         }
+
 
         public override void _Process(double delta)
         {
@@ -47,11 +44,16 @@ namespace Dose.Core.Scenes
             {
                 GameEvent.OnTrigger(this);
             }
+
+            if (_following == null && tempPlaer != null && IsInsideTree())
+            {
+                BeginFollow(tempPlaer);
+            }
         }
 
         public override void _PhysicsProcess(double delta)
         {
-            if (_following == null)
+            if (_following == null || _navigationAgent == null)
             {
                 return;
             }
@@ -111,6 +113,8 @@ namespace Dose.Core.Scenes
             Speaker = new ESpeaker(Context.Voice, args.Player.ProgressDialogue);
             
             AddChild((Node)Speaker);
+
+            tempPlaer = args.Player;
         }
 
         public override void _ExitTree()
@@ -182,6 +186,8 @@ namespace Dose.Core.Scenes
 
         public void Follow(Player target, float speed)
         {
+            if (_navigationAgent == null) return;
+
             _followSpeed = speed;
 
             if (_lastNavigationTarget?.IsEqualApprox(target.GlobalPosition) == true)
@@ -200,7 +206,7 @@ namespace Dose.Core.Scenes
 
         public bool HasReached(Player target)
         {
-            return _navigationAgent.IsNavigationFinished();
+            return _navigationAgent == null || _navigationAgent.IsNavigationFinished();
         }
     }
 }
