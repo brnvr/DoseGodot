@@ -1,16 +1,25 @@
+using System.Linq;
 using Godot;
 namespace Dose.Core.Library.Locations
 {
+    public static class LocationCollisionLayer
+    {
+        public const uint Physics = 1u << 0;
+        public const uint NavigationSource = 1u << 1;
+    }
+
     public abstract class LocationMeshBuilder(
         IBuildableLocation location,
         StandardMaterial3D material,
         bool isCollidable,
-        string? meshInstanceName
+        string? meshInstanceName,
+        uint collisionLayer = LocationCollisionLayer.Physics
     ) : LocationBuilder(location)
     {
         protected SurfaceTool _surfaceTool = new();
 
         public bool IsCollidable { get; } = isCollidable;
+        public uint CollisionLayer { get; } = collisionLayer;
         public string? MeshInstanceName { get; } = meshInstanceName;
         public StandardMaterial3D Material { get; } = material;
 
@@ -37,6 +46,11 @@ namespace Dose.Core.Library.Locations
             if (IsCollidable)
             {
                 meshInstance.CreateTrimeshCollision();
+
+                foreach (var body in meshInstance.GetChildren().OfType<StaticBody3D>())
+                {
+                    body.CollisionLayer = CollisionLayer;
+                }
             }
 
             Location.OnBuild(meshInstance);

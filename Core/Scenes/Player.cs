@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -45,17 +46,20 @@ namespace Dose.Core.Scenes
             Vector3 position,
             float speed,
             float arrivalTolerance = 0,
-            bool snapToTarget = true
+            bool snapToTarget = true,
+            bool ignoreCollisions = false
         )
         {
             public float Speed { get; } = speed;
             public Vector3 Position { get; } = position;
             public float ArrivalTolerance { get; } = arrivalTolerance;
             public bool SnapToTarget { get; } = snapToTarget;
+            public bool IgnoreCollisions { get; } = ignoreCollisions;
             public EventHandler? Completed { get; set; }
         }
        
         const float RAY_LENGTH = 2.3f;
+        const float DOOR_TRANSITION_INSET = 0.3f;
         
         RayCast3D? _rayCast;
         float _cameraAngle = 0f;
@@ -232,10 +236,12 @@ namespace Dose.Core.Scenes
             var flatDisplacement = new Vector3(displacement.X, 0, displacement.Z);
             var distance = flatDisplacement.Length();
 
-            var arrivalDistance = Mathf.Max(
-                _autoMoveParameters.Speed * delta,
-                _autoMoveParameters.ArrivalTolerance
-            );
+            var arrivalDistance = _autoMoveParameters.IgnoreCollisions
+                ? _autoMoveParameters.ArrivalTolerance
+                : Mathf.Max(
+                    _autoMoveParameters.Speed * delta,
+                    _autoMoveParameters.ArrivalTolerance
+                );
 
             if (distance <= arrivalDistance)
             {
@@ -254,6 +260,17 @@ namespace Dose.Core.Scenes
 
             Velocity = flatDisplacement.Normalized() * _autoMoveParameters.Speed;
             Velocity = new Vector3(Velocity.X, 0, Velocity.Z);
+
+            if (_autoMoveParameters.IgnoreCollisions)
+            {
+                GlobalPosition = GlobalPosition.MoveToward(
+                    flatTarget,
+                    _autoMoveParameters.Speed * delta
+                );
+                _autoMoveBlockedFrames = 0;
+
+                return;
+            }
 
             var positionBeforeMove = GlobalPosition;
             MoveAndSlide();
@@ -316,8 +333,9 @@ namespace Dose.Core.Scenes
             }
         }
 
-        public void OnDoorOpened(IDoor door)
+        public async void OnDoorOpened(IDoor door)
         {
+            _moveState = MoveState.Locked;
             _interactionState = InteractionState.Locked;
 
             Transform3D? local = null;
@@ -327,7 +345,10 @@ namespace Dose.Core.Scenes
                 local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
             }
 
-            _controlPlane?.LocationController?.UpdateLocation(door);
+            if (_controlPlane?.LocationController != null)
+            {
+                await _controlPlane.LocationController.UpdateLocation(door);
+            }
             
 
             if (local != null && door.Linked is Door linkedDoorNode)
@@ -338,16 +359,22 @@ namespace Dose.Core.Scenes
                 var parameters = new AutoMoveParameters(
                     targetPosition,
                     5f,
-                    arrivalTolerance: 0.3f,
+                    arrivalTolerance: DOOR_TRANSITION_INSET,
                     snapToTarget: false
                 );
                 parameters.Completed += (sender, e) =>
                 {
                     //door.OpenDirection = ClockOpposite(door.OpenDirection);
                     var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
-                    var parameters = new AutoMoveParameters(targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign, 5f);
+                    var insideTarget = targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign;
 
-                    parameters.Completed += (sender, e) => {
+                    var bridgeParameters = new AutoMoveParameters(
+                        insideTarget,
+                        5f,
+                        snapToTarget: false,
+                        ignoreCollisions: true
+                    );
+                    bridgeParameters.Completed += (sender, e) => {
                         linkedDoorNode.TryClose();
 
                         _interactionState = InteractionState.Curious;
@@ -358,13 +385,18 @@ namespace Dose.Core.Scenes
                         }
                     };
 
-                    AutoMoveTo(parameters);
+                    AutoMoveTo(bridgeParameters);
                 };
 
                 AutoMoveTo(parameters);
 
                 linkedDoorNode.TryOpen();
+
+                return;
             }
+
+            _moveState = MoveState.Free;
+            _interactionState = InteractionState.Curious;
         }
 
 
@@ -684,12 +716,27 @@ namespace Dose.Core.Scenes
 
         public void UseStairs(IStairs stairs)
         {
+            _ = UseStairsAsync(stairs);
+        }
+
+        async Task UseStairsAsync(IStairs stairs)
+        {
             _moveState = MoveState.Locked;
             _interactionState = InteractionState.Locked;
 
-            _ = FadeTransition.Instance?.Fade(() =>
+            if (FadeTransition.Instance == null)
             {
-                _controlPlane?.LocationController?.UpdateLocation(stairs);
+                _moveState = MoveState.Free;
+                _interactionState = InteractionState.Curious;
+                return;
+            }
+
+            await FadeTransition.Instance.Fade(async () =>
+            {
+                if (_controlPlane?.LocationController != null)
+                {
+                    await _controlPlane.LocationController.UpdateLocation(stairs);
+                }
 
                 if (stairs is Stairs stairsNode && stairsNode.Linked is Stairs linked)
                 {
@@ -714,7 +761,12 @@ namespace Dose.Core.Scenes
 
                     _moveState = MoveState.Free;
                     _interactionState = InteractionState.Curious;
+
+                    return;
                 }
+
+                _moveState = MoveState.Free;
+                _interactionState = InteractionState.Curious;
             }, 2);
         }
     }

@@ -39,7 +39,8 @@ namespace Dose.Core.Scenes
             { 
                 NavigationMesh = new NavigationMesh
                 {
-                    GeometryParsedGeometryType = NavigationMesh.ParsedGeometryType.StaticColliders
+                    GeometryParsedGeometryType = NavigationMesh.ParsedGeometryType.StaticColliders,
+                    GeometryCollisionMask = LocationCollisionLayer.NavigationSource
                 }
             };
 

@@ -85,7 +85,7 @@ namespace Dose.Core.Scenes
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
 			{
-				{ ROOM_CATEGORY, CreateRoom },
+				{ ROOM_CATEGORY, direction => CreateRoom(direction) },
 				{ CORRIDOR_CATEGORY, direction => CreateCorridor(direction) },
 				{ CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsUp: true) },
 				{ CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsDown: true) }
@@ -141,12 +141,157 @@ namespace Dose.Core.Scenes
 
 			if (category == null) return null;
 
-			CurrentLocation = InitializeLocation(_locationQueue.PopNextLocation(category, clockDirection));
+			var mustPreserveFrontier = CountReachableUnlinkedPortals() <= 1;
+			var nextLocation = mustPreserveFrontier
+				? CreateFrontierSafeLocation(category, clockDirection, portal)
+				: _locationQueue.PopNextLocation(category, clockDirection);
 
-			return CurrentLocation;
+			if (nextLocation == null)
+			{
+				return null;
+			}
+
+			if (mustPreserveFrontier && !HasCompatibleEntranceAndExit(nextLocation, portal))
+			{
+				GD.PushError("Failed to generate a location that preserves an unexplored portal.");
+				return null;
+			}
+
+			var initializedLocation = InitializeLocation(nextLocation);
+
+			if (initializedLocation is Node3D locationNode)
+			{
+				locationNode.Visible = false;
+				AddChild(locationNode);
+			}
+
+			return initializedLocation;
 		}
 
-		BuildableLocation? CreateRoom(ClockDirection clockDirection)
+		ILocation? CreateFrontierSafeLocation(string category, ClockDirection clockDirection, IPortal incomingPortal)
+		{
+			var minimumDoorways = incomingPortal is IDoor ? 2 : 1;
+
+			return category switch
+			{
+				ROOM_CATEGORY => CreateRoom(
+					clockDirection,
+					minimumDoorways: 2
+				),
+				CORRIDOR_CATEGORY => CreateCorridor(
+					clockDirection,
+					minimumDoorways: minimumDoorways,
+					allowCustomRoomLinks: false
+				),
+				CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY => CreateCorridor(
+					clockDirection,
+					shouldEnsureStairsUp: true,
+					minimumDoorways: minimumDoorways,
+					allowCustomRoomLinks: false
+				),
+				CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY => CreateCorridor(
+					clockDirection,
+					shouldEnsureStairsDown: true,
+					minimumDoorways: minimumDoorways,
+					allowCustomRoomLinks: false
+				),
+				_ => null
+			};
+		}
+
+		int CountReachableUnlinkedPortals()
+		{
+			if (CurrentLocation == null)
+			{
+				return 0;
+			}
+
+			Queue<ILocation> locations = new();
+			HashSet<ILocation> visited = [];
+			var frontierCount = 0;
+			locations.Enqueue(CurrentLocation);
+
+			while (locations.TryDequeue(out var location))
+			{
+				if (!visited.Add(location))
+				{
+					continue;
+				}
+
+				foreach (var locationPortal in GetPortals(location))
+				{
+					if (locationPortal.Linked == null)
+					{
+						frontierCount++;
+					}
+					else if (locationPortal.Linked.Location != null)
+					{
+						locations.Enqueue(locationPortal.Linked.Location);
+					}
+				}
+			}
+
+			return frontierCount;
+		}
+
+		static bool HasCompatibleEntranceAndExit(ILocation location, IPortal incomingPortal)
+		{
+			if (location is BuildableLocation { Map: not null } buildableLocation)
+			{
+				var portalTypes = buildableLocation.Map.GetFilledPositions()
+					.SelectMany(position => AllDirections()
+						.Select(direction => buildableLocation.Map.Get(position).GetWall(direction)?.Type))
+					.Where(type => type == MapCellWall.MapCellType.Doorway ||
+						type == MapCellWall.MapCellType.Upstairs ||
+						type == MapCellWall.MapCellType.Downstairs)
+					.Cast<MapCellWall.MapCellType>()
+					.ToList();
+
+				return portalTypes.Count >= 2 && portalTypes.Any(type =>
+				{
+					if (incomingPortal is not IStairs stairs)
+					{
+						return incomingPortal is IDoor && type == MapCellWall.MapCellType.Doorway;
+					}
+
+					return stairs.Direction switch
+					{
+						StairsDirection.Up => type == MapCellWall.MapCellType.Downstairs,
+						StairsDirection.Down => type == MapCellWall.MapCellType.Upstairs,
+						_ => false
+					};
+				});
+			}
+
+			var portals = GetPortals(location)
+				.Where(portal => portal.Linked == null)
+				.ToList();
+
+			return portals.Count >= 2 && portals.Any(portal => AreCompatible(incomingPortal, portal));
+		}
+
+		static bool AreCompatible(IPortal source, IPortal candidate)
+		{
+			if (source is IStairs sourceStairs)
+			{
+				return candidate is IStairs candidateStairs &&
+					sourceStairs.Direction != candidateStairs.Direction;
+			}
+
+			return source is IDoor && candidate is IDoor;
+		}
+
+		static IEnumerable<IPortal> GetPortals(ILocation location)
+		{
+			return location is Node locationNode
+				? locationNode.GetChildren().OfType<IPortal>()
+				: [];
+		}
+
+		BuildableLocation? CreateRoom(
+			ClockDirection clockDirection,
+			int minimumDoorways = 1
+		)
 		{
 			if (ControlPlane == null)
             {
@@ -164,6 +309,11 @@ namespace Dose.Core.Scenes
 				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
 			);
 
+			if (location.Map != null)
+			{
+				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
+			}
+
 			BuildLocation(location);
 			PopulateLocation(location);
 		
@@ -172,7 +322,13 @@ namespace Dose.Core.Scenes
 			return location;
 		}
 
-		BuildableLocation? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairsUp = false, bool shouldEnsureStairsDown = false)
+		BuildableLocation? CreateCorridor(
+			ClockDirection clockDirection,
+			bool shouldEnsureStairsUp = false,
+			bool shouldEnsureStairsDown = false,
+			int minimumDoorways = 1,
+			bool allowCustomRoomLinks = true
+		)
 		{
 			if (ControlPlane == null)
             {
@@ -190,7 +346,12 @@ namespace Dose.Core.Scenes
 				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
 			);
 
-			BuildLocation(location);
+			if (location.Map != null)
+			{
+				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
+			}
+
+			BuildLocation(location, allowCustomRoomLinks);
 			PopulateLocation(location);
 		
 			//location.CreateFlippedBack();
@@ -211,7 +372,7 @@ namespace Dose.Core.Scenes
 			return new Vector2(xOffset, yOffset);
 		}
 
-		void BuildLocation(BuildableLocation location)
+		void BuildLocation(BuildableLocation location, bool allowCustomRoomLinks = true)
 		{
 			if (ControlPlane == null)
             {
@@ -268,7 +429,7 @@ namespace Dose.Core.Scenes
 				CreatePlainMaterial(_blackTexture)
 			);
 
-			var shouldPullNumber = location.Type == Location.LocationType.Corridor;
+			var shouldPullNumber = allowCustomRoomLinks && location.Type == Location.LocationType.Corridor;
 
 			var doorContext = new DoorContext
             {
@@ -278,7 +439,15 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreatePlainMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
-				new LocationBaseMeshBuilder(location, _floorMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, true, "FloorMeshInstance"),
+				new LocationBaseMeshBuilder(
+					location,
+					_floorMesh,
+					CreatePlainMaterial(_blackTexture),
+					BLOCK_SIZE,
+					true,
+					"FloorMeshInstance",
+					LocationCollisionLayer.NavigationSource
+				),
 				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, false, "CeilingMeshInstance"),
 				new LocationSceneProvider
 				(
@@ -441,15 +610,20 @@ namespace Dose.Core.Scenes
 
 		void SetCurrentLocation(ILocation? location)
         {
-			if (_currentLocation is Node currentLocationNode)
+			if (_currentLocation is Node currentLocationNode && currentLocationNode.GetParent() == this)
             {
-				RemoveChild(currentLocationNode);
+                RemoveChild(currentLocationNode);
             }
 
-			if (location is Node locationNode)
+			if (location is Node locationNode && locationNode.GetParent() != this)
             {
-				AddChild(locationNode);
+                AddChild(locationNode);
             }
+
+			if (location is Node3D locationNode3D)
+			{
+				locationNode3D.Visible = true;
+			}
 
 			_currentLocation = location;
         }

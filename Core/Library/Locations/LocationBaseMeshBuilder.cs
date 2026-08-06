@@ -8,8 +8,9 @@ namespace Dose.Core.Library.Locations
         StandardMaterial3D material,
         int blockSize,
         bool isCollidable,
-        string? meshInstanceName = null
-    ) : LocationMeshBuilder(location, material, isCollidable, meshInstanceName)
+        string? meshInstanceName = null,
+        uint collisionLayer = LocationCollisionLayer.Physics
+    ) : LocationMeshBuilder(location, material, isCollidable, meshInstanceName, collisionLayer)
     {
         public int BlockSize { get; } = blockSize;
         public Mesh Mesh { get; } = mesh;

@@ -16,36 +16,37 @@ namespace Dose.Core.Library.Locations
 
         public void EnsureAtLeastOne()
         {
-            var allCells = Map.GetDefinedValues();
+            EnsureAtLeast(1);
+        }
 
-            var wallOfType = AllDirections()
-                .SelectMany(dir => allCells
-                    .Select(cell => cell.GetWall(dir))
-                    .Where(w => w is not null && Types.Contains(w.Type)))
-                .FirstOrDefault();
-
-            if (wallOfType == null)
+        public void EnsureAtLeast(int count)
+        {
+            if (count < 1)
             {
-                var wall = AllDirections()
-                    .Where(dir => allCells.First().GetWall(dir)?.Type == MapCellType.Solid)
-                    .Select(dir => allCells.First().GetWall(dir))
-                    .FirstOrDefault();
-                    
-                if (wall == null)
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be at least one.");
+            }
+
+            var walls = AllDirections()
+                .SelectMany(direction => Map.GetDefinedValues()
+                    .Select(cell => cell.GetWall(direction)))
+                .Where(wall => wall != null)
+                .Cast<MapCellWall>()
+                .ToList();
+
+            while (walls.Count(wall => Types.Contains(wall.Type)) < count)
+            {
+                var solidWalls = walls
+                    .Where(wall => wall.Type == MapCellType.Solid)
+                    .ToList();
+
+                if (solidWalls.Count == 0)
                 {
-                    GD.PushWarning("No walls found. Can't ensure a wall type.");
+                    GD.PushWarning($"Not enough solid walls to ensure {count} portal walls.");
                     return;
                 }
-                
+
+                var wall = new RandomSelector<MapCellWall>(solidWalls).Pick();
                 wall.Type = new RandomSelector<MapCellType>(Types).Pick();
-            }
-            else
-            {
-                // TODO: Update ensurer logic
-                // if (!allCells.Any(cell => AllDirections().Any(dir => cell.GetWall(dir)?.DoorType != MapCellDoorType.Locked)))
-                // {
-                //     wallOfType.DoorType = MapCellDoorType.Open;
-                // }
             }
         }
     }
