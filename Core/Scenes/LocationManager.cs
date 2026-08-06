@@ -91,30 +91,14 @@ namespace Dose.Core.Scenes
 				{ CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsDown: true) }
 			}).Initialize();
 
-			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
-
-			// if (ControlPlane?.DoorNumberController != null)
-			// {
-			// 	foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
-			// 	{
-			// 		if (customRoomCtx.Location is not CustomRoom customRoom)
-			// 		{
-			// 			GD.PushWarning($"{customRoomCtx.Location} is not of type {nameof(CustomRoom)} and will not be initialized.");
-			// 			continue;
-			// 		}
-
-			// 		customRoom.Initialize(BLOCK_SIZE, this);
-			// 	}
-			// }
-
-			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvailableContexts.ToList()[0]));
+			CurrentLocation = InitializeLocation(_locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise));
 
             return this;
         }
 
 		string GetNextLocationCategory(IPortal portal)
 		{
-			if (_currentLocation == null)
+			if (CurrentLocation == null)
 				return ROOM_CATEGORY;
 
 			if (portal is IStairs stairs)
@@ -127,7 +111,7 @@ namespace Dose.Core.Scenes
 			}
 				
 
-			if (_currentLocation is not BuildableLocation currentLocation)
+			if (CurrentLocation is not BuildableLocation currentLocation)
 				return ROOM_CATEGORY;
 
 			if (currentLocation.Type == Location.LocationType.Corridor)
@@ -147,7 +131,7 @@ namespace Dose.Core.Scenes
 		public ILocation? BuildNextLocation(IPortal portal)
 		{
 			var category = GetNextLocationCategory(portal);
-			var clockDirection = _currentLocation is IBuildableLocation buildable? ClockOpposite(buildable.DoorClockDirection) : ClockDirection.Clockwise;
+			var clockDirection = CurrentLocation is IBuildableLocation buildable? ClockOpposite(buildable.DoorClockDirection) : ClockDirection.Clockwise;
 
 			if (_locationQueue == null)
 			{
@@ -157,7 +141,7 @@ namespace Dose.Core.Scenes
 
 			if (category == null) return null;
 
-			CurrentLocation = _locationQueue.PopNextLocation(category, clockDirection);
+			CurrentLocation = InitializeLocation(_locationQueue.PopNextLocation(category, clockDirection));
 
 			return CurrentLocation;
 		}
@@ -444,15 +428,20 @@ namespace Dose.Core.Scenes
 				AddChild(locationNode);
             }
 
-			if (location is Location _location)
-			{
-				if (_location.NavigationRegion == null) {
-					_location.InitializeNavigationRegion();
-				}
-			}
-
 			_currentLocation = location;
         }
+
+		static ILocation? InitializeLocation(ILocation? location)
+		{
+			if (location is not Location locationNode) return location;
+
+			if (locationNode.NavigationRegion == null)
+			{
+				Callable.From(() => { locationNode.InitializeNavigationRegion(); }).CallDeferred();
+			}
+
+			return location;
+		}
 
 		static RoomMapGenerator GenerateRoomMap()
         {

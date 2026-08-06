@@ -19,7 +19,7 @@ namespace Dose.Core.Scenes
 
         public abstract LocationType? Type { get; }
 
-        public Location InitializeNavigationRegion(string floorNodeName = "FloorMeshInstance")
+        public virtual Location InitializeNavigationRegion(string floorNodeName = "FloorMeshInstance")
         {
             var floorNode = FindChild(floorNodeName, owned: false);
             
@@ -58,9 +58,9 @@ namespace Dose.Core.Scenes
                 sourceData
             );
 
-                GD.Print($"Source has data: {sourceData.HasData()}");
-                GD.Print($"Source vertices: {sourceData.GetVertices().Count()}");
-                GD.Print($"Source indices: {sourceData.GetIndices().Count()}");
+            // GD.Print($"Source has data: {sourceData.HasData()}");
+            // GD.Print($"Source vertices: {sourceData.GetVertices().Length}");
+            // GD.Print($"Source indices: {sourceData.GetIndices().Length}");
 
             return this;
         }

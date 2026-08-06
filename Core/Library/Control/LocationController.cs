@@ -2,8 +2,9 @@ using Dose.Core.Library.Locations;
 
 namespace Dose.Core.Library.Control
 {
-    public class LocationController(ILocationManager locationManager)
+    public class LocationController(ILocationManager locationManager, int maxLayers = 3)
     {
+        public int MaxLayers { get; } = maxLayers;
         public ILocationManager LocationManager { get; } = locationManager;
 
         public void UpdateLocation<TPortal>(TPortal portal) where TPortal : IPortal
@@ -31,7 +32,7 @@ namespace Dose.Core.Library.Control
                 LocationManager.CurrentLocation = portal.Linked.Location;
             }
 
-            portal.Linked?.Location?.Clear(3);
+            portal.Linked?.Location?.Clear(MaxLayers);
             
         }
     }
