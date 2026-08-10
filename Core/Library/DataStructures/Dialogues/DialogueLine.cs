@@ -20,7 +20,7 @@ namespace Dose.Core.Library.DataStructures.Dialogues
 
         public void OnUIEvent(IUI ui)
         {
-            ui.SetLabelValue("DialogueCaption", Text);
+            ui.ShowDialogueLine(Text);
             ui.SetLabelVisible("NameCaption", false);
         }
 

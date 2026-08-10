@@ -8,34 +8,30 @@ namespace Dose.Core.Scenes
 {
     public partial class UI : CanvasLayer, IUI, INotificator
     {
-        NotificationCenter? _notificationCenter;
+        NotificationCenter _notificationCenter = null!;
         CenterContainer? _currentMenu;
         Input.MouseModeEnum? _mouseModePrevious;
+        PanelContainer _dialogueCaption = null!;
+        Label _dialogueText = null!;
 
         public bool IsMenuDisplayed { get; private set; }
 
         public override void _Ready()
         {
             ProcessMode = ProcessModeEnum.Always;
-            _notificationCenter = new NotificationCenter(this);
+            _dialogueCaption = GetNode<PanelContainer>("DialogueCaption");
+            _dialogueText = GetNode<Label>("DialogueCaption/MarginContainer/Text");
+            _notificationCenter = GetNode<NotificationCenter>("Notifications");
 
             base._Ready();
-
-        }
-
-        public override void _ExitTree()
-        {
-            _notificationCenter?.QueueFree();
-
-            base._ExitTree();
         }
 
 
         public void SetLabelValue(string labelName, string text)
         {
             var label = GetNode<Label>(labelName);
-    
-            label.Text = text ?? "";
+            label.Text = text;
+            label.Show();
         }
 
         public void SetLabelVisible(string labelName, bool visible)
@@ -45,11 +41,20 @@ namespace Dose.Core.Scenes
             label.Visible = visible;
         }
 
+        public void ShowDialogueLine(string text)
+        {
+            _dialogueText.Text = text;
+            _dialogueCaption.Show();
+        }
+
+        public void HideDialogue()
+        {
+            _dialogueCaption.Hide();
+        }
+
         public void Notify(string message, float duration = 2f)
         {
-            var notification = new Notification(message, duration);
-            AddChild(notification);
-            _notificationCenter?.Add(notification);
+            _notificationCenter.ShowNotification(message, duration);
         }
 
         public void DisplayMenu(IEnumerable<MenuOption> options)

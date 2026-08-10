@@ -6,5 +6,7 @@ namespace Dose.Core.Library.UI
     {
         void SetLabelValue(string labelName, string text);
         void SetLabelVisible(string labelName, bool visible);
+        void ShowDialogueLine(string text);
+        void HideDialogue();
     }
 }

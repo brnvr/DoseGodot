@@ -44,6 +44,7 @@ namespace Dose.Core.Library.DataStructures.Dialogues
                 onButtonDown: () => Selected = o
             ));
 
+            ui.HideDialogue();
             ui.DisplayMenu(menuOptions);
         }
 
