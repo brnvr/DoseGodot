@@ -1,4 +1,5 @@
 using Godot;
+using Dose.Core.Library.UI;
 
 namespace Dose.Core.Scenes
 {
@@ -30,6 +31,8 @@ namespace Dose.Core.Scenes
         public override void _Ready()
         {
             _itemAnchor = GetNode<Control>("ItemAnchor");
+            _itemAnchor.AnchorLeft = UIScreenLayout.GameplayCenterRatio.X;
+            _itemAnchor.AnchorRight = UIScreenLayout.GameplayCenterRatio.X;
             _equipMotion = GetNode<Control>("ItemAnchor/EquipMotion");
             _targetMotion = GetNode<Control>("ItemAnchor/EquipMotion/TargetMotion");
             _feedbackMotion = GetNode<Control>("ItemAnchor/EquipMotion/TargetMotion/FeedbackMotion");

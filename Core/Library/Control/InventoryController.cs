@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Text.Json;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures;
@@ -13,16 +12,13 @@ namespace Dose.Core.Library.Control
     public class InventoryController
     {
         int _currentItemIndex;
+        ItemContext? _equipedItem;
 
         public Inventory Inventory { get; }
         public ItemContext? CurrentItem { get => GetNextItem(0); }
         public IUI UI { get; }
         public INotificator? Notificator { get; }
         public EventHandler<InventoryItemSetEventArgs>? ItemSet { get; set; }
-
-        public string InventoryLabelName { get; init; } = "Inventory";
-        public string CurrentItemLabelName { get; init; } = "CurrentItem";
-        public string ActiveItemLabelName { get; init; } = "ActiveItem";
 
         public InventoryController(Inventory inventory, IUI ui, INotificator? notificator)
         {
@@ -33,41 +29,17 @@ namespace Dose.Core.Library.Control
             Inventory.ItemAdded += (sender, e) =>
             {
                 GD.Print($"Added {e.ItemContext.DisplayName} to inventory.");
-
-                if (UI != null)
-                {
-                    string json = JsonSerializer.Serialize(Inventory);
-                    UI.SetLabelValue(InventoryLabelName, json);
-                }
-
+                UpdateInventoryUI();
                 Notificator?.Notify($"Added {e.ItemContext.DisplayName} to inventory.", 2f);
             };
 
             Inventory.ItemDropped += (sender, e) =>
             {
                 GD.Print($"Dropped {e.ItemContext.DisplayName} from inventory.");
-
-                if (UI != null)
-                {
-                    string json = JsonSerializer.Serialize(Inventory);
-                    UI.SetLabelValue(InventoryLabelName, json);
-                }
-
-                UI?.SetLabelValue(CurrentItemLabelName, e.ItemContext?.DisplayName ?? "");
+                UpdateInventoryUI();
             };
 
-            ItemSet += (sender, e) =>
-            {
-                UI?.SetLabelValue(CurrentItemLabelName, e.ItemContext?.DisplayName ?? "");
-            };
-
-            Inventory.ItemAdded += (sender, e) =>
-            {
-                if (Inventory.Count() == 1)
-                {
-                    UI?.SetLabelValue(CurrentItemLabelName, e.ItemContext?.DisplayName ?? "");
-                }
-            };
+            ItemSet += (sender, e) => UpdateInventoryUI();
         }
 
         public void GoToFirstItem()
@@ -145,12 +117,19 @@ namespace Dose.Core.Library.Control
                 return;
             }
 
-            UI.SetLabelValue(ActiveItemLabelName, CurrentItem.DisplayName);
+            _equipedItem = CurrentItem;
+            UpdateInventoryUI();
         }
 
         public void OnActiveItemUnselected()
         {
-            UI.SetLabelValue(ActiveItemLabelName, "");
+            _equipedItem = null;
+            UpdateInventoryUI();
+        }
+
+        void UpdateInventoryUI()
+        {
+            UI.UpdateInventory(Inventory.Entries, CurrentItem, _equipedItem);
         }
     }
 }

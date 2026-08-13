@@ -3,6 +3,8 @@ using Dose.Core.Library.Common;
 using Dose.Core.Library.UI;
 using Godot;
 using Dose.Core.Library.Control;
+using Dose.Core.Library.Actors;
+using Dose.Core.Library.DataStructures;
 
 namespace Dose.Core.Scenes
 {
@@ -15,17 +17,28 @@ namespace Dose.Core.Scenes
         TextWithBackground _actorNameCaption = null!;
         EquipedItemDisplay _equipedItemDisplay = null!;
         Cursor _cursor = null!;
+        InventoryDisplay _inventoryDisplay = null!;
+        ColorRect _bottomBar = null!;
+        ColorRect _rightBar = null!;
 
         public bool IsMenuDisplayed { get; private set; }
 
         public override void _Ready()
         {
             ProcessMode = ProcessModeEnum.Always;
-            _dialogueCaption = GetNode<TextWithBackground>("DialogueCaption");
-            _actorNameCaption = GetNode<TextWithBackground>("NameCaption");
+            _dialogueCaption = GetNode<TextWithBackground>("BottomBar/DialogueCaption");
+            _actorNameCaption = GetNode<TextWithBackground>("BottomBar/NameCaption");
             _equipedItemDisplay = GetNode<EquipedItemDisplay>("EquipedItemDisplay");
             _cursor = GetNode<Cursor>("Cursor");
             _notificationCenter = GetNode<NotificationCenter>("Notifications");
+            _inventoryDisplay = GetNode<InventoryDisplay>("RightBar/CenterContainer/InventoryDisplay");
+            _bottomBar = GetNode<ColorRect>("BottomBar");
+            _rightBar = GetNode<ColorRect>("RightBar");
+
+            _bottomBar.AnchorTop = UIScreenLayout.GameplayBottomRatio;
+            _bottomBar.AnchorRight = UIScreenLayout.GameplayRightRatio;
+            _rightBar.AnchorLeft = UIScreenLayout.GameplayRightRatio;
+            _notificationCenter.AnchorRight = UIScreenLayout.GameplayRightRatio - 0.02f;
 
             base._Ready();
         }
@@ -78,6 +91,15 @@ namespace Dose.Core.Scenes
             _equipedItemDisplay.PlayRejectedInteractionFeedback();
         }
 
+        public void UpdateInventory(
+            IEnumerable<InventoryEntry> entries,
+            ItemContext? selectedItem,
+            ItemContext? equipedItem
+        )
+        {
+            _inventoryDisplay.UpdateItems(entries, selectedItem, equipedItem);
+        }
+
         public void Notify(string message, float duration = 2f)
         {
             _notificationCenter.ShowNotification(message, duration);
@@ -99,8 +121,8 @@ namespace Dose.Core.Scenes
             {
                 AnchorLeft = 0,
                 AnchorTop = 0,
-                AnchorRight = 1,
-                AnchorBottom = 1
+                AnchorRight = UIScreenLayout.GameplayRightRatio,
+                AnchorBottom = UIScreenLayout.GameplayBottomRatio
             };
 
             var menuBox = new VBoxContainer
@@ -114,6 +136,35 @@ namespace Dose.Core.Scenes
                 {
                     Text = option.Text
                 };
+
+                foreach (var colorName in new[]
+                {
+                    "font_color",
+                    "font_focus_color",
+                    "font_hover_color",
+                    "font_hover_pressed_color",
+                    "font_pressed_color",
+                    "font_disabled_color"
+                })
+                {
+                    button.AddThemeColorOverride(colorName, Colors.Transparent);
+                }
+
+                var buttonText = new Label
+                {
+                    Text = option.Text,
+                    AnchorRight = 1,
+                    AnchorBottom = 1,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    MouseFilter = Control.MouseFilterEnum.Ignore
+                };
+                buttonText.AddThemeColorOverride("font_color", Colors.White);
+                buttonText.AddThemeColorOverride("font_shadow_color", Colors.Black);
+                buttonText.AddThemeConstantOverride("shadow_offset_x", 2);
+                buttonText.AddThemeConstantOverride("shadow_offset_y", 2);
+                buttonText.AddThemeConstantOverride("shadow_outline_size", 1);
+                button.AddChild(buttonText);
 
                 if (option.OnPressed != null) button.Pressed += option.OnPressed;
                 if (option.OnButtonDown != null) button.ButtonDown += option.OnButtonDown;

@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using Dose.Core.Library.Control;
+using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.Actors;
 
 namespace Dose.Core.Library.UI
 {
@@ -10,5 +13,10 @@ namespace Dose.Core.Library.UI
         void SetActorNameVisible(bool visible);
         void ShowDialogueLine(string text);
         void HideDialogue();
+        void UpdateInventory(
+            IEnumerable<InventoryEntry> entries,
+            ItemContext? selectedItem,
+            ItemContext? equipedItem
+        );
     }
 }

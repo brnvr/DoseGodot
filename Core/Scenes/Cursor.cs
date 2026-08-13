@@ -1,5 +1,5 @@
 using Godot;
-using System;
+using Dose.Core.Library.UI;
 
 namespace Dose.Core.Scenes
 {
@@ -14,7 +14,7 @@ namespace Dose.Core.Scenes
 
         public override void _Draw()
         {
-            Vector2 center = Size / 2f;
+            Vector2 center = Size * UIScreenLayout.GameplayCenterRatio;
             float radius = 3f; // size of the dot in pixels
             DrawCircle(center, radius, Colors.White);
         }

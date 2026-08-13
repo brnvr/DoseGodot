@@ -10,6 +10,7 @@ using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Quests;
+using Dose.Core.Library.UI;
 using Dose.Core.QuestArgs;
 using Dose.Core.Quests;
 using Godot;
@@ -84,6 +85,7 @@ namespace Dose.Core.Scenes
         AutoMoveParameters? _autoMoveParameters;
         Node3D? _head;
         Camera3D? _view;
+        Vector2 _cameraViewportSize;
         IActor<Player>? _currentTarget;
         IControlPlane? _controlPlane;
         MoveState _moveState = MoveState.Locked;
@@ -106,6 +108,7 @@ namespace Dose.Core.Scenes
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
             _view = GetNode<Camera3D>("Head/View");
+            UpdateCameraProjection();
             _rayCast = GetNode<RayCast3D>("Head/View/RayCast3D");
             _rayCast.TargetPosition = new Vector3(0, 0, -RAY_LENGTH);
             GlobalPosition += Vector3.Up * 0.05f;
@@ -134,6 +137,7 @@ namespace Dose.Core.Scenes
 
         public override void _Process(double delta)
         {
+            UpdateCameraProjection();
             ProcessInteract();
             ProcessInventory();
             ProcessDialogue();
@@ -179,6 +183,34 @@ namespace Dose.Core.Scenes
         public bool CanSeek()
         {
             return CanLook() && _moveState != MoveState.Focused;
+        }
+
+        void UpdateCameraProjection()
+        {
+            if (_view == null)
+            {
+                return;
+            }
+
+            var viewportSize = GetViewport().GetVisibleRect().Size;
+
+            if (viewportSize.IsEqualApprox(_cameraViewportSize) || viewportSize.Y <= 0)
+            {
+                return;
+            }
+
+            _cameraViewportSize = viewportSize;
+
+            var verticalSize = 2f * _view.Near * Mathf.Tan(Mathf.DegToRad(_view.Fov) * 0.5f);
+            var halfHeight = verticalSize * 0.5f;
+            var halfWidth = halfHeight * viewportSize.Aspect();
+            var offset = new Vector2(
+                UIScreenLayout.RightBarWidthRatio * halfWidth,
+                -UIScreenLayout.BottomBarHeightRatio * halfHeight
+            );
+
+            _view.KeepAspect = Camera3D.KeepAspectEnum.Height;
+            _view.SetFrustum(verticalSize, offset, _view.Near, _view.Far);
         }
 
         public bool CanMove()
