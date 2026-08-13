@@ -22,6 +22,7 @@ namespace Dose.Core.Library.Actors
                 DisplayName = itemConfig.DisplayName,
                 Rarity = Enum.Parse<Rarity>(itemConfig.Rarity, true),
                 Texture = ResourceLoader.Load<Texture2D>(itemConfig.TexturePath),
+                EquipedTexture = ResourceLoader.Load<Texture2D>(itemConfig.EquipedTexturePath),
                 MaxQuantity = itemConfig.MaxQuantity ?? -1,
                 Execute = itemConfig.Execute.Select(config => new Executable
                 {

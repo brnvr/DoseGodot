@@ -5,7 +5,9 @@ namespace Dose.Core.Library.UI
     public interface IUI : IMenuContainer
     {
         void SetLabelValue(string labelName, string text);
-        void SetLabelVisible(string labelName, bool visible);
+        void SetCursorVisible(bool visible);
+        void SetActorName(string? name);
+        void SetActorNameVisible(bool visible);
         void ShowDialogueLine(string text);
         void HideDialogue();
     }

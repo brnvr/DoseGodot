@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -23,6 +24,22 @@ namespace Dose.Core.Scenes
             public ILocation Location { get; } = location;
         }
 
+        public class SelectedItemChangedArgs(ItemContext? item)
+        {
+            public ItemContext? Item { get; } = item;
+        }
+
+        public class InteractionAvailabilityChangedArgs(bool canInteract)
+        {
+            public bool CanInteract { get; } = canInteract;
+        }
+
+        public class InteractionTargetChangedArgs(IActor<Player>? target)
+        {
+            public IActor<Player>? Target { get; } = target;
+            public bool HasTarget => Target != null;
+        }
+
         enum MoveState
         {
             Locked,
@@ -37,7 +54,7 @@ namespace Dose.Core.Scenes
             Curious,
             Talking,
             Locked,
-            HoldingItem,
+            EquipedItem,
             QuestBookOpened
         }
 
@@ -76,7 +93,12 @@ namespace Dose.Core.Scenes
         public Inventory Inventory { get; } = [];
         public QuestBook QuestBook { get; } = [];
         public ItemContext? SelectedItem { get; private set; }
+        public bool HasInteractionTarget => _currentTarget != null;
         public EventHandler<MovedToLocationArgs>? MovedToLocation { get; set; }
+        public EventHandler<SelectedItemChangedArgs>? SelectedItemChanged { get; set; }
+        public EventHandler<InteractionAvailabilityChangedArgs>? InteractionAvailabilityChanged { get; set; }
+        public EventHandler<InteractionTargetChangedArgs>? InteractionTargetChanged { get; set; }
+        public EventHandler? ItemInteractionRejected { get; set; }
 
         public override void _Ready()
         {
@@ -98,9 +120,14 @@ namespace Dose.Core.Scenes
 
             Inventory.ItemDropped += (sender, e) =>
             {
+                if (SelectedItem == e.ItemContext && !Inventory.Exists(e.ItemContext))
+                {
+                    UnselectItem();
+                }
+
                 if (!Inventory.Any())
                 {
-                    _interactionState = InteractionState.Curious;
+                    SetInteractionState(InteractionState.Curious);
                 }  
             };
         }
@@ -143,7 +170,7 @@ namespace Dose.Core.Scenes
             if (dialogueRunner.Dialogue is Dialogue)
             {
                 _moveState = MoveState.Focused;
-                _interactionState = InteractionState.Talking;
+                SetInteractionState(InteractionState.Talking);
             }
             
             UpdateDialogue();
@@ -171,6 +198,27 @@ namespace Dose.Core.Scenes
             return _interactionState != InteractionState.Locked && _interactionState != InteractionState.QuestBookOpened;
         }
 
+        void SetInteractionState(InteractionState state)
+        {
+            var couldInteract = CanInteract();
+            _interactionState = state;
+            var canInteract = CanInteract();
+
+            if (couldInteract && !canInteract)
+            {
+                _currentTarget = null;
+                UpdateTarget();
+            }
+
+            if (couldInteract != canInteract)
+            {
+                InteractionAvailabilityChanged?.Invoke(
+                    this,
+                    new InteractionAvailabilityChangedArgs(canInteract)
+                );
+            }
+        }
+
         public bool CanSwitchItem()
         {
             return _interactionState == InteractionState.Curious;
@@ -178,7 +226,7 @@ namespace Dose.Core.Scenes
 
         public bool CanSelectItem()
         {
-            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.HoldingItem;
+            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.EquipedItem;
         }
 
         bool CanCloseQuestBook()
@@ -188,7 +236,7 @@ namespace Dose.Core.Scenes
         
         bool CanOpenQuestBook()
         {
-            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.HoldingItem;
+            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.EquipedItem;
         }
 
         public void ProgressDialogue()
@@ -197,7 +245,7 @@ namespace Dose.Core.Scenes
             {
                 GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
-                _interactionState = InteractionState.Curious;
+                SetInteractionState(InteractionState.Curious);
                 _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 return;
@@ -207,7 +255,7 @@ namespace Dose.Core.Scenes
             {
                 DialogueRunner = null;
                 _moveState = MoveState.Free;
-                _interactionState = InteractionState.Curious;
+                SetInteractionState(InteractionState.Curious);
                 _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 UpdateTarget();
@@ -301,7 +349,7 @@ namespace Dose.Core.Scenes
         public void OnDoorOpened(IDoor door)
         {
             _moveState = MoveState.Locked;
-            _interactionState = InteractionState.Locked;
+            SetInteractionState(InteractionState.Locked);
 
             Transform3D? local = null;
             
@@ -342,7 +390,7 @@ namespace Dose.Core.Scenes
                     bridgeParameters.Completed += (sender, e) => {
                         linkedDoorNode.TryClose();
 
-                        _interactionState = InteractionState.Curious;
+                        SetInteractionState(InteractionState.Curious);
 
                         if (door.Linked.Location != null)
                         {
@@ -361,7 +409,7 @@ namespace Dose.Core.Scenes
             }
 
             _moveState = MoveState.Free;
-            _interactionState = InteractionState.Curious;
+            SetInteractionState(InteractionState.Curious);
         }
 
 
@@ -375,6 +423,7 @@ namespace Dose.Core.Scenes
         void UpdateTarget()
         {
             _controlPlane?.InteractivityController?.OnTargetChange(_currentTarget);
+            InteractionTargetChanged?.Invoke(this, new InteractionTargetChangedArgs(_currentTarget));
         }
 
         void LookAt(Vector3 to, double delta)
@@ -451,7 +500,7 @@ namespace Dose.Core.Scenes
             if (!CanOpenQuestBook()) return;
 
             UnselectItem();
-            _interactionState = InteractionState.QuestBookOpened;
+            SetInteractionState(InteractionState.QuestBookOpened);
             _controlPlane?.QuestBookController?.OnQuestBookOpened();
         }
 
@@ -459,7 +508,7 @@ namespace Dose.Core.Scenes
         {
             if (!CanCloseQuestBook()) return;
 
-            _interactionState = InteractionState.Curious;
+            SetInteractionState(InteractionState.Curious);
             _controlPlane?.QuestBookController?.OnQuestBookClosed();  
         }
 
@@ -520,7 +569,7 @@ namespace Dose.Core.Scenes
 
             if (CanSelectItem() && Input.IsActionJustPressed("InventorySelect"))
             {
-                if (_interactionState == InteractionState.HoldingItem)
+                if (_interactionState == InteractionState.EquipedItem)
                 {
                     UnselectItem();
                 }
@@ -534,14 +583,16 @@ namespace Dose.Core.Scenes
         void UnselectItem()
         {
             SelectedItem = null;
-            _interactionState = InteractionState.Curious;
+            SelectedItemChanged?.Invoke(this, new SelectedItemChangedArgs(SelectedItem));
+            SetInteractionState(InteractionState.Curious);
             _controlPlane?.InventoryController?.OnActiveItemUnselected();
         }
 
         void SelectItem()
         {
             SelectedItem = _controlPlane?.InventoryController?.CurrentItem;
-            _interactionState = InteractionState.HoldingItem;
+            SelectedItemChanged?.Invoke(this, new SelectedItemChangedArgs(SelectedItem));
+            SetInteractionState(InteractionState.EquipedItem);
             _controlPlane?.InventoryController?.OnActiveItemSet();
         }
 
@@ -630,8 +681,15 @@ namespace Dose.Core.Scenes
                     ProgressDialogue();
                     break;
 
-                case InteractionState.HoldingItem:
-                    if (_currentTarget != null) UseItemWith(_currentTarget);
+                case InteractionState.EquipedItem:
+                    if (_currentTarget != null)
+                    {
+                        UseItemWith(_currentTarget);
+                    }
+                    else
+                    {
+                        UnselectItem();
+                    }
                     break;
             }          
         }
@@ -642,7 +700,7 @@ namespace Dose.Core.Scenes
 
             if (item == null)
             {
-                GD.PushWarning($"Player is not holding any item. Skipping {nameof(UseItemWith)}.");
+                GD.PushWarning($"Player does not have an equiped item. Skipping {nameof(UseItemWith)}.");
                 return;
             }
 
@@ -652,12 +710,20 @@ namespace Dose.Core.Scenes
                 return;
             }
 
+            var interacted = false;
+
             foreach (var op in item.InteractWith)
             {
                 if (op.TryInteract(item, actor.Context))
                 {
+                    interacted = true;
                     GD.Print($"Interacted with actor \"{actor.Context.Identifier}\" using item \"{item.Identifier}\".");
                 }
+            }
+
+            if (!interacted)
+            {
+                ItemInteractionRejected?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -681,16 +747,25 @@ namespace Dose.Core.Scenes
         public void UseStairs(IStairs stairs)
         {
             _moveState = MoveState.Locked;
-            _interactionState = InteractionState.Locked;
+            SetInteractionState(InteractionState.Locked);
+            _controlPlane?.InteractivityController?.SetTargetCaptionEnabled(false);
 
-            if (FadeTransition.Instance == null)
+            var fadeTransition = FadeTransition.Instance;
+
+            if (fadeTransition == null)
             {
                 _moveState = MoveState.Free;
-                _interactionState = InteractionState.Curious;
+                SetInteractionState(InteractionState.Curious);
+                _controlPlane?.InteractivityController?.SetTargetCaptionEnabled(true);
                 return;
             }
 
-            _ = FadeTransition.Instance.Fade(() =>
+            _ = CompleteStairsTransition(stairs, fadeTransition);
+        }
+
+        async Task CompleteStairsTransition(IStairs stairs, FadeTransition fadeTransition)
+        {
+            await fadeTransition.Fade(() =>
             {
                 if (_controlPlane?.LocationController != null)
                 {
@@ -717,16 +792,15 @@ namespace Dose.Core.Scenes
                         var localBasis = linked.GlobalTransform.Basis.Inverse() * linked.GlobalTransform.Basis;
                         _head.Rotation = (localBasis * Basis.FromEuler(new Vector3(0, Mathf.Pi, 0))).GetEuler();
                     }
-
-                    _moveState = MoveState.Free;
-                    _interactionState = InteractionState.Curious;
-
-                    return;
                 }
 
                 _moveState = MoveState.Free;
-                _interactionState = InteractionState.Curious;
+                SetInteractionState(InteractionState.Curious);
             }, 2);
+
+            _currentTarget = null;
+            UpdateTarget();
+            _controlPlane?.InteractivityController?.SetTargetCaptionEnabled(true);
         }
     }
 }

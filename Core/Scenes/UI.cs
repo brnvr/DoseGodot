@@ -11,16 +11,20 @@ namespace Dose.Core.Scenes
         NotificationCenter _notificationCenter = null!;
         CenterContainer? _currentMenu;
         Input.MouseModeEnum? _mouseModePrevious;
-        PanelContainer _dialogueCaption = null!;
-        Label _dialogueText = null!;
+        TextWithBackground _dialogueCaption = null!;
+        TextWithBackground _actorNameCaption = null!;
+        EquipedItemDisplay _equipedItemDisplay = null!;
+        Cursor _cursor = null!;
 
         public bool IsMenuDisplayed { get; private set; }
 
         public override void _Ready()
         {
             ProcessMode = ProcessModeEnum.Always;
-            _dialogueCaption = GetNode<PanelContainer>("DialogueCaption");
-            _dialogueText = GetNode<Label>("DialogueCaption/MarginContainer/Text");
+            _dialogueCaption = GetNode<TextWithBackground>("DialogueCaption");
+            _actorNameCaption = GetNode<TextWithBackground>("NameCaption");
+            _equipedItemDisplay = GetNode<EquipedItemDisplay>("EquipedItemDisplay");
+            _cursor = GetNode<Cursor>("Cursor");
             _notificationCenter = GetNode<NotificationCenter>("Notifications");
 
             base._Ready();
@@ -34,22 +38,44 @@ namespace Dose.Core.Scenes
             label.Show();
         }
 
-        public void SetLabelVisible(string labelName, bool visible)
+        public void SetCursorVisible(bool visible)
         {
-            var label = GetNode<Label>(labelName);
+            _cursor.Visible = visible;
+        }
 
-            label.Visible = visible;
+        public void SetActorName(string? name)
+        {
+            _actorNameCaption.SetText(name);
+        }
+
+        public void SetActorNameVisible(bool visible)
+        {
+            _actorNameCaption.SetTextVisible(visible);
         }
 
         public void ShowDialogueLine(string text)
         {
-            _dialogueText.Text = text;
-            _dialogueCaption.Show();
+            _dialogueCaption.SetText(text);
         }
 
         public void HideDialogue()
         {
-            _dialogueCaption.Hide();
+            _dialogueCaption.SetTextVisible(false);
+        }
+
+        public void SetEquipedItem(Texture2D? texture)
+        {
+            _equipedItemDisplay.SetItem(texture);
+        }
+
+        public void SetEquipedItemTargeted(bool targeted)
+        {
+            _equipedItemDisplay.SetInteractionTargeted(targeted);
+        }
+
+        public void PlayRejectedItemInteractionFeedback()
+        {
+            _equipedItemDisplay.PlayRejectedInteractionFeedback();
         }
 
         public void Notify(string message, float duration = 2f)

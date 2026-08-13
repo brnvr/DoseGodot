@@ -8,12 +8,14 @@ namespace Dose.Core.Library.Configuration.Actors
         public override ItemConfig FromDict(Dictionary<string, object?> dict)
         {
             var identifier = GetRequired<string>(dict, "identifier");
+            var texturePath = GetRequired<string>(dict, "texturePath");
 
             return new ItemConfig
             {
                 Identifier = identifier,
                 DisplayName = GetOptional<string>(dict, "displayName") ?? identifier,
-                TexturePath = GetRequired<string>(dict, "texturePath"),
+                TexturePath = texturePath,
+                EquipedTexturePath = GetOptional<string>(dict, "equipedTexturePath") ?? texturePath,
                 Rarity = GetRequired<string>(dict, "rarity"),
                 MaxQuantity = GetOptional<int?>(dict, "maxQuantity"),
                 Execute = GetOptional<List<object>>(dict, "execute", []).Select(o => {

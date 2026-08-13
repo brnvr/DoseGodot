@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 using Dose.Core.ActionPerformers;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
@@ -54,6 +55,30 @@ namespace Dose.Core.Scenes
 			var locationManager = GetNode<LocationManager>("LocationManager");
 			var locationOccluder = GetNode<LocationOccluder>("LocationOccluder");
 
+            void SyncCursorVisibility()
+            {
+                ui.SetCursorVisible(player.CanInteract() && player.SelectedItem == null);
+            }
+
+            player.SelectedItemChanged += (sender, e) =>
+            {
+                ui.SetEquipedItem(e.Item?.EquipedTexture);
+                ui.SetEquipedItemTargeted(e.Item != null && player.HasInteractionTarget);
+                SyncCursorVisibility();
+            };
+            player.InteractionAvailabilityChanged += (sender, e) =>
+            {
+                SyncCursorVisibility();
+            };
+            player.InteractionTargetChanged += (sender, e) =>
+            {
+                ui.SetEquipedItemTargeted(e.HasTarget);
+            };
+            player.ItemInteractionRejected += (sender, e) =>
+            {
+                ui.PlayRejectedItemInteractionFeedback();
+            };
+
 			List<IGameEvent<Npc>> npcEvents = [
 				new DisappearOnDistanceEvent<Npc>(player, 10)
 			];
@@ -94,6 +119,8 @@ namespace Dose.Core.Scenes
 					{ "receive", new ReceivePerformer(player) }
 				})
 			).Load();
+
+            var currantSyrup = itemPool.Content.Single(item => item.Identifier == "currant syrup");
 			
 			var npcPool = new ActorPool<NpcContext>
 			(
@@ -135,6 +162,7 @@ namespace Dose.Core.Scenes
 				locationEvents
 			);
 			player.Initialize(controlPlane);
+            player.Inventory.Add(currantSyrup);
 			postShader.Initialize(palette);
 
 			AudioCollector.InitializeESpeak();

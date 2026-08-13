@@ -6,7 +6,6 @@ namespace Dose.Core.Library.Control
     public class DialogueController(IUI? ui)
     {
         public IUI? UI { get; } = ui;
-        public string NameCaptionLabelName { get; init; } = "NameCaption";
 
         public void OnDialogueChange(IDialogueNode node)
         {
@@ -24,7 +23,7 @@ namespace Dose.Core.Library.Control
         public void OnDialogueEnd()
         {
             UI?.HideDialogue();
-            UI?.SetLabelVisible(NameCaptionLabelName, true);
+            UI?.SetActorNameVisible(true);
         }
     }
 }

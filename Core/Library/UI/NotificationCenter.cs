@@ -4,8 +4,8 @@ namespace Dose.Core.Library.UI
 {
     public partial class NotificationCenter : VBoxContainer
     {
-        const float ENTRY_OFFSET = 8f;
-        const float ENTRY_DURATION = 0.2f;
+        const float ENTRY_OFFSET = 6f;
+        const float ENTRY_DURATION = 0.3f;
         const float FADE_DURATION = 0.25f;
 
         public void ShowNotification(string message, float duration)

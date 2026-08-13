@@ -21,7 +21,7 @@ namespace Dose.Core.Library.DataStructures.Dialogues
         public void OnUIEvent(IUI ui)
         {
             ui.ShowDialogueLine(Text);
-            ui.SetLabelVisible("NameCaption", false);
+            ui.SetActorNameVisible(false);
         }
 
         public void Process()

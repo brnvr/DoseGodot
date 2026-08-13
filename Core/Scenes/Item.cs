@@ -15,6 +15,8 @@ namespace Dose.Core.Scenes
         public void Initialize(ItemContext context, ItemArgs args)
         {
             Context = context;
+            MeshInstance = GetNode<MeshInstance3D>("Mesh");
+            UpdateTexture();
         }
 
         public void Destroy()
