@@ -18,6 +18,8 @@ namespace Dose.Core.Scenes
         EquipedItemDisplay _equipedItemDisplay = null!;
         Cursor _cursor = null!;
         InventoryDisplay _inventoryDisplay = null!;
+        ColorRect _leftBar = null!;
+        ColorRect _topBar = null!;
         ColorRect _bottomBar = null!;
         ColorRect _rightBar = null!;
 
@@ -32,9 +34,16 @@ namespace Dose.Core.Scenes
             _cursor = GetNode<Cursor>("Cursor");
             _notificationCenter = GetNode<NotificationCenter>("Notifications");
             _inventoryDisplay = GetNode<InventoryDisplay>("RightBar/CenterContainer/InventoryDisplay");
+            _leftBar = GetNode<ColorRect>("LeftBar");
+            _topBar = GetNode<ColorRect>("TopBar");
             _bottomBar = GetNode<ColorRect>("BottomBar");
             _rightBar = GetNode<ColorRect>("RightBar");
 
+            _leftBar.AnchorRight = UIScreenLayout.GameplayLeftRatio;
+            _topBar.AnchorLeft = UIScreenLayout.GameplayLeftRatio;
+            _topBar.AnchorRight = UIScreenLayout.GameplayRightRatio;
+            _topBar.AnchorBottom = UIScreenLayout.GameplayTopRatio;
+            _bottomBar.AnchorLeft = UIScreenLayout.GameplayLeftRatio;
             _bottomBar.AnchorTop = UIScreenLayout.GameplayBottomRatio;
             _bottomBar.AnchorRight = UIScreenLayout.GameplayRightRatio;
             _rightBar.AnchorLeft = UIScreenLayout.GameplayRightRatio;
@@ -119,8 +128,8 @@ namespace Dose.Core.Scenes
 
             var center = new CenterContainer
             {
-                AnchorLeft = 0,
-                AnchorTop = 0,
+                AnchorLeft = UIScreenLayout.GameplayLeftRatio,
+                AnchorTop = UIScreenLayout.GameplayTopRatio,
                 AnchorRight = UIScreenLayout.GameplayRightRatio,
                 AnchorBottom = UIScreenLayout.GameplayBottomRatio
             };

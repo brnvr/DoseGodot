@@ -205,8 +205,8 @@ namespace Dose.Core.Scenes
             var halfHeight = verticalSize * 0.5f;
             var halfWidth = halfHeight * viewportSize.Aspect();
             var offset = new Vector2(
-                UIScreenLayout.RightBarWidthRatio * halfWidth,
-                -UIScreenLayout.BottomBarHeightRatio * halfHeight
+                (UIScreenLayout.RightBarWidthRatio - UIScreenLayout.LeftBarWidthRatio) * halfWidth,
+                (UIScreenLayout.TopBarHeightRatio - UIScreenLayout.BottomBarHeightRatio) * halfHeight
             );
 
             _view.KeepAspect = Camera3D.KeepAspectEnum.Height;
