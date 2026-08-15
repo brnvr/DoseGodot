@@ -18,7 +18,11 @@ namespace Dose.Core.Library.Props
                     : null,
                 ModelScene = propConfig.IsBillboard
                     ? null
-                    : GD.Load<PackedScene>(propConfig.ModelPath)
+                    : GD.Load<PackedScene>(propConfig.ModelPath),
+                MinDistanceToWall = propConfig.MinDistanceToWall,
+                MaxDistanceToWall = propConfig.MaxDistanceToWall,
+                MinDistanceFromCorner = propConfig.MinDistanceFromCorner,
+                MaxDistanceFromCorner = propConfig.MaxDistanceFromCorner
             };
         }
     }

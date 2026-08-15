@@ -19,6 +19,15 @@ namespace Dose.Core.Scenes
 
 	public partial class LocationManager : Node, ILocationManager
 	{
+		[Flags]
+		enum PopulateTargets
+		{
+			None = 0,
+			Npc = 1 << 0,
+			Item = 1 << 1,
+			Prop = 1 << 2
+		}
+
 		const int BLOCK_SIZE = 4;
 		const string ROOM_CATEGORY = "room";
 		const string CORRIDOR_CATEGORY = "corridor";
@@ -316,7 +325,10 @@ namespace Dose.Core.Scenes
 			}
 
 			BuildLocation(location);
-			PopulateLocation(location);
+			PopulateLocation(
+				location,
+				PopulateTargets.Npc | PopulateTargets.Item | PopulateTargets.Prop
+			);
 		
 			//location.CreateFlippedBack();
 
@@ -353,7 +365,7 @@ namespace Dose.Core.Scenes
 			}
 
 			BuildLocation(location, allowCustomRoomLinks);
-			PopulateLocation(location);
+			PopulateLocation(location, PopulateTargets.Npc | PopulateTargets.Item);
 		
 			//location.CreateFlippedBack();
 
@@ -532,51 +544,66 @@ namespace Dose.Core.Scenes
 			return PickRandom(values);
 		}
 
-		void PopulateLocation(BuildableLocation location)
+		void PopulateLocation(BuildableLocation location, PopulateTargets targets)
 		{
-			if (_itemPool == null)
+			var populators = new List<LocationPopulator>();
+
+			if ((targets & PopulateTargets.Prop) != 0)
 			{
-				GD.PushWarning($"{nameof(_itemPool)} is null");
-				return;
+				if (PropPool == null)
+				{
+					GD.PushWarning($"{nameof(PropPool)} is null");
+				}
+				else
+				{
+					populators.Add(new PropLocationPopulator(
+						location,
+						PropPool,
+						new Probability(0.5),
+						BLOCK_SIZE
+					));
+				}
 			}
 
-			if (_npcPool == null)
+			if ((targets & PopulateTargets.Item) != 0)
 			{
-				GD.PushWarning($"{nameof(_npcPool)} is null");
-				return;
+				if (_itemPool == null)
+				{
+					GD.PushWarning($"{nameof(_itemPool)} is null");
+				}
+				else
+				{
+					populators.Add(new LocationPopulator<Item, ItemContext, ItemArgs>(
+						location,
+						new ActorPoolSelector<Item, ItemContext, ItemArgs>(_itemPool),
+						new Probability(0.5),
+						new ItemArgs(),
+						BLOCK_SIZE
+					));
+				}
 			}
 
-			var itemSelector = new ActorPoolSelector<Item, ItemContext, ItemArgs>(_itemPool);
-			var npcSelector = new ActorPoolSelector<Npc, NpcContext, NpcArgs>(_npcPool);
-
-			var itemArgs = new ItemArgs();
-			var npcArgs = new NpcArgs
+			if ((targets & PopulateTargets.Npc) != 0)
 			{
-				Player = Player,
-				GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
-			};
-
-			var itemPopulator = new LocationPopulator<Item, ItemContext, ItemArgs>(
-				location,
-				itemSelector,
-				new Probability(0.5),
-				itemArgs,
-				BLOCK_SIZE
-			);
-
-			var npcPopulator = new LocationPopulator<Npc, NpcContext, NpcArgs>(
-				location,
-				npcSelector,
-				new Probability(0.5),
-				npcArgs,
-				BLOCK_SIZE
-			);
-
-			var populators = new List<LocationPopulator>
-			{
-				itemPopulator,
-				npcPopulator
-			};
+				if (_npcPool == null)
+				{
+					GD.PushWarning($"{nameof(_npcPool)} is null");
+				}
+				else
+				{
+					populators.Add(new LocationPopulator<Npc, NpcContext, NpcArgs>(
+						location,
+						new ActorPoolSelector<Npc, NpcContext, NpcArgs>(_npcPool),
+						new Probability(0.5),
+						new NpcArgs
+						{
+							Player = Player,
+							GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
+						},
+						BLOCK_SIZE
+					));
+				}
+			}
 
 			var populatedPositions = GetReservedActorPositions(location);
 
