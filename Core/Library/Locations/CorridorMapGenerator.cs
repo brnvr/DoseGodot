@@ -17,7 +17,9 @@ namespace Dose.Core.Library.Locations
         Probability probabilityToExtendCorridor,
         Probability probabilityToBifurcate,
         Probability probabilityToBuildDoors,
-        Probability probabilityToBuildStairs
+        Probability probabilityToBuildStairs,
+        Probability probabilityToSetWallOverlay,
+        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures
     ) : IMapGenerator
     {
         const int CORRIDOR_CHUNK_LENGTH_CELLS = 5;
@@ -33,6 +35,8 @@ namespace Dose.Core.Library.Locations
         public Probability ProbabilityToBifurcate { get; } = probabilityToBifurcate;
         public Probability ProbabilityToBuildDoors { get; } = probabilityToBuildDoors;
         public Probability ProbabilityToBuildStairs { get; } = probabilityToBuildStairs;
+        public Probability ProbabilityToSetWallOverlay { get; } = probabilityToSetWallOverlay;
+        public IEnumerable<WallOverlayTextureDefinition> WallOverlayTextures { get; } = wallOverlayTextures;
 
         public Map GenerateMap()
         {
@@ -56,7 +60,7 @@ namespace Dose.Core.Library.Locations
             return map;
         }
 
-        static void GenerateIntersection(Map map, Vector2I point)
+        void GenerateIntersection(Map map, Vector2I point)
         {
             var baseCell = BuildCellWalls(new MapCell(), AllDirections());
 
@@ -179,10 +183,10 @@ namespace Dose.Core.Library.Locations
             return ChooseNextDirection(map, point, availableDirections.Except([selectedDirection]));
         }
 
-        static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
+        MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
         {
             var wallDirection = wallDirections.First();
-            var wall = new MapCellWall(MapCellType.Solid);
+            var wall = BuildWall(MapCellType.Solid);
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -219,7 +223,7 @@ namespace Dose.Core.Library.Locations
             var buildOrientation = OrientationFromDirection(direction);
             var wallOrientation = OrientationFromDirection(wallDirection);
             var hasDoor = (buildOrientation != wallOrientation) && ((shouldBuildDoors0 && _directions0.Contains(wallDirection)) || (shouldBuildDoors1 && _directions1.Contains(wallDirection)));
-            var wall = new MapCellWall(DecideMapCellType(hasDoor));
+            var wall = BuildWall(DecideMapCellType(hasDoor));
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -231,6 +235,25 @@ namespace Dose.Core.Library.Locations
 
             return BuildCellWalls(newCell, direction, hasDoors0, hasDoors1, iteration, remainingWallDirections);
         } 
+
+        MapCellWall BuildWall(MapCellType type)
+        {
+            WallOverlayTextureDefinition? overlay = null;
+
+            if (type == MapCellType.Solid &&
+                WallOverlayTextures.Any() &&
+                new RandomDecider(ProbabilityToSetWallOverlay).Roll())
+            {
+                overlay = new RandomSelector<WallOverlayTextureDefinition>(WallOverlayTextures).Pick();
+            }
+
+            return new MapCellWall(
+                type,
+                overlay?.Texture,
+                overlay?.Scale ?? 1f,
+                overlay?.TextureRepeat ?? false
+            );
+        }
   
         Vector2I GetCenter()
         {

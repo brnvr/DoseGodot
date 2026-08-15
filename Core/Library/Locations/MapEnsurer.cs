@@ -47,6 +47,9 @@ namespace Dose.Core.Library.Locations
 
                 var wall = new RandomSelector<MapCellWall>(solidWalls).Pick();
                 wall.Type = new RandomSelector<MapCellType>(Types).Pick();
+                wall.OverlayTexture = null;
+                wall.OverlayTextureScale = 1f;
+                wall.OverlayTextureRepeat = false;
             }
         }
     }

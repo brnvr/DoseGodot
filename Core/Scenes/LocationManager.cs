@@ -46,6 +46,7 @@ namespace Dose.Core.Scenes
 		WeightedPool<TextureDefinition>? _wallTexturePool;
 		WeightedPool<TextureDefinition>? _lampTexturePool;
 		WeightedPool<TextureDefinition>? _doorTexturePool;
+		Pool<WallOverlayTextureDefinition>? _wallOverlayTexturePool;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
@@ -70,6 +71,7 @@ namespace Dose.Core.Scenes
 			WeightedPool<TextureDefinition> wallTexturePool,
 			WeightedPool<TextureDefinition> doorTexturePool,
 			WeightedPool<TextureDefinition> lampTexturePool,
+			Pool<WallOverlayTextureDefinition> wallOverlayTexturePool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
 		)
@@ -81,6 +83,7 @@ namespace Dose.Core.Scenes
 			_wallTexturePool = wallTexturePool;
 			_doorTexturePool = doorTexturePool;
 			_lampTexturePool = lampTexturePool;
+			_wallOverlayTexturePool = wallOverlayTexturePool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
@@ -634,16 +637,18 @@ namespace Dose.Core.Scenes
 			}
 		}
 
-		static RoomMapGenerator GenerateRoomMap()
+		RoomMapGenerator GenerateRoomMap()
         {
             return new RoomMapGenerator(
 				minSize: 2,
 				maxSize: 10,
-				probabilityToBuildDoor: new Probability(0.1)
+				probabilityToBuildDoor: new Probability(0.1),
+				probabilityToSetWallOverlay: new Probability(0.1),
+				wallOverlayTextures: _wallOverlayTexturePool?.Content ?? []
 			);
         }
 
-        static CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairsUp, bool shouldEnsureStairsDown)
+        CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairsUp, bool shouldEnsureStairsDown)
         {
             return new CorridorMapGenerator(
 				horizontalCells: 500,
@@ -651,7 +656,9 @@ namespace Dose.Core.Scenes
 				probabilityToExtendCorridor: new Probability(0.5),
 				probabilityToBifurcate: new Probability(0.15),
 				probabilityToBuildDoors: new Probability(0.4),
-				probabilityToBuildStairs: new Probability(0.1)
+				probabilityToBuildStairs: new Probability(0.1),
+				probabilityToSetWallOverlay: new Probability(0.1),
+				wallOverlayTextures: _wallOverlayTexturePool?.Content ?? []
 			)
 			{
 				ShouldEnsureStairsUp = shouldEnsureStairsUp,

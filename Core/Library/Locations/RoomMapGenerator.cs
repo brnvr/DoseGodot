@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
 using Godot;
@@ -7,11 +9,19 @@ using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
-    public class RoomMapGenerator(int minSize, int maxSize, Probability probabilityToBuildDoor) : IMapGenerator
+    public class RoomMapGenerator(
+        int minSize,
+        int maxSize,
+        Probability probabilityToBuildDoor,
+        Probability probabilityToSetWallOverlay,
+        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures
+    ) : IMapGenerator
     {
         public int MinSize { get; } = minSize;
         public int MaxSize { get; } = maxSize;
         public Probability ProbabilityToBuildDoor { get; } = probabilityToBuildDoor;
+        public Probability ProbabilityToSetWallOverlay { get; } = probabilityToSetWallOverlay;
+        public IEnumerable<WallOverlayTextureDefinition> WallOverlayTextures { get; } = wallOverlayTextures;
 
         public Map GenerateMap()
         {
@@ -42,7 +52,16 @@ namespace Dose.Core.Library.Locations
 
             var shouldBuildDoor = new RandomDecider(ProbabilityToBuildDoor).Roll();
             var type = shouldBuildDoor ? MapCellType.Doorway : MapCellType.Solid;
-            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(type));
+            var overlay = PickWallOverlayTexture(type);
+            var cell = (existingCell ?? new MapCell()).WithWall(
+                wallDirection,
+                new MapCellWall(
+                    type,
+                    overlay?.Texture,
+                    overlay?.Scale ?? 1f,
+                    overlay?.TextureRepeat ?? false
+                )
+            );
 
             map.Set(point, cell);
 
@@ -59,6 +78,18 @@ namespace Dose.Core.Library.Locations
             var nextDirection = NextDirection(direction, ClockDirection.Clockwise);
 
             GenerateWall(map, point, nextDirection);
+        }
+
+        WallOverlayTextureDefinition? PickWallOverlayTexture(MapCellType type)
+        {
+            if (type != MapCellType.Solid || !WallOverlayTextures.Any())
+            {
+                return null;
+            }
+
+            return new RandomDecider(ProbabilityToSetWallOverlay).Roll()
+                ? new RandomSelector<WallOverlayTextureDefinition>(WallOverlayTextures).Pick()
+                : null;
         }
 
         private static void FillEmptyCells(Map map, int width, int height)
