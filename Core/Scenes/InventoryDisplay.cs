@@ -11,7 +11,6 @@ namespace Dose.Core.Scenes
         const float TEXTURE_MARGIN = 8f;
 
         static readonly Color SelectedColor = new("ffd319");
-        static readonly Color EquipedColor = new("24d7ff");
 
         public void UpdateItems(
             IEnumerable<InventoryEntry> entries,
@@ -51,10 +50,6 @@ namespace Dose.Core.Scenes
             selectedOutline.Visible = selected;
             tile.AddChild(selectedOutline);
 
-            var equipedOutline = CreateOutline(EquipedColor, 2, 5);
-            equipedOutline.Visible = equiped;
-            tile.AddChild(equipedOutline);
-
             var texture = new TextureRect
             {
                 Texture = entry.Item.Texture,
@@ -88,6 +83,28 @@ namespace Dose.Core.Scenes
                 count.AddThemeConstantOverride("shadow_offset_x", 1);
                 count.AddThemeConstantOverride("shadow_offset_y", 1);
                 tile.AddChild(count);
+            }
+
+            if (equiped)
+            {
+                var equipedLabel = new Label
+                {
+                    Text = "EQUIPED",
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    MouseFilter = MouseFilterEnum.Ignore,
+                    OffsetTop = -7,
+                    OffsetRight = TILE_SIZE,
+                    OffsetBottom = 11,
+                    ZIndex = 2
+                };
+                equipedLabel.AddThemeFontSizeOverride("font_size", 10);
+                equipedLabel.AddThemeColorOverride("font_color", Colors.White);
+                equipedLabel.AddThemeColorOverride("font_shadow_color", Colors.Black);
+                equipedLabel.AddThemeConstantOverride("shadow_offset_x", 1);
+                equipedLabel.AddThemeConstantOverride("shadow_offset_y", 1);
+                equipedLabel.AddThemeConstantOverride("shadow_outline_size", 1);
+                tile.AddChild(equipedLabel);
             }
 
             return tile;
