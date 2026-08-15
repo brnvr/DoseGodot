@@ -14,6 +14,8 @@ using Dose.Core.Library.GameEvents;
 using Dose.Core.Library.DataStructures;
 using System.IO;
 using Dose.Core.Library.Loaders;
+using Dose.Core.Library.Configuration.Props;
+using Dose.Core.Library.Props;
 
 namespace Dose.Core.Scenes
 {
@@ -155,6 +157,14 @@ namespace Dose.Core.Scenes
 				builder: new CustomRoomContextBuilder()
 			).Load();
 
+			var propPool = new PropPool
+			(
+				configPath: "Configuration/Props",
+				propScene: GD.Load<PackedScene>("res://Configuration/Scenes/Prop.tscn"),
+				configConverter: new PropConfigConverter(),
+				builder: new PropDefinitionBuilder()
+			).Load();
+
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader<CustomRoom>());
 			locationManager.Initialize
 			(
@@ -166,6 +176,7 @@ namespace Dose.Core.Scenes
 				doorTexturePool,
 				lampTexturePool,
 				wallOverlayTexturePool,
+				propPool,
 				npcEvents,
 				locationEvents
 			);

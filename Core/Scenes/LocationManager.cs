@@ -13,6 +13,7 @@ using Dose.Core.ActorArgs;
 using Dose.Core.Library.GameEvents;
 using System.Linq;
 using Dose.Core.Library;
+using Dose.Core.Library.Props;
 namespace Dose.Core.Scenes
 {
 
@@ -53,6 +54,7 @@ namespace Dose.Core.Scenes
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
+		public PropPool? PropPool { get; private set; }
 		
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
@@ -72,6 +74,7 @@ namespace Dose.Core.Scenes
 			WeightedPool<TextureDefinition> doorTexturePool,
 			WeightedPool<TextureDefinition> lampTexturePool,
 			Pool<WallOverlayTextureDefinition> wallOverlayTexturePool,
+			PropPool propPool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
 		)
@@ -84,6 +87,7 @@ namespace Dose.Core.Scenes
 			_doorTexturePool = doorTexturePool;
 			_lampTexturePool = lampTexturePool;
 			_wallOverlayTexturePool = wallOverlayTexturePool;
+			PropPool = propPool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>

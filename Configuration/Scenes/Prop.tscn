@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bep1e5d2jhol4"]
 
-[ext_resource type="Script" uid="uid://bhpex71d701u6" path="res://Core/Scenes/Item.cs" id="1_qbndv"]
+[ext_resource type="Script" uid="uid://obdyu33y6cux" path="res://Core/Scenes/Prop.cs" id="1_qbndv"]
 [ext_resource type="Texture2D" uid="uid://dinna5i27gyg8" path="res://Media/Textures/Placehoders/Item.png" id="2_lbuee"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
@@ -22,9 +22,9 @@ center_offset = Vector3(0, 1, 0)
 gravity_scale = 0.0
 script = ExtResource("1_qbndv")
 
-[node name="MeshInstance" type="MeshInstance3D" parent="."]
+[node name="Mesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_kl7so")
 
-[node name="CollisionShape" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 1.5, 0)
 shape = SubResource("CylinderShape3D_kjml4")
