@@ -13,7 +13,7 @@ using Dose.Core.ActorArgs;
 using Dose.Core.Library.GameEvents;
 using System.Linq;
 using Dose.Core.Library;
-using Dose.Core.Library.Props;
+using Dose.Core.Library.Packs;
 namespace Dose.Core.Scenes
 {
 
@@ -51,19 +51,13 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
 
 		ILocation? _currentLocation;
-		ActorPool<ItemContext>? _itemPool;
-		ActorPool<NpcContext>? _npcPool;
-		WeightedPool<TextureDefinition>? _wallTexturePool;
-		WeightedPool<TextureDefinition>? _lampTexturePool;
-		WeightedPool<TextureDefinition>? _doorTexturePool;
-		Pool<WallOverlayTextureDefinition>? _wallOverlayTexturePool;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
-		public PropPool? PropPool { get; private set; }
+		public PackPool? PackPool { get; private set; }
 		
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
@@ -77,26 +71,14 @@ namespace Dose.Core.Scenes
 		public LocationManager Initialize(
 			IControlPlane controlPlane,
 			Player player,
-			ActorPool<ItemContext> itemPool,
-			ActorPool<NpcContext> npcPool,
-			WeightedPool<TextureDefinition> wallTexturePool,
-			WeightedPool<TextureDefinition> doorTexturePool,
-			WeightedPool<TextureDefinition> lampTexturePool,
-			Pool<WallOverlayTextureDefinition> wallOverlayTexturePool,
-			PropPool propPool,
+			PackPool packPool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
 		)
         {
 			Player = player;
 			ControlPlane = controlPlane;
-			_itemPool = itemPool;
-			_npcPool = npcPool;
-			_wallTexturePool = wallTexturePool;
-			_doorTexturePool = doorTexturePool;
-			_lampTexturePool = lampTexturePool;
-			_wallOverlayTexturePool = wallOverlayTexturePool;
-			PropPool = propPool;
+			PackPool = packPool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
@@ -306,10 +288,17 @@ namespace Dose.Core.Scenes
 			if (ControlPlane == null)
             {
 				GD.PushError($"{nameof(LocationManager)} has no defined {nameof(IControlPlane)}.");
-                return null;
-            }
+				return null;
+			}
 
-			IMapGenerator mapGenerator = GenerateRoomMap();
+			var pack = SelectPack();
+
+			if (pack == null)
+			{
+				return null;
+			}
+
+			IMapGenerator mapGenerator = GenerateRoomMap(pack);
 
 			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
@@ -324,10 +313,11 @@ namespace Dose.Core.Scenes
 				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
 			}
 
-			BuildLocation(location);
+			BuildLocation(location, pack);
 			PopulateLocation(
 				location,
-				PopulateTargets.Npc | PopulateTargets.Item | PopulateTargets.Prop
+				PopulateTargets.Npc | PopulateTargets.Item | PopulateTargets.Prop,
+				CreatePackSelectionSession(pack)
 			);
 		
 			//location.CreateFlippedBack();
@@ -349,7 +339,18 @@ namespace Dose.Core.Scenes
                 return null;
             }
 
-			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairsUp, shouldEnsureStairsDown);
+			var pack = SelectPack();
+
+			if (pack == null)
+			{
+				return null;
+			}
+
+			IMapGenerator mapGenerator = GenerateCorridorMap(
+				pack,
+				shouldEnsureStairsUp,
+				shouldEnsureStairsDown
+			);
 
 			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
@@ -364,8 +365,12 @@ namespace Dose.Core.Scenes
 				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
 			}
 
-			BuildLocation(location, allowCustomRoomLinks);
-			PopulateLocation(location, PopulateTargets.Npc | PopulateTargets.Item);
+			BuildLocation(location, pack, allowCustomRoomLinks);
+			PopulateLocation(
+				location,
+				PopulateTargets.Npc | PopulateTargets.Item,
+				CreatePackSelectionSession(pack)
+			);
 		
 			//location.CreateFlippedBack();
 
@@ -385,7 +390,7 @@ namespace Dose.Core.Scenes
 			return new Vector2(xOffset, yOffset);
 		}
 
-		void BuildLocation(BuildableLocation location, bool allowCustomRoomLinks = true)
+		void BuildLocation(BuildableLocation location, Pack pack, bool allowCustomRoomLinks = true)
 		{
 			if (ControlPlane == null)
             {
@@ -395,7 +400,7 @@ namespace Dose.Core.Scenes
 
 			var doorNumberController = location.Type == Location.LocationType.Corridor ? ControlPlane.DoorNumberController : null;
 			
-			var doorTexture = PickRandomTexture(_doorTexturePool?.GetWeightedList());
+			var doorTexture = PickRandomTexture(pack.GetWeightedDoorTextures());
 
 			if (doorTexture is null)
 			{
@@ -416,7 +421,7 @@ namespace Dose.Core.Scenes
 				Location = location
 			};
 
-			var wallTexture = PickRandomTexture(_wallTexturePool?.GetWeightedList());
+			var wallTexture = PickRandomTexture(pack.GetWeightedWallTextures());
 
 			if (wallTexture is null)
 			{
@@ -424,7 +429,7 @@ namespace Dose.Core.Scenes
 				return;
 			}
 
-			var lampTexture = PickRandomTexture(_lampTexturePool?.GetWeightedList());
+			var lampTexture = PickRandomTexture(pack.GetWeightedLampTextures());
 
 			if (lampTexture is null)
 			{
@@ -544,65 +549,48 @@ namespace Dose.Core.Scenes
 			return PickRandom(values);
 		}
 
-		void PopulateLocation(BuildableLocation location, PopulateTargets targets)
+		void PopulateLocation(
+			BuildableLocation location,
+			PopulateTargets targets,
+			PackSelectionSession selectionSession
+		)
 		{
 			var populators = new List<LocationPopulator>();
 
 			if ((targets & PopulateTargets.Prop) != 0)
 			{
-				if (PropPool == null)
-				{
-					GD.PushWarning($"{nameof(PropPool)} is null");
-				}
-				else
-				{
-					populators.Add(new PropLocationPopulator(
-						location,
-						PropPool,
-						new Probability(0.5),
-						BLOCK_SIZE
-					));
-				}
+				populators.Add(new TargetLocationPopulator(
+					location,
+					selectionSession.SelectProp,
+					new Probability(0.5),
+					BLOCK_SIZE
+				));
 			}
 
 			if ((targets & PopulateTargets.Item) != 0)
 			{
-				if (_itemPool == null)
-				{
-					GD.PushWarning($"{nameof(_itemPool)} is null");
-				}
-				else
-				{
-					populators.Add(new LocationPopulator<Item, ItemContext, ItemArgs>(
-						location,
-						new ActorPoolSelector<Item, ItemContext, ItemArgs>(_itemPool),
-						new Probability(0.5),
-						new ItemArgs(),
-						BLOCK_SIZE
-					));
-				}
+				var itemArgs = new ItemArgs();
+				populators.Add(new TargetLocationPopulator(
+					location,
+					() => selectionSession.SelectItem(itemArgs),
+					new Probability(0.5),
+					BLOCK_SIZE
+				));
 			}
 
 			if ((targets & PopulateTargets.Npc) != 0)
 			{
-				if (_npcPool == null)
+				var npcArgs = new NpcArgs
 				{
-					GD.PushWarning($"{nameof(_npcPool)} is null");
-				}
-				else
-				{
-					populators.Add(new LocationPopulator<Npc, NpcContext, NpcArgs>(
-						location,
-						new ActorPoolSelector<Npc, NpcContext, NpcArgs>(_npcPool),
-						new Probability(0.5),
-						new NpcArgs
-						{
-							Player = Player,
-							GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
-						},
-						BLOCK_SIZE
-					));
-				}
+					Player = Player,
+					GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
+				};
+				populators.Add(new TargetLocationPopulator(
+					location,
+					() => selectionSession.SelectNpc(npcArgs),
+					new Probability(0.5),
+					BLOCK_SIZE
+				));
 			}
 
 			var populatedPositions = GetReservedActorPositions(location);
@@ -668,18 +656,46 @@ namespace Dose.Core.Scenes
 			}
 		}
 
-		RoomMapGenerator GenerateRoomMap()
+		Pack? SelectPack()
+		{
+			if (PackPool == null)
+			{
+				GD.PushError($"{nameof(PackPool)} is null.");
+				return null;
+			}
+
+			var pack = PackPool.Select();
+
+			if (pack == null)
+			{
+				GD.PushError("No Pack could be selected.");
+			}
+
+			return pack;
+		}
+
+		PackSelectionSession CreatePackSelectionSession(Pack pack)
+		{
+			return PackPool?.CreateSelectionSession(pack)
+				?? throw new InvalidOperationException($"{nameof(PackPool)} is null.");
+		}
+
+		RoomMapGenerator GenerateRoomMap(Pack pack)
         {
             return new RoomMapGenerator(
 				minSize: 2,
 				maxSize: 10,
 				probabilityToBuildDoor: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
-				wallOverlayTextures: _wallOverlayTexturePool?.Content ?? []
+				wallOverlayTextures: pack.GetWeightedWallOverlays()
 			);
         }
 
-        CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairsUp, bool shouldEnsureStairsDown)
+        CorridorMapGenerator GenerateCorridorMap(
+			Pack pack,
+			bool shouldEnsureStairsUp,
+			bool shouldEnsureStairsDown
+		)
         {
             return new CorridorMapGenerator(
 				horizontalCells: 500,
@@ -689,7 +705,7 @@ namespace Dose.Core.Scenes
 				probabilityToBuildDoors: new Probability(0.4),
 				probabilityToBuildStairs: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
-				wallOverlayTextures: _wallOverlayTexturePool?.Content ?? []
+				wallOverlayTextures: pack.GetWeightedWallOverlays()
 			)
 			{
 				ShouldEnsureStairsUp = shouldEnsureStairsUp,

@@ -1,6 +1,7 @@
 ---
 identifier: currant syrup
 rarity: VeryCommon
+packId: thisside
 texturePath: "res://Media/Textures/Items/CurrantSyrup.png"
 execute:
   - action: movePlayer

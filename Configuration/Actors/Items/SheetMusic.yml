@@ -1,6 +1,7 @@
 ---
 identifier: sheet music
 rarity: VeryCommon
+packId: thisside
 texturePath: "res://Media/Textures/Placehoders/Item.png"
 execute:
   - action: movePlayer

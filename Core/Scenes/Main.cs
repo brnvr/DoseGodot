@@ -16,6 +16,8 @@ using System.IO;
 using Dose.Core.Library.Loaders;
 using Dose.Core.Library.Configuration.Props;
 using Dose.Core.Library.Props;
+using Dose.Core.Library.Configuration.Packs;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Scenes
 {
@@ -110,7 +112,7 @@ namespace Dose.Core.Scenes
 				configConverter: new TextureConfigConverter()
 			).Load();
 
-			var wallOverlayTexturePool = new Pool<WallOverlayTextureDefinition>
+			var wallOverlayTexturePool = new WeightedPool<WallOverlayTextureDefinition>
 			(
 				configPath: Path.Join(TEXTURE_PATH, "Environment/WallOverlays"),
 				builder: new WallOverlayTextureBuilder(),
@@ -165,18 +167,30 @@ namespace Dose.Core.Scenes
 				builder: new PropDefinitionBuilder()
 			).Load();
 
+			var packConfigs = new Pool<PackConfig>
+			(
+				configPath: "Configuration/Packs",
+				configConverter: new PackConfigConverter(),
+				builder: new PackConfigBuilder()
+			).Load();
+
+			var packPool = new PackPoolBuilder(
+				packConfigs.Content,
+				itemPool,
+				npcPool,
+				wallTexturePool.Content,
+				doorTexturePool.Content,
+				lampTexturePool.Content,
+				wallOverlayTexturePool.Content,
+				propPool
+			).Build();
+
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader<CustomRoom>());
 			locationManager.Initialize
 			(
 				controlPlane,
 				player,
-				itemPool,
-				npcPool,
-				wallTexturePool,
-				doorTexturePool,
-				lampTexturePool,
-				wallOverlayTexturePool,
-				propPool,
+				packPool,
 				npcEvents,
 				locationEvents
 			);

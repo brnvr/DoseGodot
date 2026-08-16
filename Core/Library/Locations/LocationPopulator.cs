@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Dose.Core.Library.Actors;
-using Dose.Core.Library.Common;
+using System;
 using Dose.Core.Library.Numbers;
-using Dose.Core.Library.Props;
 using Dose.Core.Library.Randomness;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
@@ -234,56 +232,15 @@ namespace Dose.Core.Library.Locations
         protected abstract Node3D? CreateTarget();
     }
 
-    public class LocationPopulator<TActor, TActorContext, TArgs>(
+    public class TargetLocationPopulator(
         IBuildableLocation location,
-        ActorPoolSelector<TActor, TActorContext, TArgs> selector,
-        Probability probabilityPopulate,
-        TArgs args,
-        int blockSize
-    ) : LocationPopulator(location, probabilityPopulate, blockSize)
-        where TActor : class, IInitializableActor<TActorContext, TArgs>, new()
-        where TActorContext : IActorContext, IHasRarity
-    {
-        public ActorPoolSelector<TActor, TActorContext, TArgs> Selector { get; } = selector;
-        public TArgs Args { get; } = args;
-
-        protected override Node3D? CreateTarget()
-        {
-            var actor = Selector.Select(Args);
-
-            if (actor == null)
-            {
-                return null;
-            }
-
-            if (actor is Node3D node)
-            {
-                return node;
-            }
-
-            GD.PushError($"{typeof(TActor).Name} must inherit {nameof(Node3D)} to populate a location.");
-            return null;
-        }
-    }
-
-    public class PropLocationPopulator(
-        IBuildableLocation location,
-        PropPool propPool,
+        Func<Node3D?> targetFactory,
         Probability probabilityPopulate,
         int blockSize
     ) : LocationPopulator(location, probabilityPopulate, blockSize)
     {
-        public PropPool PropPool { get; } = propPool;
+        public Func<Node3D?> TargetFactory { get; } = targetFactory;
 
-        protected override Node3D? CreateTarget()
-        {
-            if (PropPool.Content.Count == 0)
-            {
-                return null;
-            }
-
-            var definition = new RandomSelector<PropDefinition>(PropPool.GetWeightedList()).Pick();
-            return PropPool.Create(definition);
-        }
+        protected override Node3D? CreateTarget() => TargetFactory();
     }
 }

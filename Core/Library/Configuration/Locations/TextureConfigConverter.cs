@@ -9,6 +9,7 @@ namespace Dose.Core.Library.Configuration.Locations
             return new TextureConfig
             {
                 Rarity = GetRequired<string>(dict, "rarity"),
+                PackId = GetRequired<string>(dict, "packId"),
                 TexturePath = GetRequired<string>(dict, "texturePath")
             };
         }

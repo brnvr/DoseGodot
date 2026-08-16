@@ -45,6 +45,7 @@ namespace Dose.Core.Library.Configuration.Props
                 TexturePath = hasTexturePath ? texturePath : null,
                 ModelPath = hasModelPath ? modelPath : null,
                 Rarity = GetRequired<string>(dict, "rarity"),
+                PackId = GetRequired<string>(dict, "packId"),
                 Scale = scale,
                 MinDistanceToWall = minDistanceToWall,
                 MaxDistanceToWall = maxDistanceToWall,

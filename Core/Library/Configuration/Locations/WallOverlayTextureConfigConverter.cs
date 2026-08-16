@@ -23,6 +23,8 @@ namespace Dose.Core.Library.Configuration.Locations
             return new WallOverlayTextureConfig
             {
                 TexturePath = GetRequired<string>(dict, "texturePath"),
+                Rarity = GetRequired<string>(dict, "rarity"),
+                PackId = GetRequired<string>(dict, "packId"),
                 Scale = scale,
                 TextureRepeat = textureRepeat
             };

@@ -34,6 +34,7 @@ namespace Dose.Core.Library.Actors
                 Identifier = npcConfig.Identifier,
                 DisplayName = npcConfig.DisplayName,
                 Rarity = Enum.Parse<Rarity>(npcConfig.Rarity, true),
+                PackId = npcConfig.PackId,
                 Texture = ResourceLoader.Load<Texture2D>(npcConfig.TexturePath),
                 Voice = new Voice(npcConfig.Voice, 16000),
                 DialogueMap = GetDialogueMap(npcConfig),

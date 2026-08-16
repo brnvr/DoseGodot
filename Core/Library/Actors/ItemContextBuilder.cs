@@ -21,6 +21,7 @@ namespace Dose.Core.Library.Actors
                 Identifier = itemConfig.Identifier,
                 DisplayName = itemConfig.DisplayName,
                 Rarity = Enum.Parse<Rarity>(itemConfig.Rarity, true),
+                PackId = itemConfig.PackId,
                 Texture = ResourceLoader.Load<Texture2D>(itemConfig.TexturePath),
                 EquipedTexture = ResourceLoader.Load<Texture2D>(itemConfig.EquipedTexturePath),
                 MaxQuantity = itemConfig.MaxQuantity ?? -1,

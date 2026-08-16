@@ -8,6 +8,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string Identifier { get; set; }
         public required string DisplayName { get; init; }
         public required string Rarity { get; set; }
+        public required string PackId { get; init; }
         public required string TexturePath { get; init; }
         public required string DialoguesDir { get; set; }
         public required IEnumerable<string> AvailableDialogues { get; init; }
@@ -22,6 +23,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 { "displayName", DisplayName },
                 { "texturePath", TexturePath },
                 { "rarity", Rarity },
+                { "packId", PackId },
                 { "dialoguesDir", DialoguesDir },
                 { "availableDialogues", AvailableDialogues },
                 { "Voice", Voice },

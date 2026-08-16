@@ -11,6 +11,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string TexturePath { get; init; }
         public required string EquipedTexturePath { get; init; }
         public required string Rarity { get; init; }
+        public required string PackId { get; init; }
         public required IEnumerable<ItemActionConfig> Execute { get; init; }
         public int? MaxQuantity { get; init; }
         public required IEnumerable<ItemInteractionConfig> InteractWith { get; init; }
@@ -26,6 +27,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 { "texturePath", TexturePath },
                 { "equipedTexturePath", EquipedTexturePath },
                 { "rarity", Rarity },
+                { "packId", PackId },
                 { "maxQuantity", MaxQuantity },
                 { "keepAfterUse", KeepAfterUse },
                 { "scale", Scale.Value }

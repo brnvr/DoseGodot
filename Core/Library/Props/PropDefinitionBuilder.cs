@@ -21,6 +21,7 @@ namespace Dose.Core.Library.Props
                     ? null
                     : GD.Load<PackedScene>(propConfig.ModelPath),
                 Rarity = Enum.Parse<Rarity>(propConfig.Rarity, true),
+                PackId = propConfig.PackId,
                 Scale = propConfig.Scale,
                 MinDistanceToWall = propConfig.MinDistanceToWall,
                 MaxDistanceToWall = propConfig.MaxDistanceToWall,
