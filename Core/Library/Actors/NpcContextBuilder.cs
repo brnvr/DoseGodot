@@ -37,7 +37,8 @@ namespace Dose.Core.Library.Actors
                 Texture = ResourceLoader.Load<Texture2D>(npcConfig.TexturePath),
                 Voice = new Voice(npcConfig.Voice, 16000),
                 DialogueMap = GetDialogueMap(npcConfig),
-                AvailableDialogueKeys = npcConfig.AvailableDialogues
+                AvailableDialogueKeys = npcConfig.AvailableDialogues,
+                Scale = npcConfig.Scale
             };
         }
 

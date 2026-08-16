@@ -4,6 +4,7 @@ using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
 using Godot;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Actors
 {
@@ -17,5 +18,6 @@ namespace Dose.Core.Library.Actors
         public Texture2D? Texture { get; init; }
         public Voice? Voice { get; init; }
         public int MaxQuantity { get; init; } = 1;
+        public ScaleFactor Scale { get; init; } = 1f;
     }
 }

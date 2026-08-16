@@ -17,6 +17,7 @@ namespace Dose.Core.Library.Configuration.Props
             var maxDistanceToWall = GetNormalizedValue(dict, "maxDistanceToWall", 1f);
             var minDistanceFromCorner = GetNormalizedValue(dict, "minDistanceFromCorner", 0f);
             var maxDistanceFromCorner = GetNormalizedValue(dict, "maxDistanceFromCorner", 1f);
+            var scale = new ScaleFactor(GetOptionalFloat(dict, "scale", 1f));
 
             if (hasTexturePath == hasModelPath)
             {
@@ -43,6 +44,8 @@ namespace Dose.Core.Library.Configuration.Props
             {
                 TexturePath = hasTexturePath ? texturePath : null,
                 ModelPath = hasModelPath ? modelPath : null,
+                Rarity = GetRequired<string>(dict, "rarity"),
+                Scale = scale,
                 MinDistanceToWall = minDistanceToWall,
                 MaxDistanceToWall = maxDistanceToWall,
                 MinDistanceFromCorner = minDistanceFromCorner,

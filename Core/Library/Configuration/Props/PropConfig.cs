@@ -7,6 +7,8 @@ namespace Dose.Core.Library.Configuration.Props
     {
         public string? TexturePath { get; init; }
         public string? ModelPath { get; init; }
+        public required string Rarity { get; init; }
+        public ScaleFactor Scale { get; init; } = 1f;
         public NormalizedValue MinDistanceToWall { get; init; } = 0f;
         public NormalizedValue MaxDistanceToWall { get; init; } = 1f;
         public NormalizedValue MinDistanceFromCorner { get; init; } = 0f;
@@ -19,6 +21,8 @@ namespace Dose.Core.Library.Configuration.Props
             {
                 { "texturePath", TexturePath },
                 { "modelPath", ModelPath },
+                { "rarity", Rarity },
+                { "scale", Scale.Value },
                 { "minDistanceToWall", MinDistanceToWall.Value },
                 { "maxDistanceToWall", MaxDistanceToWall.Value },
                 { "minDistanceFromCorner", MinDistanceFromCorner.Value },

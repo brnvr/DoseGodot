@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Dose.Core.Library.Common;
+using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Randomness;
 
 namespace Dose.Core.Library.Actors
@@ -17,7 +18,9 @@ namespace Dose.Core.Library.Actors
         {
             if (Content.Count == 0) return default;
 
-            var selector = new RandomSelector<TActorContext>(_content);
+            var selector = new RandomSelector<TActorContext>(
+                new RarityWeighter<TActorContext>([.. _content]).Weight()
+            );
 
             var context = selector.Pick();
 

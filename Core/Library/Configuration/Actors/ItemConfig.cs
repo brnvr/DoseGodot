@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -14,6 +15,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public int? MaxQuantity { get; init; }
         public required IEnumerable<ItemInteractionConfig> InteractWith { get; init; }
         public required bool KeepAfterUse { get; init; }
+        public ScaleFactor Scale { get; init; } = 1f;
 
         public override Dictionary<string, object?> AsDict()
         {
@@ -25,7 +27,8 @@ namespace Dose.Core.Library.Configuration.Actors
                 { "equipedTexturePath", EquipedTexturePath },
                 { "rarity", Rarity },
                 { "maxQuantity", MaxQuantity },
-                { "keepAfterUse", KeepAfterUse }
+                { "keepAfterUse", KeepAfterUse },
+                { "scale", Scale.Value }
             };
 
             if (Execute.Any())

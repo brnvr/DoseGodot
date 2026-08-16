@@ -11,7 +11,7 @@ namespace Dose.Core.Library.Props
         PackedScene propScene,
         YamlConfigConverter configConverter,
         IObjectFromConfigBuilder<PropDefinition> builder
-    ) : Pool<PropDefinition>(configPath, configConverter, builder)
+    ) : WeightedPool<PropDefinition>(configPath, configConverter, builder)
     {
         public PackedScene PropScene { get; } = propScene;
 

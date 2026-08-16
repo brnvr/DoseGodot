@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -9,6 +10,7 @@ namespace Dose.Core.Library.Configuration.Actors
         {
             var identifier = GetRequired<string>(dict, "identifier");
             var texturePath = GetRequired<string>(dict, "texturePath");
+            var scale = new ScaleFactor(GetOptionalFloat(dict, "scale", 1f));
 
             return new ItemConfig
             {
@@ -43,7 +45,8 @@ namespace Dose.Core.Library.Configuration.Actors
                         Args = args is null ? [] : args.ToDictionary(kvp => (string)kvp.Key, kvp => kvp.Value)
                     };
                 }),
-                KeepAfterUse = GetOptional<bool?>(dict, "keepAfterUse", false) ?? false
+                KeepAfterUse = GetOptional<bool?>(dict, "keepAfterUse", false) ?? false,
+                Scale = scale
             };
         }
     }

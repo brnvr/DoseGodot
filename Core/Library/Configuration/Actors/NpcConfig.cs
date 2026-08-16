@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -11,6 +12,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string DialoguesDir { get; set; }
         public required IEnumerable<string> AvailableDialogues { get; init; }
         public required string Voice { get; init; }
+        public ScaleFactor Scale { get; init; } = 1f;
 
         public override Dictionary<string, object?> AsDict()
         {
@@ -23,6 +25,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 { "dialoguesDir", DialoguesDir },
                 { "availableDialogues", AvailableDialogues },
                 { "Voice", Voice },
+                { "scale", Scale.Value },
             };
         }
     }

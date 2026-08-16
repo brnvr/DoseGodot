@@ -282,7 +282,7 @@ namespace Dose.Core.Library.Locations
                 return null;
             }
 
-            var definition = new RandomSelector<PropDefinition>(PropPool.Content).Pick();
+            var definition = new RandomSelector<PropDefinition>(PropPool.GetWeightedList()).Pick();
             return PropPool.Create(definition);
         }
     }

@@ -35,7 +35,8 @@ namespace Dose.Core.Library.Actors
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
                 }),
-                KeepAfterUse = itemConfig.KeepAfterUse
+                KeepAfterUse = itemConfig.KeepAfterUse,
+                Scale = itemConfig.Scale
             };
         }
 

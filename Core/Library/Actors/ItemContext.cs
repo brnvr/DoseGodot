@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Interactivity;
 using Godot;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Actors
 {
@@ -16,5 +17,6 @@ namespace Dose.Core.Library.Actors
         public required IEnumerable<Executable> Execute { get; init; }
         public required IEnumerable<InteractionOperator> InteractWith { get; init; }
         public required bool KeepAfterUse { get; set; }
+        public ScaleFactor Scale { get; init; } = 1f;
     }
 }

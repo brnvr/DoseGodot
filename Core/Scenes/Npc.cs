@@ -27,8 +27,8 @@ namespace Dose.Core.Scenes
         public ISpeaker? Speaker { get; private set; }
         public override NpcContext? Context { get ; protected set ; }
         public Node3D LookTarget => GetNode<Node3D>("LookTarget");
-        public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * EyeHeightProportion ?? 0, 0);
-        public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * .5f ?? 0, 0);
+        public Vector3 TopLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * Scale.Y * EyeHeightProportion ?? 0, 0);
+        public Vector3 CenterLookTarget => GlobalPosition + new Vector3(0, MeshInstance?.GetAabb().Size.Y * Scale.Y * .5f ?? 0, 0);
 
         public override void _Ready()
         {
@@ -86,6 +86,7 @@ namespace Dose.Core.Scenes
         public void Initialize(NpcContext context, NpcArgs args)
         {
             Context = context;
+            Scale = Vector3.One * context.Scale;
             GameEvent = args.GameEvent;
             MeshInstance = GetNode<MeshInstance3D>("Mesh");
 

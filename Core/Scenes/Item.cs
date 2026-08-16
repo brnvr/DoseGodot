@@ -15,6 +15,7 @@ namespace Dose.Core.Scenes
         public void Initialize(ItemContext context, ItemArgs args)
         {
             Context = context;
+            Scale = Vector3.One * context.Scale;
             MeshInstance = GetNode<MeshInstance3D>("Mesh");
             UpdateTexture();
         }

@@ -17,6 +17,7 @@ namespace Dose.Core.Scenes
         public Prop Initialize(PropDefinition definition)
         {
             Definition = definition;
+            Scale = Vector3.One * definition.Scale;
 
             var billboardMesh = GetNode<MeshInstance3D>("Mesh");
             var billboardCollision = GetNode<CollisionShape3D>("CollisionShape3D");

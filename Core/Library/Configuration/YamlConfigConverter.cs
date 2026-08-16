@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Dose.Core.Library.Converters;
 
@@ -29,6 +30,24 @@ namespace Dose.Core.Library.Configuration
             var value = GetOptional<T>(dict, key) ?? throw new Exception($"Dictionary doesn't contain required key \"{key}\".");
 
             return value;
+        }
+
+        protected static float GetOptionalFloat(
+            Dictionary<string, object?> dict,
+            string key,
+            float defaultValue
+        )
+        {
+            var rawValue = GetOptional<object>(dict, key);
+
+            if (rawValue == null)
+            {
+                return defaultValue;
+            }
+
+            return rawValue is string valueText
+                ? float.Parse(valueText, NumberStyles.Float, CultureInfo.InvariantCulture)
+                : Convert.ToSingle(rawValue, CultureInfo.InvariantCulture);
         }
     }
 }
