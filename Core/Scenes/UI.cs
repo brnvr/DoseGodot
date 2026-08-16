@@ -13,6 +13,7 @@ namespace Dose.Core.Scenes
         NotificationCenter _notificationCenter = null!;
         CenterContainer? _currentMenu;
         Input.MouseModeEnum? _mouseModePrevious;
+        CursorType? _cursorTypePrevious;
         TextWithBackground _dialogueCaption = null!;
         TextWithBackground _actorNameCaption = null!;
         EquipedItemDisplay _equipedItemDisplay = null!;
@@ -48,6 +49,7 @@ namespace Dose.Core.Scenes
             _bottomBar.AnchorRight = UIScreenLayout.GameplayRightRatio;
             _rightBar.AnchorLeft = UIScreenLayout.GameplayRightRatio;
             _notificationCenter.AnchorRight = UIScreenLayout.GameplayRightRatio - 0.02f;
+            SetCursorType(Cursor.Types.Dot);
 
             base._Ready();
         }
@@ -60,9 +62,9 @@ namespace Dose.Core.Scenes
             label.Show();
         }
 
-        public void SetCursorVisible(bool visible)
+        public void SetCursorType(CursorType? type)
         {
-            _cursor.Visible = visible;
+            _cursor.SetCursorType(type);
         }
 
         public void SetActorName(string? name)
@@ -121,10 +123,12 @@ namespace Dose.Core.Scenes
             if (!IsMenuDisplayed)
             {
                 _mouseModePrevious = Input.MouseMode;
+                _cursorTypePrevious = _cursor.Type;
             }
 
             IsMenuDisplayed = true;
-            Input.MouseMode = Input.MouseModeEnum.Visible;
+            Input.MouseMode = Input.MouseModeEnum.Hidden;
+            SetCursorType(Cursor.Types.Arrow);
 
             var center = new CenterContainer
             {
@@ -200,6 +204,10 @@ namespace Dose.Core.Scenes
             {
                 Input.MouseMode = (Input.MouseModeEnum)_mouseModePrevious;
             }
+
+            SetCursorType(_cursorTypePrevious);
+            _mouseModePrevious = null;
+            _cursorTypePrevious = null;
             
             _currentMenu?.QueueFree();
             _currentMenu = null;

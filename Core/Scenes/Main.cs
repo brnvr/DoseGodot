@@ -57,22 +57,25 @@ namespace Dose.Core.Scenes
 			var postShader = GetNode<PostShader>("PostShader");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager");
-			var locationOccluder = GetNode<LocationOccluder>("LocationOccluder");
 
-            void SyncCursorVisibility()
+            void SyncCursorType()
             {
-                ui.SetCursorVisible(player.CanInteract() && player.SelectedItem == null);
+                ui.SetCursorType(
+                    player.CanInteract() && player.SelectedItem == null
+                        ? Cursor.Types.Dot
+                        : null
+                );
             }
 
             player.SelectedItemChanged += (sender, e) =>
             {
                 ui.SetEquipedItem(e.Item?.EquipedTexture);
                 ui.SetEquipedItemTargeted(e.Item != null && player.HasInteractionTarget);
-                SyncCursorVisibility();
+                SyncCursorType();
             };
             player.InteractionAvailabilityChanged += (sender, e) =>
             {
-                SyncCursorVisibility();
+                SyncCursorType();
             };
             player.InteractionTargetChanged += (sender, e) =>
             {
