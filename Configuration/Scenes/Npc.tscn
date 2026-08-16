@@ -17,6 +17,7 @@ size = Vector2(2, 2)
 center_offset = Vector3(0, 1, 0)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_b5x2e"]
+radius = 0.25
 
 [node name="Npc" type="RigidBody3D"]
 gravity_scale = 0.0
@@ -29,7 +30,7 @@ mesh = SubResource("QuadMesh_iufkg")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7643375, 0)
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
-transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CylinderShape3D_b5x2e")
 
 [node name="NavigationAgent" type="NavigationAgent3D" parent="."]

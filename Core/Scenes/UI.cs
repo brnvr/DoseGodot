@@ -64,6 +64,16 @@ namespace Dose.Core.Scenes
 
         public void SetCursorType(CursorType? type)
         {
+            var shouldCenterMouse = _cursor.Type != Cursor.Types.Arrow && type == Cursor.Types.Arrow;
+
+            if (shouldCenterMouse)
+            {
+                var viewport = GetViewport();
+                var center = Cursor.GetGameplayCenter(viewport.GetVisibleRect().Size);
+                viewport.WarpMouse(center);
+                viewport.UpdateMouseCursorState();
+            }
+
             _cursor.SetCursorType(type);
         }
 

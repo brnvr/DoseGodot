@@ -580,14 +580,13 @@ namespace Dose.Core.Scenes
 
 			if ((targets & PopulateTargets.Npc) != 0)
 			{
-				var npcArgs = new NpcArgs
-				{
-					Player = Player,
-					GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
-				};
 				populators.Add(new TargetLocationPopulator(
 					location,
-					() => selectionSession.SelectNpc(npcArgs),
+					() => selectionSession.SelectNpc(new NpcArgs
+					{
+						Player = Player,
+						GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
+					}),
 					new Probability(0.5),
 					BLOCK_SIZE
 				));

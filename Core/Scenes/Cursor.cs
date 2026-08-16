@@ -22,6 +22,12 @@ namespace Dose.Core.Scenes
 
         public CursorType? Type { get; private set; }
 
+        public static Vector2 GetGameplayCenter(Vector2 viewportSize)
+        {
+            var center = viewportSize * UIScreenLayout.GameplayCenterRatio;
+            return new Vector2(Mathf.Floor(center.X), Mathf.Floor(center.Y));
+        }
+
         public override void _Ready()
         {
             MouseFilter = MouseFilterEnum.Ignore;
