@@ -1,5 +1,5 @@
-texturePath: res://Media/Textures/Environment/WallOverlays/EyeAndStrings_NathanLerner_1939.jpg
-rarity: VeryCommon
-packId: thisside
-scale: 0.5
-textureRepeat: false
+TexturePath: res://Media/Textures/Environment/WallOverlays/EyeAndStrings_NathanLerner_1939.jpg
+Rarity: VeryCommon
+PackId: thisside
+Scale: 0.5
+TextureRepeat: false

@@ -11,8 +11,8 @@ namespace Dose.Core.Library.Configuration.Locations
         {
             return new Dictionary<string, object?>
             {
-                { "scenePath", ScenePath },
-                { "roomNumber", RoomNumber }
+                { nameof(ScenePath), ScenePath },
+                { nameof(RoomNumber), RoomNumber }
             };
         }
     }

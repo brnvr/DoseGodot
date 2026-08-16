@@ -11,8 +11,8 @@ namespace Dose.Core.Library.Configuration.Dialogues
             {
                 Args = new SpeakNodeArgs
                 {
-                    Lines = GetRequired<List<object>>(dict, "lines").Select(l => (string)l),
-                    Next = GetOptional<string>(dict, "next")
+                    Lines = GetRequired<List<object>>(dict, nameof(SpeakNodeArgs.Lines)).Select(l => (string)l),
+                    Next = GetOptional<string>(dict, nameof(SpeakNodeArgs.Next))
                 }
             };
         }

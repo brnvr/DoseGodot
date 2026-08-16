@@ -13,12 +13,12 @@ namespace Dose.Core.Library.Configuration.Actors
         {
             var dict = new Dictionary<string, object?>
             {
-                { "action", Action }
+                { nameof(Action), Action }
             };
 
             if (Args.Count > 0)
             {
-                dict.Add("args", Args);
+                dict.Add(nameof(Args), Args);
             }
 
             return dict;

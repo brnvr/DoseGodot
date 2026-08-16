@@ -10,7 +10,7 @@ namespace Dose.Core.Library.Configuration.Actors
         {
             var dict = base.AsDict();
 
-            dict["actor"] = Actor;
+            dict[nameof(Actor)] = Actor;
 
             return dict;
         }

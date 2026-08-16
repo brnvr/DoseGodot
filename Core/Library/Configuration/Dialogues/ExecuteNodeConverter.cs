@@ -10,9 +10,9 @@ namespace Dose.Core.Library.Configuration.Dialogues
             {
                 Args = new ExecuteNodeArgs
                 {
-                    Action = GetRequired<string>(dict, "action"),
-                    Next = GetOptional<string>(dict, "next"),
-                    Args = GetOptional<Dictionary<string, object?>>(dict, "args") ?? []
+                    Action = GetRequired<string>(dict, nameof(ExecuteNodeArgs.Action)),
+                    Next = GetOptional<string>(dict, nameof(ExecuteNodeArgs.Next)),
+                    Args = GetOptional<Dictionary<string, object?>>(dict, nameof(ExecuteNodeArgs.Args)) ?? []
                 }
             };
         }

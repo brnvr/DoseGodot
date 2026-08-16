@@ -9,34 +9,34 @@ namespace Dose.Core.Library.Configuration.Props
     {
         public override PropConfig FromDict(Dictionary<string, object?> dict)
         {
-            var texturePath = GetOptional<string>(dict, "texturePath");
-            var modelPath = GetOptional<string>(dict, "modelPath");
+            var texturePath = GetOptional<string>(dict, nameof(PropConfig.TexturePath));
+            var modelPath = GetOptional<string>(dict, nameof(PropConfig.ModelPath));
             var hasTexturePath = !string.IsNullOrWhiteSpace(texturePath);
             var hasModelPath = !string.IsNullOrWhiteSpace(modelPath);
-            var minDistanceToWall = GetNormalizedValue(dict, "minDistanceToWall", 0f);
-            var maxDistanceToWall = GetNormalizedValue(dict, "maxDistanceToWall", 1f);
-            var minDistanceFromCorner = GetNormalizedValue(dict, "minDistanceFromCorner", 0f);
-            var maxDistanceFromCorner = GetNormalizedValue(dict, "maxDistanceFromCorner", 1f);
-            var scale = new ScaleFactor(GetOptionalFloat(dict, "scale", 1f));
+            var minDistanceToWall = GetNormalizedValue(dict, nameof(PropConfig.MinDistanceToWall), 0f);
+            var maxDistanceToWall = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceToWall), 1f);
+            var minDistanceFromCorner = GetNormalizedValue(dict, nameof(PropConfig.MinDistanceFromCorner), 0f);
+            var maxDistanceFromCorner = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceFromCorner), 1f);
+            var scale = new ScaleFactor(GetOptionalFloat(dict, nameof(PropConfig.Scale), 1f));
 
             if (hasTexturePath == hasModelPath)
             {
                 throw new ArgumentException(
-                    "A prop config must define exactly one of texturePath or modelPath."
+                    $"A prop config must define exactly one of {nameof(PropConfig.TexturePath)} or {nameof(PropConfig.ModelPath)}."
                 );
             }
 
             if (minDistanceToWall.Value > maxDistanceToWall.Value)
             {
                 throw new ArgumentException(
-                    "A prop config's minDistanceToWall cannot exceed maxDistanceToWall."
+                    $"A prop config's {nameof(PropConfig.MinDistanceToWall)} cannot exceed {nameof(PropConfig.MaxDistanceToWall)}."
                 );
             }
 
             if (minDistanceFromCorner.Value > maxDistanceFromCorner.Value)
             {
                 throw new ArgumentException(
-                    "A prop config's minDistanceFromCorner cannot exceed maxDistanceFromCorner."
+                    $"A prop config's {nameof(PropConfig.MinDistanceFromCorner)} cannot exceed {nameof(PropConfig.MaxDistanceFromCorner)}."
                 );
             }
 
@@ -44,8 +44,8 @@ namespace Dose.Core.Library.Configuration.Props
             {
                 TexturePath = hasTexturePath ? texturePath : null,
                 ModelPath = hasModelPath ? modelPath : null,
-                Rarity = GetRequired<string>(dict, "rarity"),
-                PackId = GetRequired<string>(dict, "packId"),
+                Rarity = GetRequired<string>(dict, nameof(PropConfig.Rarity)),
+                PackId = GetRequired<string>(dict, nameof(PropConfig.PackId)),
                 Scale = scale,
                 MinDistanceToWall = minDistanceToWall,
                 MaxDistanceToWall = maxDistanceToWall,

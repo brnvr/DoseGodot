@@ -1,8 +1,8 @@
 ---
-identifier: Agnes
-texturePath: res://Media/Textures/Npcs/Agnes/Idle_000.png
-voice: mb-us1
-rarity: VeryCommon
-packId: thisside
-dialoguesDir: Configuration/Dialogues/Agnes
-availableDialogues: [SomeDialogue]
+Identifier: Agnes
+TexturePath: res://Media/Textures/Npcs/Agnes/Idle_000.png
+Voice: mb-us1
+Rarity: VeryCommon
+PackId: thisside
+DialoguesDir: Configuration/Dialogues/Agnes
+AvailableDialogues: [SomeDialogue]

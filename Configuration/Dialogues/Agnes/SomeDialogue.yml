@@ -1,43 +1,43 @@
 ---
-startAt: abc
-nodes:
+StartAt: abc
+Nodes:
   abc:
-    type: speak
-    args:
-      lines:
+    Type: speak
+    Args:
+      Lines:
         - What do you want? I don't have time to talk to you right now. I'm busy with work.
         - Oh, it's you. I guess I can spare a few minutes. What do you need?
-      next: mno
+      Next: mno
   def:
-    type: speak
-    args:
-      lines:
+    Type: speak
+    Args:
+      Lines:
         - I'm doing fine, thanks for asking. Just busy with work as usual.
   ghi:
-    type: speak
-    args:
-      lines:
+    Type: speak
+    Args:
+      Lines:
         - I'm doing well, but I appreciate the concern. I'll be okay.
         - Thanks for offering, but I think I can handle things on my own.
   jkl:
-    type: execute
-    args:
-      action: exitGame
-      next: prq
-      args:
+    Type: execute
+    Args:
+      Action: exitGame
+      Next: prq
+      Args:
         x: 1
   mno:
-    type: displayOptions
-    args:
-      options:
-      - text: I just wanted to check in and see how you're doing. Is everything okay?
-        next: def
-      - text: I know you've been busy with work, but I wanted to make sure you're taking care of yourself. Do you need any help or support?
-        next: ghi
-      - text: I don't know bye
-        next: jkl
+    Type: displayOptions
+    Args:
+      Options:
+      - Text: I just wanted to check in and see how you're doing. Is everything okay?
+        Next: def
+      - Text: I know you've been busy with work, but I wanted to make sure you're taking care of yourself. Do you need any help or support?
+        Next: ghi
+      - Text: I don't know bye
+        Next: jkl
   prq:
-    type: speak
-    args:
-      lines:
+    Type: speak
+    Args:
+      Lines:
       - Well I gotta go

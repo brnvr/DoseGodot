@@ -13,8 +13,8 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             return new Dictionary<string, object?>
             {
-              { "startAt", StartAt },
-              { "nodes", Nodes.ToDictionary(n => n.Key, n => n.Value.AsDict()) }  
+              { nameof(StartAt), StartAt },
+              { nameof(Nodes), Nodes.ToDictionary(n => n.Key, n => n.Value.AsDict()) }
             };
         }
     }

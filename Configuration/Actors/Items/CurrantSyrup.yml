@@ -1,11 +1,11 @@
 ---
-identifier: currant syrup
-rarity: VeryCommon
-packId: thisside
-texturePath: "res://Media/Textures/Items/CurrantSyrup.png"
-execute:
-  - action: movePlayer
-    args:
+Identifier: currant syrup
+Rarity: VeryCommon
+PackId: thisside
+TexturePath: "res://Media/Textures/Items/CurrantSyrup.png"
+Execute:
+  - Action: movePlayer
+    Args:
       x: 1,
       y: 0,
       z: 1

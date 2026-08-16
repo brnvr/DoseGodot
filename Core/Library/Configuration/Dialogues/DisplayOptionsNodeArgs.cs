@@ -11,7 +11,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             return new Dictionary<string, object?>
             {
-                { "options", Options.Select(o => o.AsDict()) }
+                { nameof(Options), Options.Select(o => o.AsDict()) }
             };
         }
     }

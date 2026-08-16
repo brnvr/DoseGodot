@@ -8,19 +8,19 @@ namespace Dose.Core.Library.Configuration.Actors
     {
         public override NpcConfig FromDict(Dictionary<string, object?> dict)
         {
-            var identifier = GetRequired<string>(dict, "identifier");
-            var scale = new ScaleFactor(GetOptionalFloat(dict, "scale", 1f));
+            var identifier = GetRequired<string>(dict, nameof(NpcConfig.Identifier));
+            var scale = new ScaleFactor(GetOptionalFloat(dict, nameof(NpcConfig.Scale), 1f));
 
             return new NpcConfig
             {
                 Identifier = identifier,
-                DisplayName = GetOptional<string>(dict, "displayName") ?? identifier,
-                Rarity = GetRequired<string>(dict, "rarity"),
-                PackId = GetRequired<string>(dict, "packId"),
-                TexturePath = GetRequired<string>(dict, "texturePath"),
-                Voice = GetRequired<string>(dict, "voice"),
-                DialoguesDir = GetRequired<string>(dict, "dialoguesDir"),
-                AvailableDialogues = GetRequired<List<object>>(dict, "availableDialogues").Select(o => (string)o),
+                DisplayName = GetOptional<string>(dict, nameof(NpcConfig.DisplayName)) ?? identifier,
+                Rarity = GetRequired<string>(dict, nameof(NpcConfig.Rarity)),
+                PackId = GetRequired<string>(dict, nameof(NpcConfig.PackId)),
+                TexturePath = GetRequired<string>(dict, nameof(NpcConfig.TexturePath)),
+                Voice = GetRequired<string>(dict, nameof(NpcConfig.Voice)),
+                DialoguesDir = GetRequired<string>(dict, nameof(NpcConfig.DialoguesDir)),
+                AvailableDialogues = GetRequired<List<object>>(dict, nameof(NpcConfig.AvailableDialogues)).Select(o => (string)o),
                 Scale = scale
             };
         }

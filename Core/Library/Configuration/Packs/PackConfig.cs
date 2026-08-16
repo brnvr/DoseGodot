@@ -12,9 +12,9 @@ namespace Dose.Core.Library.Configuration.Packs
         {
             return new Dictionary<string, object?>
             {
-                { "id", Id },
-                { "parentId", ParentId },
-                { "rarity", Rarity }
+                { nameof(Id), Id },
+                { nameof(ParentId), ParentId },
+                { nameof(Rarity), Rarity }
             };
         }
     }

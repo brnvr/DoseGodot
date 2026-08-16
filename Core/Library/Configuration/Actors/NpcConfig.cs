@@ -19,15 +19,15 @@ namespace Dose.Core.Library.Configuration.Actors
         {
             return new Dictionary<string, object?>
             {
-                { "identifier", Identifier },
-                { "displayName", DisplayName },
-                { "texturePath", TexturePath },
-                { "rarity", Rarity },
-                { "packId", PackId },
-                { "dialoguesDir", DialoguesDir },
-                { "availableDialogues", AvailableDialogues },
-                { "Voice", Voice },
-                { "scale", Scale.Value },
+                { nameof(Identifier), Identifier },
+                { nameof(DisplayName), DisplayName },
+                { nameof(TexturePath), TexturePath },
+                { nameof(Rarity), Rarity },
+                { nameof(PackId), PackId },
+                { nameof(DialoguesDir), DialoguesDir },
+                { nameof(AvailableDialogues), AvailableDialogues },
+                { nameof(Voice), Voice },
+                { nameof(Scale), Scale.Value },
             };
         }
     }

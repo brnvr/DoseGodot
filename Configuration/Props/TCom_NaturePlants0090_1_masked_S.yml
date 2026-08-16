@@ -1,6 +1,6 @@
-texturePath: res://Media/Textures/Environment/Props/TCom_NaturePlants0090_1_masked_S.png
-rarity: VeryCommon
-packId: thisside
-minDistanceToWall: 0
-maxDistanceToWall: 0
-maxDistanceFromCorner: 0.2
+TexturePath: res://Media/Textures/Environment/Props/TCom_NaturePlants0090_1_masked_S.png
+Rarity: VeryCommon
+PackId: thisside
+MinDistanceToWall: 0
+MaxDistanceToWall: 0
+MaxDistanceFromCorner: 0.2

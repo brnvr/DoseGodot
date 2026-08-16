@@ -22,25 +22,25 @@ namespace Dose.Core.Library.Configuration.Actors
         {
             var dict = new Dictionary<string, object?>
             {
-                { "identifier", Identifier },
-                { "displayName", DisplayName },
-                { "texturePath", TexturePath },
-                { "equipedTexturePath", EquipedTexturePath },
-                { "rarity", Rarity },
-                { "packId", PackId },
-                { "maxQuantity", MaxQuantity },
-                { "keepAfterUse", KeepAfterUse },
-                { "scale", Scale.Value }
+                { nameof(Identifier), Identifier },
+                { nameof(DisplayName), DisplayName },
+                { nameof(TexturePath), TexturePath },
+                { nameof(EquipedTexturePath), EquipedTexturePath },
+                { nameof(Rarity), Rarity },
+                { nameof(PackId), PackId },
+                { nameof(MaxQuantity), MaxQuantity },
+                { nameof(KeepAfterUse), KeepAfterUse },
+                { nameof(Scale), Scale.Value }
             };
 
             if (Execute.Any())
             {
-                dict.Add("execute", Execute.Select(a => a.AsDict()));
+                dict.Add(nameof(Execute), Execute.Select(a => a.AsDict()));
             }
 
             if (InteractWith.Any())
             {
-                dict.Add("interactWith", Execute.Select(i => i.AsDict()));
+                dict.Add(nameof(InteractWith), InteractWith.Select(i => i.AsDict()));
             }
             
 

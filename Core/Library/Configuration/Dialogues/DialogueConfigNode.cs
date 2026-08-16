@@ -16,8 +16,8 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             return new Dictionary<string, object?>
             {
-                { "type", Type },
-                { "args", Args.AsDict() }
+                { nameof(Type), Type },
+                { nameof(Args), Args.AsDict() }
             };
         }
     }

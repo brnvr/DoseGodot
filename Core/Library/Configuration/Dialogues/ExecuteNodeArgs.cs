@@ -12,13 +12,13 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             var dict = new Dictionary<string, object?>
             {
-                { "action", Action },
-                { "args", Args }
+                { nameof(Action), Action },
+                { nameof(Args), Args }
             };
 
             if (Next != null)
             {
-                dict["next"] = Next;
+                dict[nameof(Next)] = Next;
             }
 
             return dict;

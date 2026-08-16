@@ -8,11 +8,11 @@ namespace Dose.Core.Library.Configuration.Locations
     {
         public override WallOverlayTextureConfig FromDict(Dictionary<string, object?> dict)
         {
-            var rawScale = GetOptional<object>(dict, "scale") ?? 1f;
+            var rawScale = GetOptional<object>(dict, nameof(WallOverlayTextureConfig.Scale)) ?? 1f;
             var scale = rawScale is string scaleText
                 ? float.Parse(scaleText, NumberStyles.Float, CultureInfo.InvariantCulture)
                 : Convert.ToSingle(rawScale, CultureInfo.InvariantCulture);
-            var rawTextureRepeat = GetOptional<object>(dict, "textureRepeat") ?? false;
+            var rawTextureRepeat = GetOptional<object>(dict, nameof(WallOverlayTextureConfig.TextureRepeat)) ?? false;
             var textureRepeat = Convert.ToBoolean(rawTextureRepeat, CultureInfo.InvariantCulture);
 
             if (scale <= 0)
@@ -22,9 +22,9 @@ namespace Dose.Core.Library.Configuration.Locations
 
             return new WallOverlayTextureConfig
             {
-                TexturePath = GetRequired<string>(dict, "texturePath"),
-                Rarity = GetRequired<string>(dict, "rarity"),
-                PackId = GetRequired<string>(dict, "packId"),
+                TexturePath = GetRequired<string>(dict, nameof(WallOverlayTextureConfig.TexturePath)),
+                Rarity = GetRequired<string>(dict, nameof(WallOverlayTextureConfig.Rarity)),
+                PackId = GetRequired<string>(dict, nameof(WallOverlayTextureConfig.PackId)),
                 Scale = scale,
                 TextureRepeat = textureRepeat
             };

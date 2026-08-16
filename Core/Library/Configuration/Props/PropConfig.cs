@@ -20,15 +20,15 @@ namespace Dose.Core.Library.Configuration.Props
         {
             return new Dictionary<string, object?>
             {
-                { "texturePath", TexturePath },
-                { "modelPath", ModelPath },
-                { "rarity", Rarity },
-                { "packId", PackId },
-                { "scale", Scale.Value },
-                { "minDistanceToWall", MinDistanceToWall.Value },
-                { "maxDistanceToWall", MaxDistanceToWall.Value },
-                { "minDistanceFromCorner", MinDistanceFromCorner.Value },
-                { "maxDistanceFromCorner", MaxDistanceFromCorner.Value }
+                { nameof(TexturePath), TexturePath },
+                { nameof(ModelPath), ModelPath },
+                { nameof(Rarity), Rarity },
+                { nameof(PackId), PackId },
+                { nameof(Scale), Scale.Value },
+                { nameof(MinDistanceToWall), MinDistanceToWall.Value },
+                { nameof(MaxDistanceToWall), MaxDistanceToWall.Value },
+                { nameof(MinDistanceFromCorner), MinDistanceFromCorner.Value },
+                { nameof(MaxDistanceFromCorner), MaxDistanceFromCorner.Value }
             };
         }
     }

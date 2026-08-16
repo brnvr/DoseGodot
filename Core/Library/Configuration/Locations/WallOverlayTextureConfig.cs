@@ -14,11 +14,11 @@ namespace Dose.Core.Library.Configuration.Locations
         {
             return new Dictionary<string, object?>
             {
-                { "texturePath", TexturePath },
-                { "rarity", Rarity },
-                { "packId", PackId },
-                { "scale", Scale },
-                { "textureRepeat", TextureRepeat }
+                { nameof(TexturePath), TexturePath },
+                { nameof(Rarity), Rarity },
+                { nameof(PackId), PackId },
+                { nameof(Scale), Scale },
+                { nameof(TextureRepeat), TextureRepeat }
             };
         }
     }
