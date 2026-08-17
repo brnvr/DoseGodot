@@ -25,6 +25,11 @@ namespace Dose.Core.Scenes
             public ILocation Location { get; } = location;
         }
 
+        public class DoorTransitionArgs(float rotationDelta)
+        {
+            public float RotationDelta { get; } = rotationDelta;
+        }
+
         public class SelectedItemChangedArgs(ItemContext? item)
         {
             public ItemContext? Item { get; } = item;
@@ -97,6 +102,7 @@ namespace Dose.Core.Scenes
         public ItemContext? SelectedItem { get; private set; }
         public bool HasInteractionTarget => _currentTarget != null;
         public EventHandler<MovedToLocationArgs>? MovedToLocation { get; set; }
+        public EventHandler<DoorTransitionArgs>? DoorTransitionStarted { get; set; }
         public EventHandler<SelectedItemChangedArgs>? SelectedItemChanged { get; set; }
         public EventHandler<InteractionAvailabilityChangedArgs>? InteractionAvailabilityChanged { get; set; }
         public EventHandler<InteractionTargetChangedArgs>? InteractionTargetChanged { get; set; }
@@ -384,10 +390,12 @@ namespace Dose.Core.Scenes
             SetInteractionState(InteractionState.Locked);
 
             Transform3D? local = null;
+            float? sourceDoorYaw = null;
             
             if (door is Door doorNode)
             {
                 local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
+                sourceDoorYaw = doorNode.GlobalTransform.Basis.GetEuler().Y;
             }
 
             if (_controlPlane?.LocationController != null)
@@ -398,6 +406,17 @@ namespace Dose.Core.Scenes
 
             if (local != null && door.Linked is Door linkedDoorNode)
             {
+                if (sourceDoorYaw != null)
+                {
+                    var destinationDoorYaw = linkedDoorNode.GlobalTransform.Basis.GetEuler().Y;
+                    var rotationDelta = Mathf.Wrap(
+                        destinationDoorYaw - sourceDoorYaw.Value,
+                        -Mathf.Pi,
+                        Mathf.Pi
+                    );
+                    DoorTransitionStarted?.Invoke(this, new DoorTransitionArgs(rotationDelta));
+                }
+
                 GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
 
                 var targetPosition = linkedDoorNode.GetHingeCenter();

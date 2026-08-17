@@ -377,19 +377,6 @@ namespace Dose.Core.Scenes
 			return location;
 		}
 
-		static Vector2 GetLampOffset(BuildableLocation location)
-		{
-			if (location.Type == Location.LocationType.Corridor || location.Map == null)
-			{
-				return Vector2.Zero;
-			}
-
-			var xOffset = location.Map.HorizontalCells % 2 == 0 ? -0.5f : 0f;
-			var yOffset = location.Map.VerticalCells % 2 == 0 ? -0.5f : 0f;
-
-			return new Vector2(xOffset, yOffset);
-		}
-
 		void BuildLocation(BuildableLocation location, Pack pack, bool allowCustomRoomLinks = true)
 		{
 			if (ControlPlane == null)
@@ -497,8 +484,7 @@ namespace Dose.Core.Scenes
 				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory
 				(
 					lampTexture,
-					BLOCK_SIZE,
-					GetLampOffset(location)
+					BLOCK_SIZE
 				))
 			};
 
@@ -683,7 +669,7 @@ namespace Dose.Core.Scenes
         {
             return new RoomMapGenerator(
 				minSize: 2,
-				maxSize: 10,
+				maxSize: 8,
 				probabilityToBuildDoor: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
 				wallOverlayTextures: pack.GetWeightedWallOverlays()

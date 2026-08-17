@@ -26,6 +26,9 @@ namespace Dose.Core.Scenes
 		const string TEXTURE_PATH = "Configuration/Textures";
 		public override void _Ready()
 		{
+            var worldLightRig = new Node3D { Name = "WorldLightRig" };
+            AddChild(worldLightRig);
+
             List<DirectionalLight3D> lights = [
 				new DirectionalLight3D
 				{
@@ -49,7 +52,7 @@ namespace Dose.Core.Scenes
 
             foreach (var light in lights)
 			{
-				AddChild(light);
+				worldLightRig.AddChild(light);
 			}
 
 			var ui = GetNode<UI>("UI");
@@ -72,6 +75,10 @@ namespace Dose.Core.Scenes
                 ui.SetEquipedItem(e.Item?.EquipedTexture, e.Item?.EquipedScale ?? 1f);
                 ui.SetEquipedItemTargeted(e.Item != null && player.HasInteractionTarget);
                 SyncCursorType();
+            };
+            player.DoorTransitionStarted += (sender, e) =>
+            {
+                worldLightRig.RotateY(e.RotationDelta);
             };
             player.InteractionAvailabilityChanged += (sender, e) =>
             {

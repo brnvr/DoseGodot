@@ -1,13 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://dalve4wpfidw5"]
-
-[ext_resource type="Texture2D" uid="uid://ban4mmbqo2i3e" path="res://Media/Textures/Environment/Lamps/lamp_0.png" id="1_2tcb8"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_56sje"]
-transparency = 1
-albedo_texture = ExtResource("1_2tcb8")
-texture_filter = 0
-billboard_mode = 2
-billboard_keep_scale = true
+[gd_scene load_steps=2 format=3 uid="uid://dalve4wpfidw5"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_2tcb8"]
 
@@ -15,5 +6,4 @@ billboard_keep_scale = true
 
 [node name="MeshInstance" type="MeshInstance3D" parent="."]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 3.5, 0)
-material_override = SubResource("StandardMaterial3D_56sje")
 mesh = SubResource("QuadMesh_2tcb8")

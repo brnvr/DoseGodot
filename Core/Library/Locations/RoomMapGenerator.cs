@@ -17,6 +17,8 @@ namespace Dose.Core.Library.Locations
         IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures
     ) : IMapGenerator
     {
+        const int MAX_CELLS_PER_LAMP_AXIS = 5;
+
         public int MinSize { get; } = minSize;
         public int MaxSize { get; } = maxSize;
         public Probability ProbabilityToBuildDoor { get; } = probabilityToBuildDoor;
@@ -36,9 +38,34 @@ namespace Dose.Core.Library.Locations
 
             FillEmptyCells(map, width, height);
 
-            map.Set(map.Center, map.CenterCell.WithLamp());
+            AddLamps(map, width, height);
     
             return map;
+        }
+
+        static void AddLamps(Map map, int width, int height)
+        {
+            var horizontalLampCount = Mathf.CeilToInt(width / (float)MAX_CELLS_PER_LAMP_AXIS);
+            var verticalLampCount = Mathf.CeilToInt(height / (float)MAX_CELLS_PER_LAMP_AXIS);
+
+            for (var xIndex = 0; xIndex < horizontalLampCount; xIndex++)
+            {
+                var x = GetLampCoordinate(width, horizontalLampCount, xIndex);
+
+                for (var yIndex = 0; yIndex < verticalLampCount; yIndex++)
+                {
+                    var y = GetLampCoordinate(height, verticalLampCount, yIndex);
+                    var position = new Vector2I(Mathf.FloorToInt(x), Mathf.FloorToInt(y));
+                    var offset = new Vector2(x - position.X, y - position.Y);
+
+                    map.Set(position, map.Get(position).WithLamp(offset));
+                }
+            }
+        }
+
+        static float GetLampCoordinate(int cells, int lampCount, int lampIndex)
+        {
+            return (lampIndex + .5f) * cells / lampCount - .5f;
         }
 
         public void GenerateWall(Map map, Vector2I point, CardinalDirection direction)
