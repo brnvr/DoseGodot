@@ -18,11 +18,6 @@ namespace Dose.Core.Library.Packs
         public PackedScene NpcScene { get; } = npcScene;
         public PackedScene PropScene { get; } = propScene;
 
-        public Pack? Select()
-        {
-            return Select(new Probability(0));
-        }
-
         public Pack? Select(Probability randomness) =>
             new PackShuffler(_packs, randomness).Shuffle();
 

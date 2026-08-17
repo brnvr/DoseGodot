@@ -32,6 +32,11 @@ namespace Dose.Core.Scenes
             List<DirectionalLight3D> lights = [
 				new DirectionalLight3D
 				{
+					RotationDegrees = new Vector3(-90, 0, 0),
+					LightEnergy = 1.25f
+				},
+				new DirectionalLight3D
+				{
 					RotationDegrees = new Vector3(0, 0, 0)
 				},
 				new DirectionalLight3D

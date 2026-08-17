@@ -20,6 +20,7 @@ namespace Dose.Core.Scenes
 	public partial class LocationManager : Node, ILocationManager
 	{
 		const int BLOCK_SIZE = 4;
+		const float LOCATION_RANDOMNESS = 0.3f;
 		const string ROOM_CATEGORY = "room";
 		const string CORRIDOR_CATEGORY = "corridor";
 		const string CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY = "corridorWithStairsUpEnsured";
@@ -396,11 +397,6 @@ namespace Dose.Core.Scenes
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
 			};
 
-			var stairsArgs = new StairsArgs
-			{
-				Location = location
-			};
-
 			var wallTexture = PickRandomTexture(
 				pack.GetWeightedWallTextures()
 					.Where(texture => texture.CanPopulate(locationRestriction))
@@ -411,6 +407,13 @@ namespace Dose.Core.Scenes
 				GD.PushError("Wall texture could not be selected.");
 				return;
 			}
+
+			var wallMaterial = CreatePlainMaterial(wallTexture);
+			var stairsArgs = new StairsArgs
+			{
+				Location = location,
+				WallMaterial = wallMaterial
+			};
 
 			var lampTexture = PickRandomTexture(
 				pack.GetWeightedLampTextures()
@@ -423,6 +426,9 @@ namespace Dose.Core.Scenes
 				return;
 			}
 			
+			var occluderMaterial = CreatePlainMaterial(_blackTexture);
+			occluderMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+
 			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
 			(
 				_occluderScene,
@@ -430,7 +436,7 @@ namespace Dose.Core.Scenes
 				_doorwayMesh,
 				_floorMesh,
 				_ceilingMesh,
-				CreatePlainMaterial(_blackTexture)
+				occluderMaterial
 			);
 
 			var shouldPullNumber = allowCustomRoomLinks && location.Type == Location.LocationType.Corridor;
@@ -442,7 +448,7 @@ namespace Dose.Core.Scenes
 
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreatePlainMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
+				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, wallMaterial, BLOCK_SIZE, "WallMeshInstance"),
 				new LocationBaseMeshBuilder(
 					location,
 					_floorMesh,
@@ -657,7 +663,7 @@ namespace Dose.Core.Scenes
 				return null;
 			}
 
-			var pack = PackPool.Select();
+			var pack = PackPool.Select(LOCATION_RANDOMNESS);
 
 			if (pack == null)
 			{
