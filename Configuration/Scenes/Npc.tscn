@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://b38on8s8482bk"]
+[gd_scene load_steps=7 format=3 uid="uid://b38on8s8482bk"]
 
 [ext_resource type="Script" uid="uid://me0yeud2rsb2" path="res://Core/Scenes/Npc.cs" id="1_c8tqv"]
 [ext_resource type="Texture2D" uid="uid://dv7v0pr1nyo6l" path="res://Media/Textures/Placehoders/Npc.png" id="2_lyypf"]
@@ -19,6 +19,9 @@ center_offset = Vector3(0, 1, 0)
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_b5x2e"]
 radius = 0.25
 
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_interaction"]
+radius = 0.5
+
 [node name="Npc" type="RigidBody3D"]
 gravity_scale = 0.0
 script = ExtResource("1_c8tqv")
@@ -32,6 +35,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7643375, 0)
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CylinderShape3D_b5x2e")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_interaction")
 
 [node name="NavigationAgent" type="NavigationAgent3D" parent="."]
 path_desired_distance = 0.5

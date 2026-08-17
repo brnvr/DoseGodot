@@ -25,6 +25,7 @@ namespace Dose.Core.Scenes
         MeshInstance3D? _mesh;
         StaticBody3D? _body;
         CollisionShape3D? _collisionShape;
+        Area3D? _interactionArea;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
@@ -52,6 +53,7 @@ namespace Dose.Core.Scenes
             _mesh = GetNode<MeshInstance3D>("Mesh");
             _body = GetNode<StaticBody3D>("Body");
             _collisionShape = _body.GetNode<CollisionShape3D>("CollisionShape");
+            _interactionArea = GetNode<Area3D>("InteractionArea");
             
             _yRotationStart = _mesh.Rotation.Y;
         }
@@ -201,6 +203,10 @@ namespace Dose.Core.Scenes
             if (_mesh == null) return;
 
             _mesh.Rotation = new Vector3(0, _yRotationStart + _opening, 0);
+            if (_interactionArea != null)
+            {
+                _interactionArea.Rotation = _mesh.Rotation;
+            }
         }
 
         void EnableCollision()

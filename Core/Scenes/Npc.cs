@@ -94,6 +94,9 @@ namespace Dose.Core.Scenes
             var collisionShape = GetNode<CollisionShape3D>("CollisionShape");
             collisionShape.Scale *= scale;
             collisionShape.Position *= context.Scale;
+            var interactionShape = GetNode<CollisionShape3D>("InteractionArea/CollisionShape3D");
+            interactionShape.Scale *= scale;
+            interactionShape.Position *= context.Scale;
             LookTarget.Position *= context.Scale;
 
             UpdateTexture();

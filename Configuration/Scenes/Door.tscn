@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=4 uid="uid://dnho7pjdlaykl"]
+[gd_scene load_steps=8 format=4 uid="uid://dnho7pjdlaykl"]
 
 [ext_resource type="Script" uid="uid://cpwffvy6lvbjt" path="res://Core/Scenes/Door.cs" id="1_nnp71"]
 [ext_resource type="Texture2D" uid="uid://bfxfasfpo7pr1" path="res://Media/Textures/Environment/Doors/Door_Door_Apartment_01_red.png" id="2_8teuf"]
@@ -47,6 +47,9 @@ shadow_mesh = SubResource("ArrayMesh_acll8")
 data = PackedVector3Array(0.26639998, 0.67179996, 0, 0, 0, 0, -0.0409, 0.67179996, 0, 0.26639998, 0.67179996, 0, 0.22549999, 0, 0, 0, 0, 0)
 backface_collision = true
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(1.5, 3, 0.5)
+
 [node name="Door" type="Node3D"]
 script = ExtResource("1_nnp71")
 
@@ -60,3 +63,9 @@ skeleton = NodePath("")
 [node name="CollisionShape" type="CollisionShape3D" parent="Body"]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
 shape = SubResource("ConcavePolygonShape3D_mw28t")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+position = Vector3(0.45, 1.35, 0)
+shape = SubResource("BoxShape3D_interaction")
