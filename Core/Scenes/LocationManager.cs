@@ -540,38 +540,42 @@ namespace Dose.Core.Scenes
 		)
 		{
 			var itemArgs = new ItemArgs();
-			var populators = new List<LocationPopulator>
-			{
-				new TargetLocationPopulator(
-					location,
-					selectionSession.SelectProp,
-					new Probability(0.5),
-					BLOCK_SIZE
-				),
-				new TargetLocationPopulator(
-					location,
-					() => selectionSession.SelectItem(itemArgs),
-					new Probability(0.5),
-					BLOCK_SIZE
-				),
-				new TargetLocationPopulator(
-					location,
-					() => selectionSession.SelectNpc(new NpcArgs
-					{
-						Player = Player,
-						GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
-					}),
-					new Probability(0.5),
-					BLOCK_SIZE
-				)
-			};
-
 			var populatedPositions = GetReservedActorPositions(location);
+			var propPopulator = new TargetLocationPopulator(
+				location,
+				selectionSession.SelectProp,
+				new Probability(0.5),
+				BLOCK_SIZE
+			);
+			var generatedProps = propPopulator
+				.Populate(populatedPositions, out populatedPositions)
+				.OfType<Prop>()
+				.ToList();
+			var props = generatedProps
+				.Concat(location.FindChildren("*", "", true, false).OfType<Prop>())
+				.Distinct()
+				.ToList();
 
-			foreach (var populator in populators)
-			{
-				populator.Populate(populatedPositions, out populatedPositions);
-			}
+			var itemPopulator = new ItemLocationPopulator(
+				location,
+				() => selectionSession.SelectItem(itemArgs),
+				new Probability(0.5),
+				BLOCK_SIZE,
+				props
+			);
+			itemPopulator.Populate(populatedPositions, out populatedPositions);
+
+			var npcPopulator = new TargetLocationPopulator(
+				location,
+				() => selectionSession.SelectNpc(new NpcArgs
+				{
+					Player = Player,
+					GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
+				}),
+				new Probability(0.5),
+				BLOCK_SIZE
+			);
+			npcPopulator.Populate(populatedPositions, out _);
 		}
 
 		static HashSet<Vector2I> GetReservedActorPositions(BuildableLocation location)
@@ -599,6 +603,8 @@ namespace Dose.Core.Scenes
 
 		void SetCurrentLocation(ILocation? location)
         {
+			SetPropInteractionCollisionsIgnored(_currentLocation, false);
+
 			if (_currentLocation is Node currentLocationNode && currentLocationNode.GetParent() == this)
             {
                 RemoveChild(currentLocationNode);
@@ -607,7 +613,21 @@ namespace Dose.Core.Scenes
 			AttachLocation(location, visible: true);
 
 			_currentLocation = location;
+			SetPropInteractionCollisionsIgnored(_currentLocation, true);
         }
+
+		void SetPropInteractionCollisionsIgnored(ILocation? location, bool ignored)
+		{
+			if (Player == null || location is not Node locationNode)
+			{
+				return;
+			}
+
+			foreach (var prop in locationNode.FindChildren("*", "", true, false).OfType<Prop>())
+			{
+				Player.SetInteractionCollisionsIgnored(prop, ignored);
+			}
+		}
 
 		void AttachLocation(ILocation? location, bool visible)
 		{

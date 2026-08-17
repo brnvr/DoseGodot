@@ -2,4 +2,5 @@ TexturePath: res://Media/Textures/Environment/Props/TableAndChairs_0.png
 Rarity: VeryCommon
 PackId: thisside
 LocationRestriction: Rooms
+SurfaceHeight: 0.1
 MinDistanceFromWall: 0.2

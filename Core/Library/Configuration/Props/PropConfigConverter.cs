@@ -20,6 +20,7 @@ namespace Dose.Core.Library.Configuration.Props
             var maxDistanceFromCorner = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceFromCorner), 1f);
             var scale = new ScaleFactor(GetOptionalFloat(dict, nameof(PropConfig.Scale), 1f));
             var yOffset = GetOptionalFloat(dict, nameof(PropConfig.YOffset), 0f);
+            var surfaceHeight = GetOptionalSurfaceHeight(dict);
 
             if (hasTexturePath == hasModelPath)
             {
@@ -63,11 +64,36 @@ namespace Dose.Core.Library.Configuration.Props
                 ),
                 Scale = scale,
                 YOffset = yOffset,
+                SurfaceHeight = surfaceHeight,
                 MinDistanceFromWall = minDistanceFromWall,
                 MaxDistanceFromWall = maxDistanceFromWall,
                 MinDistanceFromCorner = minDistanceFromCorner,
                 MaxDistanceFromCorner = maxDistanceFromCorner
             };
+        }
+
+        static float? GetOptionalSurfaceHeight(Dictionary<string, object?> dict)
+        {
+            var rawValue = GetOptional<object>(dict, nameof(PropConfig.SurfaceHeight));
+
+            if (rawValue == null)
+            {
+                return null;
+            }
+
+            var value = rawValue is string valueText
+                ? float.Parse(valueText, NumberStyles.Float, CultureInfo.InvariantCulture)
+                : Convert.ToSingle(rawValue, CultureInfo.InvariantCulture);
+
+            if (!float.IsFinite(value))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(PropConfig.SurfaceHeight),
+                    $"A prop config's {nameof(PropConfig.SurfaceHeight)} must be finite."
+                );
+            }
+
+            return value;
         }
 
         static NormalizedValue GetNormalizedValue(

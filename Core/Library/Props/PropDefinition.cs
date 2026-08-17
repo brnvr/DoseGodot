@@ -14,6 +14,7 @@ namespace Dose.Core.Library.Props
         public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public ScaleFactor Scale { get; init; } = 1f;
         public float YOffset { get; init; }
+        public float? SurfaceHeight { get; init; }
         public NormalizedValue MinDistanceFromWall { get; init; } = 0f;
         public NormalizedValue MaxDistanceFromWall { get; init; } = 1f;
         public NormalizedValue MinDistanceFromCorner { get; init; } = 0f;

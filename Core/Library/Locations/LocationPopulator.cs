@@ -3,6 +3,7 @@ using System.Linq;
 using System;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
+using Dose.Core.Scenes;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
 
@@ -45,6 +46,12 @@ namespace Dose.Core.Library.Locations
                 if (target == null)
                 {
                     return targets;
+                }
+
+                if (TryAddTarget(target))
+                {
+                    targets.Add(target);
+                    continue;
                 }
 
                 var availablePositions = GetAvailablePositions(target, populatedPositionsOut);
@@ -210,26 +217,86 @@ namespace Dose.Core.Library.Locations
             return null;
         }
 
-        void AddTarget(Node3D target, PopulationPosition position)
+        protected void AddTarget(Node3D target, Vector3 position)
         {
             if (Location is Node locationNode)
             {
                 locationNode.AddChild(target);
             }
 
+            target.Position = position;
+        }
+
+        void AddTarget(Node3D target, PopulationPosition position)
+        {
             if (Location.Map == null)
             {
                 return;
             }
 
-            target.Position = new Vector3(
-                position.Cell.X + position.Offset.X - Location.Map.CenterX,
-                0,
-                position.Cell.Y + position.Offset.Y - Location.Map.CenterY
-            ) * BlockSize;
+            AddTarget(
+                target,
+                new Vector3(
+                    position.Cell.X + position.Offset.X - Location.Map.CenterX,
+                    0,
+                    position.Cell.Y + position.Offset.Y - Location.Map.CenterY
+                ) * BlockSize
+            );
+        }
+
+        protected virtual bool TryAddTarget(Node3D target)
+        {
+            return false;
         }
 
         protected abstract Node3D? CreateTarget();
+    }
+
+    public class ItemLocationPopulator(
+        IBuildableLocation location,
+        Func<Node3D?> targetFactory,
+        Probability probabilityPopulate,
+        int blockSize,
+        IEnumerable<Prop> props
+    ) : LocationPopulator(location, probabilityPopulate, blockSize)
+    {
+        readonly List<Prop> _availableSurfaceProps =
+        [
+            .. props.Where(prop => prop.Definition?.SurfaceHeight != null)
+        ];
+
+        protected override Node3D? CreateTarget() => targetFactory();
+
+        protected override bool TryAddTarget(Node3D target)
+        {
+            while (_availableSurfaceProps.Count > 0)
+            {
+                var prop = new RandomSelector<Prop>(_availableSurfaceProps).Pick();
+                _availableSurfaceProps.Remove(prop);
+
+                if (Location is not Node3D locationNode)
+                {
+                    return false;
+                }
+
+                if (!prop.TryGetSurfacePosition(locationNode, out var surfacePosition))
+                {
+                    continue;
+                }
+
+                AddTarget(target, surfacePosition);
+
+                if (target is PhysicsBody3D targetBody)
+                {
+                    targetBody.AddCollisionExceptionWith(prop);
+                    prop.AddCollisionExceptionWith(targetBody);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
     }
 
     public class TargetLocationPopulator(

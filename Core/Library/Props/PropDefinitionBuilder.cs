@@ -25,6 +25,7 @@ namespace Dose.Core.Library.Props
                 LocationRestriction = propConfig.LocationRestriction,
                 Scale = propConfig.Scale,
                 YOffset = propConfig.YOffset,
+                SurfaceHeight = propConfig.SurfaceHeight,
                 MinDistanceFromWall = propConfig.MinDistanceFromWall,
                 MaxDistanceFromWall = propConfig.MaxDistanceFromWall,
                 MinDistanceFromCorner = propConfig.MinDistanceFromCorner,

@@ -569,6 +569,36 @@ namespace Dose.Core.Scenes
             _controlPlane?.QuestBookController?.OnQuestBookClosed();  
         }
 
+        public void SetInteractionCollisionsIgnored(Node root, bool ignored)
+        {
+            if (_rayCast == null)
+            {
+                return;
+            }
+
+            AddExceptions(root);
+
+            void AddExceptions(Node node)
+            {
+                if (node is CollisionObject3D collisionObject)
+                {
+                    if (ignored)
+                    {
+                        _rayCast.AddException(collisionObject);
+                    }
+                    else
+                    {
+                        _rayCast.RemoveException(collisionObject);
+                    }
+                }
+
+                foreach (var child in node.GetChildren())
+                {
+                    AddExceptions(child);
+                }
+            }
+        }
+
         void ProcessSeek()
         {
             if (!CanSeek()) return;
