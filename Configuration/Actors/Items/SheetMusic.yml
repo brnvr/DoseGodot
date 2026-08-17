@@ -6,13 +6,8 @@ TexturePath: "res://Media/Textures/Items/SheetMusic_0.png"
 Scale: 0.3
 EquipedScale: 0.7
 Execute:
-  - Action: movePlayer
+  - Action: MovePlayer
     Args:
       x: 1,
       y: 0,
       z: 1
-InteractWith:
-  - Actor: Agnes
-    Action: receive
-    Args:
-      arg0: value

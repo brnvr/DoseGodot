@@ -21,6 +21,20 @@ namespace Dose.Core.Library.Configuration.Actors
                 Voice = GetRequired<string>(dict, nameof(NpcConfig.Voice)),
                 DialoguesDir = GetRequired<string>(dict, nameof(NpcConfig.DialoguesDir)),
                 AvailableDialogues = GetRequired<List<object>>(dict, nameof(NpcConfig.AvailableDialogues)).Select(o => (string)o),
+                InteractWith = GetOptional<List<object>>(dict, nameof(NpcConfig.InteractWith), []).Select(o =>
+                {
+                    var interactionDict = (Dictionary<object, object?>)o;
+                    var item = interactionDict[nameof(NpcItemInteractionConfig.Item)] ?? "";
+                    var action = interactionDict[nameof(ItemActionConfig.Action)] ?? "";
+                    var args = (Dictionary<object, object?>?)interactionDict[nameof(ItemActionConfig.Args)] ?? [];
+
+                    return new NpcItemInteractionConfig
+                    {
+                        Item = (string)item,
+                        Action = (string)action,
+                        Args = args.ToDictionary(kvp => (string)kvp.Key, kvp => kvp.Value)
+                    };
+                }),
                 Scale = scale
             };
         }

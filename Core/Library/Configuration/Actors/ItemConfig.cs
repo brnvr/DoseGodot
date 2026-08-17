@@ -14,7 +14,6 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string PackId { get; init; }
         public required IEnumerable<ItemActionConfig> Execute { get; init; }
         public int? MaxQuantity { get; init; }
-        public required IEnumerable<ItemInteractionConfig> InteractWith { get; init; }
         public required bool KeepAfterUse { get; init; }
         public ScaleFactor Scale { get; init; } = 1f;
         public ScaleFactor EquipedScale { get; init; } = 1f;
@@ -39,12 +38,6 @@ namespace Dose.Core.Library.Configuration.Actors
             {
                 dict.Add(nameof(Execute), Execute.Select(a => a.AsDict()));
             }
-
-            if (InteractWith.Any())
-            {
-                dict.Add(nameof(InteractWith), InteractWith.Select(i => i.AsDict()));
-            }
-            
 
             return dict;
         }

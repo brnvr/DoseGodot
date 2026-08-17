@@ -5,7 +5,7 @@ PackId: thisside
 Scale: 0.3
 TexturePath: "res://Media/Textures/Items/CurrantSyrup.png"
 Execute:
-  - Action: movePlayer
+  - Action: MovePlayer
     Args:
       x: 1,
       y: 0,

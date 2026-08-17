@@ -136,8 +136,7 @@ namespace Dose.Core.Scenes
 				configConverter: new ItemConfigConverter(),
 				contextBuilder: new ItemContextBuilder(new Dictionary<string, IActionPerformer>
 				{
-					{ "movePlayer", new MovePlayerPerformer(player) },
-					{ "receive", new ReceivePerformer(player) }
+					{ "MovePlayer", new MovePlayerPerformer(player) }
 				})
 			).Load();
 
@@ -159,7 +158,11 @@ namespace Dose.Core.Scenes
 						onFinish: player.ProgressDialogue
 					)),
 					new("displayOptions", new DisplayOptionsNodeConverter(), new DialogueOptionsBuilder())
-				])
+				], new Dictionary<string, IActionPerformer>
+				{
+					{ "Receive", new ReceivePerformer(player) },
+					{ "RejectWithDialogue", new RejectWithDialoguePerformer(player) }
+				})
 			).Load();
 
 			var customRoomPool = new Pool<CustomRoomContext?>

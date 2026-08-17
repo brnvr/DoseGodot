@@ -2,15 +2,15 @@ using System.Collections.Generic;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
-    public class ItemInteractionConfig : ItemActionConfig
+    public class NpcItemInteractionConfig : ItemActionConfig
     {
-        public required string Actor { get; init; }
+        public required string Item { get; init; }
 
         public override Dictionary<string, object?> AsDict()
         {
             var dict = base.AsDict();
 
-            dict[nameof(Actor)] = Actor;
+            dict[nameof(Item)] = Item;
 
             return dict;
         }

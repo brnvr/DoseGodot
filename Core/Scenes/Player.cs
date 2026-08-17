@@ -291,9 +291,15 @@ namespace Dose.Core.Scenes
 
             if (!DialogueRunner.GoToNextNode())
             {
+                var completedShortDialogue = DialogueRunner.Dialogue is ShortDialogue;
                 DialogueRunner = null;
-                _moveState = MoveState.Free;
-                SetInteractionState(InteractionState.Curious);
+
+                if (!completedShortDialogue)
+                {
+                    _moveState = MoveState.Free;
+                    SetInteractionState(InteractionState.Curious);
+                }
+
                 _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 UpdateTarget();
@@ -771,7 +777,7 @@ namespace Dose.Core.Scenes
 
         void UseItemWith(IActor<Player> actor)
         {
-            var item = _controlPlane?.InventoryController?.CurrentItem;
+            var item = SelectedItem;
 
             if (item == null)
             {
@@ -779,24 +785,37 @@ namespace Dose.Core.Scenes
                 return;
             }
 
-            if (actor.Context == null)
+            if (actor.Context is not NpcContext npcContext)
             {
-                GD.PushWarning($"Actor context is undefined. Skipping {nameof(UseItemWith)}.");
+                ItemInteractionRejected?.Invoke(this, EventArgs.Empty);
                 return;
             }
 
-            var interacted = false;
+            var hasMatchingInteraction = false;
+            var rejected = false;
 
-            foreach (var op in item.InteractWith)
+            foreach (var op in npcContext.InteractWith)
             {
-                if (op.TryInteract(item, actor.Context))
+                var result = op.Interact(item, actor);
+
+                if (result == ItemInteractionResult.NotApplicable)
                 {
-                    interacted = true;
-                    GD.Print($"Interacted with actor \"{actor.Context.Identifier}\" using item \"{item.Identifier}\".");
+                    continue;
+                }
+
+                hasMatchingInteraction = true;
+
+                if (result == ItemInteractionResult.Accepted)
+                {
+                    GD.Print($"Interacted with NPC \"{npcContext.Identifier}\" using item \"{item.Identifier}\".");
+                }
+                else
+                {
+                    rejected = true;
                 }
             }
 
-            if (!interacted)
+            if (!hasMatchingInteraction || rejected)
             {
                 ItemInteractionRejected?.Invoke(this, EventArgs.Empty);
             }

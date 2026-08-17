@@ -4,7 +4,6 @@ using System.Linq;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Actors;
-using Dose.Core.Library.Interactivity;
 using Dose.Core.Scenes;
 using Godot;
 
@@ -27,12 +26,6 @@ namespace Dose.Core.Library.Actors
                 MaxQuantity = itemConfig.MaxQuantity ?? -1,
                 Execute = itemConfig.Execute.Select(config => new Executable
                 {
-                    Performer = ActionPerformerMap[config.Action],
-                    Args = config.Args
-                }),
-                InteractWith = itemConfig.InteractWith.Select(config => new InteractionOperator
-                {
-                    ActorIdentifier = config.Actor,
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
                 }),

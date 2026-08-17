@@ -7,3 +7,12 @@ PackId: thisside
 DialoguesDir: Configuration/Dialogues/Agnes
 Scale: 0.985
 AvailableDialogues: [SomeDialogue]
+InteractWith:
+  - Item: sheet music
+    Action: Receive
+    Args:
+      arg0: value
+  - Item: currant syrup
+    Action: RejectWithDialogue
+    Args:
+      line: "I don't like it."

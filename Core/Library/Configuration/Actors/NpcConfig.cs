@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Configuration.Actors
@@ -13,11 +14,12 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string DialoguesDir { get; set; }
         public required IEnumerable<string> AvailableDialogues { get; init; }
         public required string Voice { get; init; }
+        public required IEnumerable<NpcItemInteractionConfig> InteractWith { get; init; }
         public ScaleFactor Scale { get; init; } = 1f;
 
         public override Dictionary<string, object?> AsDict()
         {
-            return new Dictionary<string, object?>
+            var dict = new Dictionary<string, object?>
             {
                 { nameof(Identifier), Identifier },
                 { nameof(DisplayName), DisplayName },
@@ -29,6 +31,13 @@ namespace Dose.Core.Library.Configuration.Actors
                 { nameof(Voice), Voice },
                 { nameof(Scale), Scale.Value },
             };
+
+            if (InteractWith.Any())
+            {
+                dict.Add(nameof(InteractWith), InteractWith.Select(interaction => interaction.AsDict()));
+            }
+
+            return dict;
         }
     }
 }
