@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Locations
 {
@@ -25,6 +26,11 @@ namespace Dose.Core.Library.Configuration.Locations
                 TexturePath = GetRequired<string>(dict, nameof(WallOverlayTextureConfig.TexturePath)),
                 Rarity = GetRequired<string>(dict, nameof(WallOverlayTextureConfig.Rarity)),
                 PackId = GetRequired<string>(dict, nameof(WallOverlayTextureConfig.PackId)),
+                LocationRestriction = GetOptionalEnum(
+                    dict,
+                    nameof(WallOverlayTextureConfig.LocationRestriction),
+                    LocationRestriction.AnyLocation
+                ),
                 Scale = scale,
                 TextureRepeat = textureRepeat
             };

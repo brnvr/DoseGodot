@@ -9,5 +9,6 @@ namespace Dose.Core.Library.Locations
         public required Rarity Rarity { get; init; }
         public required string TexturePath { get; init; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
     }
 }

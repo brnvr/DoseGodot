@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -12,6 +13,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string EquipedTexturePath { get; init; }
         public required string Rarity { get; init; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public required IEnumerable<ItemActionConfig> Execute { get; init; }
         public int? MaxQuantity { get; init; }
         public required bool KeepAfterUse { get; init; }
@@ -28,6 +30,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 { nameof(EquipedTexturePath), EquipedTexturePath },
                 { nameof(Rarity), Rarity },
                 { nameof(PackId), PackId },
+                { nameof(LocationRestriction), LocationRestriction.ToString() },
                 { nameof(MaxQuantity), MaxQuantity },
                 { nameof(KeepAfterUse), KeepAfterUse },
                 { nameof(Scale), Scale.Value },

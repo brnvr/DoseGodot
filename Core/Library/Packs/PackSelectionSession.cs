@@ -14,11 +14,24 @@ namespace Dose.Core.Library.Packs
         Pack pack,
         PackedScene itemScene,
         PackedScene npcScene,
-        PackedScene propScene
+        PackedScene propScene,
+        LocationRestriction locationRestriction
     )
     {
-        readonly List<ItemContext> _items = [.. pack.GetWeightedItems().Distinct()];
-        readonly List<NpcContext> _npcs = [.. pack.GetWeightedNpcs().Distinct()];
+        readonly List<ItemContext> _items = [
+            .. pack.GetWeightedItems()
+                .Where(item => item.CanPopulate(locationRestriction))
+                .Distinct()
+        ];
+        readonly List<NpcContext> _npcs = [
+            .. pack.GetWeightedNpcs()
+                .Where(npc => npc.CanPopulate(locationRestriction))
+                .Distinct()
+        ];
+        readonly List<PropDefinition> _props = [
+            .. pack.GetWeightedProps()
+                .Where(prop => prop.CanPopulate(locationRestriction))
+        ];
         readonly Dictionary<IActorContext, int> _quantities = [];
 
         public Pack Pack { get; } = pack;
@@ -56,13 +69,12 @@ namespace Dose.Core.Library.Packs
 
         public Prop? SelectProp()
         {
-            var definition = Pack.SelectProp();
-
-            if (definition == null)
+            if (_props.Count == 0)
             {
                 return null;
             }
 
+            var definition = new RandomSelector<PropDefinition>(_props).Pick();
             var prop = PropScene.Instantiate<Prop>();
             prop.Initialize(definition);
             return prop;

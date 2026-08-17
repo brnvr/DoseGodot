@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -17,6 +18,11 @@ namespace Dose.Core.Library.Configuration.Actors
                 DisplayName = GetOptional<string>(dict, nameof(NpcConfig.DisplayName)) ?? identifier,
                 Rarity = GetRequired<string>(dict, nameof(NpcConfig.Rarity)),
                 PackId = GetRequired<string>(dict, nameof(NpcConfig.PackId)),
+                LocationRestriction = GetOptionalEnum(
+                    dict,
+                    nameof(NpcConfig.LocationRestriction),
+                    LocationRestriction.AnyLocation
+                ),
                 TexturePath = GetRequired<string>(dict, nameof(NpcConfig.TexturePath)),
                 Voice = GetRequired<string>(dict, nameof(NpcConfig.Voice)),
                 DialoguesDir = GetRequired<string>(dict, nameof(NpcConfig.DialoguesDir)),

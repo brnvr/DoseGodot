@@ -19,15 +19,6 @@ namespace Dose.Core.Scenes
 
 	public partial class LocationManager : Node, ILocationManager
 	{
-		[Flags]
-		enum PopulateTargets
-		{
-			None = 0,
-			Npc = 1 << 0,
-			Item = 1 << 1,
-			Prop = 1 << 2
-		}
-
 		const int BLOCK_SIZE = 4;
 		const string ROOM_CATEGORY = "room";
 		const string CORRIDOR_CATEGORY = "corridor";
@@ -316,8 +307,7 @@ namespace Dose.Core.Scenes
 			BuildLocation(location, pack);
 			PopulateLocation(
 				location,
-				PopulateTargets.Npc | PopulateTargets.Item | PopulateTargets.Prop,
-				CreatePackSelectionSession(pack)
+				CreatePackSelectionSession(pack, LocationRestriction.Rooms)
 			);
 		
 			//location.CreateFlippedBack();
@@ -368,8 +358,7 @@ namespace Dose.Core.Scenes
 			BuildLocation(location, pack, allowCustomRoomLinks);
 			PopulateLocation(
 				location,
-				PopulateTargets.Npc | PopulateTargets.Item,
-				CreatePackSelectionSession(pack)
+				CreatePackSelectionSession(pack, LocationRestriction.Corridors)
 			);
 		
 			//location.CreateFlippedBack();
@@ -387,7 +376,11 @@ namespace Dose.Core.Scenes
 
 			var doorNumberController = location.Type == Location.LocationType.Corridor ? ControlPlane.DoorNumberController : null;
 			
-			var doorTexture = PickRandomTexture(pack.GetWeightedDoorTextures());
+			var locationRestriction = GetLocationRestriction(location);
+			var doorTexture = PickRandomTexture(
+				pack.GetWeightedDoorTextures()
+					.Where(texture => texture.CanPopulate(locationRestriction))
+			);
 
 			if (doorTexture is null)
 			{
@@ -408,7 +401,10 @@ namespace Dose.Core.Scenes
 				Location = location
 			};
 
-			var wallTexture = PickRandomTexture(pack.GetWeightedWallTextures());
+			var wallTexture = PickRandomTexture(
+				pack.GetWeightedWallTextures()
+					.Where(texture => texture.CanPopulate(locationRestriction))
+			);
 
 			if (wallTexture is null)
 			{
@@ -416,7 +412,10 @@ namespace Dose.Core.Scenes
 				return;
 			}
 
-			var lampTexture = PickRandomTexture(pack.GetWeightedLampTextures());
+			var lampTexture = PickRandomTexture(
+				pack.GetWeightedLampTextures()
+					.Where(texture => texture.CanPopulate(locationRestriction))
+			);
 
 			if (lampTexture is null)
 			{
@@ -537,36 +536,25 @@ namespace Dose.Core.Scenes
 
 		void PopulateLocation(
 			BuildableLocation location,
-			PopulateTargets targets,
 			PackSelectionSession selectionSession
 		)
 		{
-			var populators = new List<LocationPopulator>();
-
-			if ((targets & PopulateTargets.Prop) != 0)
+			var itemArgs = new ItemArgs();
+			var populators = new List<LocationPopulator>
 			{
-				populators.Add(new TargetLocationPopulator(
+				new TargetLocationPopulator(
 					location,
 					selectionSession.SelectProp,
 					new Probability(0.5),
 					BLOCK_SIZE
-				));
-			}
-
-			if ((targets & PopulateTargets.Item) != 0)
-			{
-				var itemArgs = new ItemArgs();
-				populators.Add(new TargetLocationPopulator(
+				),
+				new TargetLocationPopulator(
 					location,
 					() => selectionSession.SelectItem(itemArgs),
 					new Probability(0.5),
 					BLOCK_SIZE
-				));
-			}
-
-			if ((targets & PopulateTargets.Npc) != 0)
-			{
-				populators.Add(new TargetLocationPopulator(
+				),
+				new TargetLocationPopulator(
 					location,
 					() => selectionSession.SelectNpc(new NpcArgs
 					{
@@ -575,8 +563,8 @@ namespace Dose.Core.Scenes
 					}),
 					new Probability(0.5),
 					BLOCK_SIZE
-				));
-			}
+				)
+			};
 
 			var populatedPositions = GetReservedActorPositions(location);
 
@@ -659,10 +647,23 @@ namespace Dose.Core.Scenes
 			return pack;
 		}
 
-		PackSelectionSession CreatePackSelectionSession(Pack pack)
+		PackSelectionSession CreatePackSelectionSession(
+			Pack pack,
+			LocationRestriction locationRestriction
+		)
 		{
-			return PackPool?.CreateSelectionSession(pack)
+			return PackPool?.CreateSelectionSession(pack, locationRestriction)
 				?? throw new InvalidOperationException($"{nameof(PackPool)} is null.");
+		}
+
+		static LocationRestriction GetLocationRestriction(Location location)
+		{
+			return location.Type switch
+			{
+				Location.LocationType.Room => LocationRestriction.Rooms,
+				Location.LocationType.Corridor => LocationRestriction.Corridors,
+				_ => throw new InvalidOperationException("Location type is not defined.")
+			};
 		}
 
 		RoomMapGenerator GenerateRoomMap(Pack pack)
@@ -673,6 +674,7 @@ namespace Dose.Core.Scenes
 				probabilityToBuildDoor: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
 				wallOverlayTextures: pack.GetWeightedWallOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Rooms))
 			);
         }
 
@@ -691,6 +693,7 @@ namespace Dose.Core.Scenes
 				probabilityToBuildStairs: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
 				wallOverlayTextures: pack.GetWeightedWallOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Corridors))
 			)
 			{
 				ShouldEnsureStairsUp = shouldEnsureStairsUp,

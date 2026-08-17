@@ -49,5 +49,23 @@ namespace Dose.Core.Library.Configuration
                 ? float.Parse(valueText, NumberStyles.Float, CultureInfo.InvariantCulture)
                 : Convert.ToSingle(rawValue, CultureInfo.InvariantCulture);
         }
+
+        protected static TEnum GetOptionalEnum<TEnum>(
+            Dictionary<string, object?> dict,
+            string key,
+            TEnum defaultValue
+        ) where TEnum : struct, Enum
+        {
+            var rawValue = GetOptional<object>(dict, key);
+
+            if (rawValue == null)
+            {
+                return defaultValue;
+            }
+
+            return rawValue is TEnum enumValue
+                ? enumValue
+                : Enum.Parse<TEnum>(Convert.ToString(rawValue, CultureInfo.InvariantCulture)!, true);
+        }
     }
 }

@@ -17,6 +17,7 @@ namespace Dose.Core.Library.Locations
                 Texture = GD.Load<Texture2D>(wallOverlayConfig.TexturePath),
                 Rarity = Enum.Parse<Rarity>(wallOverlayConfig.Rarity, true),
                 PackId = wallOverlayConfig.PackId,
+                LocationRestriction = wallOverlayConfig.LocationRestriction,
                 Scale = wallOverlayConfig.Scale,
                 TextureRepeat = wallOverlayConfig.TextureRepeat
             };

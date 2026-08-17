@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -21,6 +22,11 @@ namespace Dose.Core.Library.Configuration.Actors
                 EquipedTexturePath = GetOptional<string>(dict, nameof(ItemConfig.EquipedTexturePath)) ?? texturePath,
                 Rarity = GetRequired<string>(dict, nameof(ItemConfig.Rarity)),
                 PackId = GetRequired<string>(dict, nameof(ItemConfig.PackId)),
+                LocationRestriction = GetOptionalEnum(
+                    dict,
+                    nameof(ItemConfig.LocationRestriction),
+                    LocationRestriction.AnyLocation
+                ),
                 MaxQuantity = GetOptional<int?>(dict, nameof(ItemConfig.MaxQuantity)),
                 Execute = GetOptional<List<object>>(dict, nameof(ItemConfig.Execute), []).Select(o => {
                     var dict = (Dictionary<object, object?>)o;

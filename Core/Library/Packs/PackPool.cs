@@ -32,9 +32,18 @@ namespace Dose.Core.Library.Packs
             return new RandomSelector<Pack>(weighted).Pick();
         }
 
-        public PackSelectionSession CreateSelectionSession(Pack pack)
+        public PackSelectionSession CreateSelectionSession(
+            Pack pack,
+            LocationRestriction locationRestriction
+        )
         {
-            return new PackSelectionSession(pack, ItemScene, NpcScene, PropScene);
+            return new PackSelectionSession(
+                pack,
+                ItemScene,
+                NpcScene,
+                PropScene,
+                locationRestriction
+            );
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Locations
 {
@@ -6,6 +7,7 @@ namespace Dose.Core.Library.Configuration.Locations
     {
         public required string Rarity { get; init; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public required string TexturePath { get; init; }
 
         public override Dictionary<string, object?> AsDict()
@@ -14,7 +16,8 @@ namespace Dose.Core.Library.Configuration.Locations
             {
                 { nameof(TexturePath), TexturePath },
                 { nameof(Rarity), Rarity.ToString() },
-                { nameof(PackId), PackId }
+                { nameof(PackId), PackId },
+                { nameof(LocationRestriction), LocationRestriction.ToString() }
             };
         }
     }

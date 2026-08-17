@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Props
 {
@@ -55,6 +56,11 @@ namespace Dose.Core.Library.Configuration.Props
                 ModelPath = hasModelPath ? modelPath : null,
                 Rarity = GetRequired<string>(dict, nameof(PropConfig.Rarity)),
                 PackId = GetRequired<string>(dict, nameof(PropConfig.PackId)),
+                LocationRestriction = GetOptionalEnum(
+                    dict,
+                    nameof(PropConfig.LocationRestriction),
+                    LocationRestriction.AnyLocation
+                ),
                 Scale = scale,
                 YOffset = yOffset,
                 MinDistanceFromWall = minDistanceFromWall,

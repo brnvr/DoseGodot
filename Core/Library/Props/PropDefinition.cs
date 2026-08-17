@@ -11,6 +11,7 @@ namespace Dose.Core.Library.Props
         public PackedScene? ModelScene { get; init; }
         public Rarity Rarity { get; init; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public ScaleFactor Scale { get; init; } = 1f;
         public float YOffset { get; init; }
         public NormalizedValue MinDistanceFromWall { get; init; } = 0f;

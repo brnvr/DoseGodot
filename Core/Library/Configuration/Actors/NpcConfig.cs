@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Actors
 {
@@ -10,6 +11,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required string DisplayName { get; init; }
         public required string Rarity { get; set; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public required string TexturePath { get; init; }
         public required string DialoguesDir { get; set; }
         public required IEnumerable<string> AvailableDialogues { get; init; }
@@ -26,6 +28,7 @@ namespace Dose.Core.Library.Configuration.Actors
                 { nameof(TexturePath), TexturePath },
                 { nameof(Rarity), Rarity },
                 { nameof(PackId), PackId },
+                { nameof(LocationRestriction), LocationRestriction.ToString() },
                 { nameof(DialoguesDir), DialoguesDir },
                 { nameof(AvailableDialogues), AvailableDialogues },
                 { nameof(Voice), Voice },

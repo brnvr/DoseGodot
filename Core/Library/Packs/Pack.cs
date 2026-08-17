@@ -67,13 +67,26 @@ namespace Dose.Core.Library.Packs
         public IEnumerable<PropDefinition> GetWeightedProps() =>
             CombineWithParents(Props.GetWeightedList(), pack => pack.Props.GetWeightedList());
 
-        public ItemContext? SelectItem() => Select(GetWeightedItems());
-        public NpcContext? SelectNpc() => Select(GetWeightedNpcs());
-        public TextureDefinition? SelectWallTexture() => Select(GetWeightedWallTextures());
-        public TextureDefinition? SelectDoorTexture() => Select(GetWeightedDoorTextures());
-        public TextureDefinition? SelectLampTexture() => Select(GetWeightedLampTextures());
-        public WallOverlayTextureDefinition? SelectWallOverlay() => Select(GetWeightedWallOverlays());
-        public PropDefinition? SelectProp() => Select(GetWeightedProps());
+        public ItemContext? SelectItem(LocationRestriction restriction) =>
+            Select(GetWeightedItems().Where(item => item.CanPopulate(restriction)));
+
+        public NpcContext? SelectNpc(LocationRestriction restriction) =>
+            Select(GetWeightedNpcs().Where(npc => npc.CanPopulate(restriction)));
+
+        public TextureDefinition? SelectWallTexture(LocationRestriction restriction) =>
+            Select(GetWeightedWallTextures().Where(texture => texture.CanPopulate(restriction)));
+
+        public TextureDefinition? SelectDoorTexture(LocationRestriction restriction) =>
+            Select(GetWeightedDoorTextures().Where(texture => texture.CanPopulate(restriction)));
+
+        public TextureDefinition? SelectLampTexture(LocationRestriction restriction) =>
+            Select(GetWeightedLampTextures().Where(texture => texture.CanPopulate(restriction)));
+
+        public WallOverlayTextureDefinition? SelectWallOverlay(LocationRestriction restriction) =>
+            Select(GetWeightedWallOverlays().Where(overlay => overlay.CanPopulate(restriction)));
+
+        public PropDefinition? SelectProp(LocationRestriction restriction) =>
+            Select(GetWeightedProps().Where(prop => prop.CanPopulate(restriction)));
 
         IEnumerable<T> CombineWithParents<T>(
             IEnumerable<T> localValues,

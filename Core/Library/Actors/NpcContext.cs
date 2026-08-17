@@ -16,6 +16,7 @@ namespace Dose.Core.Library.Actors
         public string DisplayName { get; init; } = "";
         public Rarity Rarity { get; init; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public Dictionary<string, IDialogue> DialogueMap { get; init; } = [];
         public IEnumerable<string> AvailableDialogueKeys { get; init; } = [];
         public Texture2D? Texture { get; init; }

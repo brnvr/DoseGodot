@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Library.Configuration.Props
 {
@@ -9,6 +10,7 @@ namespace Dose.Core.Library.Configuration.Props
         public string? ModelPath { get; init; }
         public required string Rarity { get; init; }
         public required string PackId { get; init; }
+        public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public ScaleFactor Scale { get; init; } = 1f;
         public float YOffset { get; init; }
         public NormalizedValue MinDistanceFromWall { get; init; } = 0f;
@@ -25,6 +27,7 @@ namespace Dose.Core.Library.Configuration.Props
                 { nameof(ModelPath), ModelPath },
                 { nameof(Rarity), Rarity },
                 { nameof(PackId), PackId },
+                { nameof(LocationRestriction), LocationRestriction.ToString() },
                 { nameof(Scale), Scale.Value },
                 { nameof(YOffset), YOffset },
                 { nameof(MinDistanceFromWall), MinDistanceFromWall.Value },
