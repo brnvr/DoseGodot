@@ -2,4 +2,6 @@
 Identifier: apple
 Rarity: VeryCommon
 PackId: thisside
-TexturePath: "res://Media/Textures/Placehoders/Item.png"
+TexturePath: "res://Media/Textures/Items/Apple.png"
+Scale: 0.2
+EquipedScale: 0.5

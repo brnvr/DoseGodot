@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://bep1e5d2jhol4"]
+[gd_scene load_steps=5 format=3 uid="uid://bep1e5d2jhol4"]
 
 [ext_resource type="Script" uid="uid://obdyu33y6cux" path="res://Core/Scenes/Prop.cs" id="1_qbndv"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5e60b"]
+shading_mode = 0
+texture_filter = 0
+
 [sub_resource type="QuadMesh" id="QuadMesh_5e60b"]
+material = SubResource("StandardMaterial3D_5e60b")
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kjml4"]
 radius = 0.25

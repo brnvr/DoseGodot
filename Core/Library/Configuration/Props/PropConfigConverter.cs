@@ -13,11 +13,12 @@ namespace Dose.Core.Library.Configuration.Props
             var modelPath = GetOptional<string>(dict, nameof(PropConfig.ModelPath));
             var hasTexturePath = !string.IsNullOrWhiteSpace(texturePath);
             var hasModelPath = !string.IsNullOrWhiteSpace(modelPath);
-            var minDistanceToWall = GetNormalizedValue(dict, nameof(PropConfig.MinDistanceToWall), 0f);
-            var maxDistanceToWall = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceToWall), 1f);
+            var minDistanceFromWall = GetNormalizedValue(dict, nameof(PropConfig.MinDistanceFromWall), 0f);
+            var maxDistanceFromWall = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceFromWall), 1f);
             var minDistanceFromCorner = GetNormalizedValue(dict, nameof(PropConfig.MinDistanceFromCorner), 0f);
             var maxDistanceFromCorner = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceFromCorner), 1f);
             var scale = new ScaleFactor(GetOptionalFloat(dict, nameof(PropConfig.Scale), 1f));
+            var yOffset = GetOptionalFloat(dict, nameof(PropConfig.YOffset), 0f);
 
             if (hasTexturePath == hasModelPath)
             {
@@ -26,10 +27,18 @@ namespace Dose.Core.Library.Configuration.Props
                 );
             }
 
-            if (minDistanceToWall.Value > maxDistanceToWall.Value)
+            if (!float.IsFinite(yOffset))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(PropConfig.YOffset),
+                    $"A prop config's {nameof(PropConfig.YOffset)} must be finite."
+                );
+            }
+
+            if (minDistanceFromWall.Value > maxDistanceFromWall.Value)
             {
                 throw new ArgumentException(
-                    $"A prop config's {nameof(PropConfig.MinDistanceToWall)} cannot exceed {nameof(PropConfig.MaxDistanceToWall)}."
+                    $"A prop config's {nameof(PropConfig.MinDistanceFromWall)} cannot exceed {nameof(PropConfig.MaxDistanceFromWall)}."
                 );
             }
 
@@ -47,8 +56,9 @@ namespace Dose.Core.Library.Configuration.Props
                 Rarity = GetRequired<string>(dict, nameof(PropConfig.Rarity)),
                 PackId = GetRequired<string>(dict, nameof(PropConfig.PackId)),
                 Scale = scale,
-                MinDistanceToWall = minDistanceToWall,
-                MaxDistanceToWall = maxDistanceToWall,
+                YOffset = yOffset,
+                MinDistanceFromWall = minDistanceFromWall,
+                MaxDistanceFromWall = maxDistanceFromWall,
                 MinDistanceFromCorner = minDistanceFromCorner,
                 MaxDistanceFromCorner = maxDistanceFromCorner
             };

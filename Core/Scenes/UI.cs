@@ -5,6 +5,7 @@ using Godot;
 using Dose.Core.Library.Control;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.DataStructures;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Scenes
 {
@@ -97,9 +98,9 @@ namespace Dose.Core.Scenes
             _dialogueCaption.SetTextVisible(false);
         }
 
-        public void SetEquipedItem(Texture2D? texture)
+        public void SetEquipedItem(Texture2D? texture, ScaleFactor scale)
         {
-            _equipedItemDisplay.SetItem(texture);
+            _equipedItemDisplay.SetItem(texture, scale);
         }
 
         public void SetEquipedItemTargeted(bool targeted)

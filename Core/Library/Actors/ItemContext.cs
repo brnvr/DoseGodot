@@ -20,5 +20,6 @@ namespace Dose.Core.Library.Actors
         public required IEnumerable<InteractionOperator> InteractWith { get; init; }
         public required bool KeepAfterUse { get; set; }
         public ScaleFactor Scale { get; init; } = 1f;
+        public ScaleFactor EquipedScale { get; init; } = 1f;
     }
 }

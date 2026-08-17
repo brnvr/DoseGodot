@@ -11,6 +11,7 @@ namespace Dose.Core.Library.Configuration.Actors
             var identifier = GetRequired<string>(dict, nameof(ItemConfig.Identifier));
             var texturePath = GetRequired<string>(dict, nameof(ItemConfig.TexturePath));
             var scale = new ScaleFactor(GetOptionalFloat(dict, nameof(ItemConfig.Scale), 1f));
+            var equipedScale = new ScaleFactor(GetOptionalFloat(dict, nameof(ItemConfig.EquipedScale), 1f));
 
             return new ItemConfig
             {
@@ -47,7 +48,8 @@ namespace Dose.Core.Library.Configuration.Actors
                     };
                 }),
                 KeepAfterUse = GetOptional<bool?>(dict, nameof(ItemConfig.KeepAfterUse), false) ?? false,
-                Scale = scale
+                Scale = scale,
+                EquipedScale = equipedScale
             };
         }
     }

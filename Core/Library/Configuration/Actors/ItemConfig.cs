@@ -17,6 +17,7 @@ namespace Dose.Core.Library.Configuration.Actors
         public required IEnumerable<ItemInteractionConfig> InteractWith { get; init; }
         public required bool KeepAfterUse { get; init; }
         public ScaleFactor Scale { get; init; } = 1f;
+        public ScaleFactor EquipedScale { get; init; } = 1f;
 
         public override Dictionary<string, object?> AsDict()
         {
@@ -30,7 +31,8 @@ namespace Dose.Core.Library.Configuration.Actors
                 { nameof(PackId), PackId },
                 { nameof(MaxQuantity), MaxQuantity },
                 { nameof(KeepAfterUse), KeepAfterUse },
-                { nameof(Scale), Scale.Value }
+                { nameof(Scale), Scale.Value },
+                { nameof(EquipedScale), EquipedScale.Value }
             };
 
             if (Execute.Any())

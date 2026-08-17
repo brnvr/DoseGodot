@@ -15,8 +15,12 @@ namespace Dose.Core.Scenes
         public void Initialize(ItemContext context, ItemArgs args)
         {
             Context = context;
-            Scale = Vector3.One * context.Scale;
             MeshInstance = GetNode<MeshInstance3D>("Mesh");
+            var scale = Vector3.One * context.Scale;
+            MeshInstance.Scale *= scale;
+            var collisionShape = GetNode<CollisionShape3D>("CollisionShape3D");
+            collisionShape.Scale *= scale;
+            collisionShape.Position *= context.Scale;
             UpdateTexture();
         }
 

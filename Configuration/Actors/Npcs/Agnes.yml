@@ -5,4 +5,5 @@ Voice: mb-us1
 Rarity: VeryCommon
 PackId: thisside
 DialoguesDir: Configuration/Dialogues/Agnes
+Scale: 0.985
 AvailableDialogues: [SomeDialogue]

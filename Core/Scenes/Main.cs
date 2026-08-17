@@ -69,7 +69,7 @@ namespace Dose.Core.Scenes
 
             player.SelectedItemChanged += (sender, e) =>
             {
-                ui.SetEquipedItem(e.Item?.EquipedTexture);
+                ui.SetEquipedItem(e.Item?.EquipedTexture, e.Item?.EquipedScale ?? 1f);
                 ui.SetEquipedItemTargeted(e.Item != null && player.HasInteractionTarget);
                 SyncCursorType();
             };

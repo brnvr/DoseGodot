@@ -23,8 +23,9 @@ namespace Dose.Core.Library.Props
                 Rarity = Enum.Parse<Rarity>(propConfig.Rarity, true),
                 PackId = propConfig.PackId,
                 Scale = propConfig.Scale,
-                MinDistanceToWall = propConfig.MinDistanceToWall,
-                MaxDistanceToWall = propConfig.MaxDistanceToWall,
+                YOffset = propConfig.YOffset,
+                MinDistanceFromWall = propConfig.MinDistanceFromWall,
+                MaxDistanceFromWall = propConfig.MaxDistanceFromWall,
                 MinDistanceFromCorner = propConfig.MinDistanceFromCorner,
                 MaxDistanceFromCorner = propConfig.MaxDistanceFromCorner
             };

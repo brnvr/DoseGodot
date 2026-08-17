@@ -75,7 +75,7 @@ namespace Dose.Core.Scenes
             public EventHandler? Completed { get; set; }
         }
        
-        const float RAY_LENGTH = 2.3f;
+        const float RAY_LENGTH = 3.1f;
         const float DOOR_TRANSITION_INSET = 0.3f;
         
         RayCast3D? _rayCast;
@@ -720,10 +720,34 @@ namespace Dose.Core.Scenes
                     }
                     else
                     {
-                        UnselectItem();
+                        ExecuteSelectedItem();
                     }
                     break;
             }          
+        }
+
+        void ExecuteSelectedItem()
+        {
+            var item = SelectedItem;
+
+            if (item == null)
+            {
+                GD.PushWarning($"Player does not have an equiped item. Skipping {nameof(ExecuteSelectedItem)}.");
+                return;
+            }
+
+            var executed = false;
+
+            foreach (var executable in item.Execute)
+            {
+                executable.Execute(this);
+                executed = true;
+            }
+
+            if (executed && !item.KeepAfterUse)
+            {
+                Inventory.Drop(item);
+            }
         }
 
         void UseItemWith(IActor<Player> actor)

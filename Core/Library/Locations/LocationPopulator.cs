@@ -84,8 +84,8 @@ namespace Dose.Core.Library.Locations
                 .Where(position => IsWithinWallDistance(
                     position.Cell,
                     position.Offset,
-                    wallPositioned.MinDistanceToWall,
-                    wallPositioned.MaxDistanceToWall,
+                    wallPositioned.MinDistanceFromWall,
+                    wallPositioned.MaxDistanceFromWall,
                     wallPositioned.MinDistanceFromCorner,
                     wallPositioned.MaxDistanceFromCorner
                 ))

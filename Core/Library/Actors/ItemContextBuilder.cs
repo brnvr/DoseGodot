@@ -37,7 +37,8 @@ namespace Dose.Core.Library.Actors
                     Args = config.Args
                 }),
                 KeepAfterUse = itemConfig.KeepAfterUse,
-                Scale = itemConfig.Scale
+                Scale = itemConfig.Scale,
+                EquipedScale = itemConfig.EquipedScale
             };
         }
 

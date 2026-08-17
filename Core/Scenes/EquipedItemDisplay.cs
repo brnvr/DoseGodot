@@ -1,4 +1,5 @@
 using Godot;
+using Dose.Core.Library.Numbers;
 using Dose.Core.Library.UI;
 
 namespace Dose.Core.Scenes
@@ -41,10 +42,11 @@ namespace Dose.Core.Scenes
             _itemAnchor.OffsetTop = EQUIP_POSITION_Y;
             _itemAnchor.OffsetBottom = EQUIP_POSITION_Y;
             _equipMotion.Scale = Vector2.One * EQUIP_SCALE;
+            _textureRect.PivotOffset = new Vector2(_textureRect.Size.X * .5f, _textureRect.Size.Y);
             Hide();
         }
 
-        public void SetItem(Texture2D? texture)
+        public void SetItem(Texture2D? texture, ScaleFactor scale)
         {
             if (texture == null)
             {
@@ -54,6 +56,14 @@ namespace Dose.Core.Scenes
 
             var wasVisible = Visible;
             _textureRect.Texture = texture;
+            _textureRect.Scale = Vector2.One * scale.Value;
+            _itemAnchor.OffsetTop = EQUIP_POSITION_Y * scale.Value;
+            _itemAnchor.OffsetBottom = EQUIP_POSITION_Y * scale.Value;
+            var animationPivot = (
+                _textureRect.Position + _textureRect.Size * .5f
+            ) * scale.Value;
+            _feedbackMotion.PivotOffset = animationPivot;
+            _swayMotion.PivotOffset = animationPivot;
             Show();
             PlayEquipAnimation();
 
