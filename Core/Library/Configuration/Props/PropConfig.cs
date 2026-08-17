@@ -13,7 +13,7 @@ namespace Dose.Core.Library.Configuration.Props
         public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;
         public ScaleFactor Scale { get; init; } = 1f;
         public float YOffset { get; init; }
-        public float? SurfaceHeight { get; init; }
+        public SurfaceOffsetConfig? SurfaceOffset { get; init; }
         public NormalizedValue MinDistanceFromWall { get; init; } = 0f;
         public NormalizedValue MaxDistanceFromWall { get; init; } = 1f;
         public NormalizedValue MinDistanceFromCorner { get; init; } = 0f;
@@ -31,7 +31,7 @@ namespace Dose.Core.Library.Configuration.Props
                 { nameof(LocationRestriction), LocationRestriction.ToString() },
                 { nameof(Scale), Scale.Value },
                 { nameof(YOffset), YOffset },
-                { nameof(SurfaceHeight), SurfaceHeight },
+                { nameof(SurfaceOffset), SurfaceOffset?.AsDict() },
                 { nameof(MinDistanceFromWall), MinDistanceFromWall.Value },
                 { nameof(MaxDistanceFromWall), MaxDistanceFromWall.Value },
                 { nameof(MinDistanceFromCorner), MinDistanceFromCorner.Value },

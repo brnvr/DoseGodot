@@ -25,7 +25,9 @@ namespace Dose.Core.Library.Props
                 LocationRestriction = propConfig.LocationRestriction,
                 Scale = propConfig.Scale,
                 YOffset = propConfig.YOffset,
-                SurfaceHeight = propConfig.SurfaceHeight,
+                SurfaceOffset = propConfig.SurfaceOffset is { } surfaceOffset
+                    ? new Vector2(surfaceOffset.Horizontal, surfaceOffset.Vertical)
+                    : null,
                 MinDistanceFromWall = propConfig.MinDistanceFromWall,
                 MaxDistanceFromWall = propConfig.MaxDistanceFromWall,
                 MinDistanceFromCorner = propConfig.MinDistanceFromCorner,

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Packs;
 
@@ -20,7 +21,7 @@ namespace Dose.Core.Library.Configuration.Props
             var maxDistanceFromCorner = GetNormalizedValue(dict, nameof(PropConfig.MaxDistanceFromCorner), 1f);
             var scale = new ScaleFactor(GetOptionalFloat(dict, nameof(PropConfig.Scale), 1f));
             var yOffset = GetOptionalFloat(dict, nameof(PropConfig.YOffset), 0f);
-            var surfaceHeight = GetOptionalSurfaceHeight(dict);
+            var surfaceOffset = GetOptionalSurfaceOffset(dict);
 
             if (hasTexturePath == hasModelPath)
             {
@@ -64,7 +65,7 @@ namespace Dose.Core.Library.Configuration.Props
                 ),
                 Scale = scale,
                 YOffset = yOffset,
-                SurfaceHeight = surfaceHeight,
+                SurfaceOffset = surfaceOffset,
                 MinDistanceFromWall = minDistanceFromWall,
                 MaxDistanceFromWall = maxDistanceFromWall,
                 MinDistanceFromCorner = minDistanceFromCorner,
@@ -72,15 +73,37 @@ namespace Dose.Core.Library.Configuration.Props
             };
         }
 
-        static float? GetOptionalSurfaceHeight(Dictionary<string, object?> dict)
+        static SurfaceOffsetConfig? GetOptionalSurfaceOffset(Dictionary<string, object?> dict)
         {
-            var rawValue = GetOptional<object>(dict, nameof(PropConfig.SurfaceHeight));
+            var rawValue = GetOptional<object>(dict, nameof(PropConfig.SurfaceOffset));
 
             if (rawValue == null)
             {
                 return null;
             }
 
+            var offsetDict = rawValue switch
+            {
+                Dictionary<string, object?> normalized => normalized,
+                Dictionary<object, object?> yaml => yaml.ToDictionary(
+                    pair => Convert.ToString(pair.Key, CultureInfo.InvariantCulture)!,
+                    pair => pair.Value
+                ),
+                _ => throw new FormatException(
+                    $"A prop config's {nameof(PropConfig.SurfaceOffset)} must be an object."
+                )
+            };
+
+            return new SurfaceOffsetConfig
+            {
+                Horizontal = GetFiniteFloat(offsetDict, nameof(SurfaceOffsetConfig.Horizontal)),
+                Vertical = GetFiniteFloat(offsetDict, nameof(SurfaceOffsetConfig.Vertical))
+            };
+        }
+
+        static float GetFiniteFloat(Dictionary<string, object?> dict, string key)
+        {
+            var rawValue = GetRequired<object>(dict, key);
             var value = rawValue is string valueText
                 ? float.Parse(valueText, NumberStyles.Float, CultureInfo.InvariantCulture)
                 : Convert.ToSingle(rawValue, CultureInfo.InvariantCulture);
@@ -88,8 +111,8 @@ namespace Dose.Core.Library.Configuration.Props
             if (!float.IsFinite(value))
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof(PropConfig.SurfaceHeight),
-                    $"A prop config's {nameof(PropConfig.SurfaceHeight)} must be finite."
+                    key,
+                    $"A prop config's {nameof(PropConfig.SurfaceOffset)}.{key} must be finite."
                 );
             }
 

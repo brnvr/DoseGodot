@@ -19,7 +19,7 @@ namespace Dose.Core.Scenes
         {
             position = default;
 
-            if (Definition?.SurfaceHeight is not float relativeHeight)
+            if (Definition?.SurfaceOffset is not Vector2 relativeOffset)
             {
                 return false;
             }
@@ -40,7 +40,7 @@ namespace Dose.Core.Scenes
                 .OfType<MeshInstance3D>()
                 .Where(mesh => mesh.Visible && mesh.Mesh != null))
             {
-                if (!TryGetTransformRelativeTo(mesh, relativeTo, out var meshTransform))
+                if (!TryGetTransformRelativeTo(mesh, this, out var meshTransform))
                 {
                     continue;
                 }
@@ -58,16 +58,23 @@ namespace Dose.Core.Scenes
 
             if (!hasBounds)
             {
-                GD.PushWarning("A prop with SurfaceHeight has no visible mesh bounds.");
+                GD.PushWarning("A prop with SurfaceOffset has no visible mesh bounds.");
                 return false;
             }
 
             var center = (minimum + maximum) * 0.5f;
-            position = new Vector3(
-                center.X,
-                center.Y + (maximum.Y - minimum.Y) * relativeHeight,
+            var localSurfacePosition = new Vector3(
+                center.X + (maximum.X - minimum.X) * relativeOffset.X,
+                center.Y + (maximum.Y - minimum.Y) * relativeOffset.Y,
                 center.Z
             );
+
+            if (!TryGetTransformRelativeTo(this, relativeTo, out var propTransform))
+            {
+                return false;
+            }
+
+            position = propTransform * localSurfacePosition;
 
             return true;
         }

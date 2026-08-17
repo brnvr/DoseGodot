@@ -262,7 +262,7 @@ namespace Dose.Core.Library.Locations
     {
         readonly List<Prop> _availableSurfaceProps =
         [
-            .. props.Where(prop => prop.Definition?.SurfaceHeight != null)
+            .. props.Where(prop => prop.Definition?.SurfaceOffset != null)
         ];
 
         protected override Node3D? CreateTarget() => targetFactory();
