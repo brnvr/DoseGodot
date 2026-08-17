@@ -1,8 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
-using Dose.Core.Library.Common;
-using Dose.Core.Library.DataStructures;
-using Dose.Core.Library.Randomness;
+using Dose.Core.Library.Numbers;
 using Godot;
 
 namespace Dose.Core.Library.Packs
@@ -23,14 +20,11 @@ namespace Dose.Core.Library.Packs
 
         public Pack? Select()
         {
-            if (_packs.Count == 0)
-            {
-                return null;
-            }
-
-            var weighted = new RarityWeighter<Pack>([.. _packs]).Weight();
-            return new RandomSelector<Pack>(weighted).Pick();
+            return Select(new Probability(0));
         }
+
+        public Pack? Select(Probability randomness) =>
+            new PackShuffler(_packs, randomness).Shuffle();
 
         public PackSelectionSession CreateSelectionSession(
             Pack pack,

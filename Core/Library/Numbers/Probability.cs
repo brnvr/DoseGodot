@@ -10,7 +10,7 @@ namespace Dose.Core.Library.Numbers
 
         public Probability(double value)
         {
-            if (value is < 0.0 or > 1.0)
+            if (double.IsNaN(value) || value is < 0.0 or > 1.0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), "Probability must be between 0 and 1.");
             }
