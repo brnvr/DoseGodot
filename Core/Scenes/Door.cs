@@ -23,9 +23,11 @@ namespace Dose.Core.Scenes
         const double MAX_OPENING = Math.PI / 2;
 
         MeshInstance3D? _mesh;
+        Label3D? _numberLabel;
         StaticBody3D? _body;
         CollisionShape3D? _collisionShape;
         Area3D? _interactionArea;
+        StandardMaterial3D? _material;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
@@ -50,12 +52,17 @@ namespace Dose.Core.Scenes
 
         public override void _Ready()
         {
-            _mesh = GetNode<MeshInstance3D>("Mesh");
-            _body = GetNode<StaticBody3D>("Body");
-            _collisionShape = _body.GetNode<CollisionShape3D>("CollisionShape");
-            _interactionArea = GetNode<Area3D>("InteractionArea");
-            
-            _yRotationStart = _mesh.Rotation.Y;
+            CacheNodes();
+            _yRotationStart = _mesh!.Rotation.Y;
+        }
+
+        void CacheNodes()
+        {
+            _mesh ??= GetNode<MeshInstance3D>("Mesh");
+            _numberLabel ??= GetNode<Label3D>("Mesh/Number");
+            _body ??= GetNode<StaticBody3D>("Body");
+            _collisionShape ??= _body.GetNode<CollisionShape3D>("CollisionShape");
+            _interactionArea ??= GetNode<Area3D>("InteractionArea");
         }
 
         public void Link(Door other)
@@ -71,7 +78,46 @@ namespace Dose.Core.Scenes
             }
 
             Linked = other;
+            SynchronizeLinkedVisuals(other);
             other.Link(this);
+        }
+
+        void SynchronizeLinkedVisuals(Door other)
+        {
+            if (Context?.Number is int number && other.Context?.Number == null)
+            {
+                other.SetNumber(number);
+            }
+            else if (other.Context?.Number is int otherNumber && Context?.Number == null)
+            {
+                SetNumber(otherNumber);
+            }
+
+            if (_material != null && other._material == null)
+            {
+                other.SetMaterial(_material);
+            }
+            else if (other._material != null && _material == null)
+            {
+                SetMaterial(other._material);
+            }
+        }
+
+        void SetNumber(int? number)
+        {
+            Context = new DoorContext { Number = number };
+
+            if (_numberLabel != null)
+            {
+                _numberLabel.Visible = number != null;
+                _numberLabel.Text = Context.FormattedNumber;
+            }
+        }
+
+        void SetMaterial(StandardMaterial3D material)
+        {
+            _material = material;
+            _mesh?.SetSurfaceOverrideMaterial(0, material);
         }
 
         public void Unlink()
@@ -227,6 +273,7 @@ namespace Dose.Core.Scenes
 
         public void Initialize(DoorContext context, DoorArgs args)
         {
+            CacheNodes();
             _opening = 0;
             State = DoorState.Closed;
             Context = context;
@@ -236,8 +283,10 @@ namespace Dose.Core.Scenes
 
             if (args.Material != null)
             {
-                _mesh?.SetSurfaceOverrideMaterial(0, args.Material);
+                SetMaterial(args.Material);
             }
+
+            SetNumber(context.Number);
         }
     }
 }

@@ -7,5 +7,6 @@ namespace Dose.Core.ActorArgs
     {
         public required ILocation Location { get; init; }
         public required StandardMaterial3D WallMaterial { get; init; }
+        public required StandardMaterial3D BlackMaterial { get; init; }
     }
 }

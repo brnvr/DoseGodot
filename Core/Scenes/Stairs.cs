@@ -68,23 +68,30 @@ namespace Dose.Core.Scenes
                 {
                     var importedMaterial = mesh.SurfaceGetMaterial(surfaceIndex);
                     var activeMaterial = meshInstance.GetActiveMaterial(surfaceIndex);
-                    var isWallSurface = mesh is ArrayMesh arrayMesh && string.Equals(
-                        arrayMesh.SurfaceGetName(surfaceIndex),
-                        "Walls",
-                        StringComparison.OrdinalIgnoreCase
-                    ) || string.Equals(
-                        importedMaterial?.ResourceName,
-                        "Walls",
-                        StringComparison.OrdinalIgnoreCase
-                    ) || string.Equals(
-                        activeMaterial?.ResourceName,
-                        "Walls",
-                        StringComparison.OrdinalIgnoreCase
-                    );
+                    var surfaceName = mesh is ArrayMesh arrayMesh
+                        ? arrayMesh.SurfaceGetName(surfaceIndex)
+                        : null;
 
-                    if (isWallSurface)
+                    bool HasName(string name) =>
+                        string.Equals(surfaceName, name, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(
+                            importedMaterial?.ResourceName,
+                            name,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                        || string.Equals(
+                            activeMaterial?.ResourceName,
+                            name,
+                            StringComparison.OrdinalIgnoreCase
+                        );
+
+                    if (HasName("Walls"))
                     {
                         meshInstance.SetSurfaceOverrideMaterial(surfaceIndex, args.WallMaterial);
+                    }
+                    else if (HasName("Black"))
+                    {
+                        meshInstance.SetSurfaceOverrideMaterial(surfaceIndex, args.BlackMaterial);
                     }
                 }
             }

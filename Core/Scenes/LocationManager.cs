@@ -389,9 +389,13 @@ namespace Dose.Core.Scenes
 				return;
 			}
 
+			var doorMaterial = CreatePlainMaterial(doorTexture);
+			doorMaterial.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
+			doorMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+
 			var doorArgs = new DoorArgs
 			{
-				Material = CreatePlainMaterial(doorTexture),
+				Material = doorMaterial,
 				Location = location,
 				LocationManager = this,
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
@@ -409,10 +413,13 @@ namespace Dose.Core.Scenes
 			}
 
 			var wallMaterial = CreatePlainMaterial(wallTexture);
+			var unshadedBlackMaterial = CreatePlainMaterial(_blackTexture);
+			unshadedBlackMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
 			var stairsArgs = new StairsArgs
 			{
 				Location = location,
-				WallMaterial = wallMaterial
+				WallMaterial = wallMaterial,
+				BlackMaterial = unshadedBlackMaterial
 			};
 
 			var lampTexture = PickRandomTexture(
@@ -426,9 +433,6 @@ namespace Dose.Core.Scenes
 				return;
 			}
 			
-			var occluderMaterial = CreatePlainMaterial(_blackTexture);
-			occluderMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
-
 			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
 			(
 				_occluderScene,
@@ -436,7 +440,7 @@ namespace Dose.Core.Scenes
 				_doorwayMesh,
 				_floorMesh,
 				_ceilingMesh,
-				occluderMaterial
+				unshadedBlackMaterial
 			);
 
 			var shouldPullNumber = allowCustomRoomLinks && location.Type == Location.LocationType.Corridor;
@@ -452,7 +456,7 @@ namespace Dose.Core.Scenes
 				new LocationBaseMeshBuilder(
 					location,
 					_floorMesh,
-					CreatePlainMaterial(_blackTexture),
+					unshadedBlackMaterial,
 					BLOCK_SIZE,
 					true,
 					"FloorMeshInstance",
