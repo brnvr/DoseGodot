@@ -134,6 +134,13 @@ namespace Dose.Core.Scenes
 				configConverter: new WallOverlayTextureConfigConverter()
 			).Load();
 
+			var floorOverlayTexturePool = new WeightedPool<FloorOverlayTextureDefinition>
+			(
+				configPath: Path.Join(TEXTURE_PATH, "Environment/FloorOverlays"),
+				builder: new FloorOverlayTextureBuilder(),
+				configConverter: new FloorOverlayTextureConfigConverter()
+			).Load();
+
 			var itemPool = new ActorPool<ItemContext>
 			(
 				configPath: "Configuration/Actors/Items",
@@ -200,6 +207,7 @@ namespace Dose.Core.Scenes
 				doorTexturePool.Content,
 				lampTexturePool.Content,
 				wallOverlayTexturePool.Content,
+				floorOverlayTexturePool.Content,
 				propPool
 			).Build();
 

@@ -14,7 +14,9 @@ namespace Dose.Core.Library.Locations
         int maxSize,
         Probability probabilityToBuildDoor,
         Probability probabilityToSetWallOverlay,
-        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures
+        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures,
+        Probability probabilityToSetFloorOverlay,
+        IEnumerable<FloorOverlayTextureDefinition> floorOverlayTextures
     ) : IMapGenerator
     {
         const int MAX_CELLS_PER_LAMP_AXIS = 5;
@@ -24,6 +26,8 @@ namespace Dose.Core.Library.Locations
         public Probability ProbabilityToBuildDoor { get; } = probabilityToBuildDoor;
         public Probability ProbabilityToSetWallOverlay { get; } = probabilityToSetWallOverlay;
         public IEnumerable<WallOverlayTextureDefinition> WallOverlayTextures { get; } = wallOverlayTextures;
+        public Probability ProbabilityToSetFloorOverlay { get; } = probabilityToSetFloorOverlay;
+        public IEnumerable<FloorOverlayTextureDefinition> FloorOverlayTextures { get; } = floorOverlayTextures;
 
         public Map GenerateMap()
         {
@@ -37,6 +41,7 @@ namespace Dose.Core.Library.Locations
             new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
 
             FillEmptyCells(map, width, height);
+            SetFloorOverlays(map);
 
             AddLamps(map, width, height);
     
@@ -117,6 +122,29 @@ namespace Dose.Core.Library.Locations
             return new RandomDecider(ProbabilityToSetWallOverlay).Roll()
                 ? new RandomSelector<WallOverlayTextureDefinition>(WallOverlayTextures).Pick()
                 : null;
+        }
+
+        void SetFloorOverlays(Map map)
+        {
+            if (!FloorOverlayTextures.Any())
+            {
+                return;
+            }
+
+            foreach (var position in map.GetFilledPositions())
+            {
+                if (!new RandomDecider(ProbabilityToSetFloorOverlay).Roll())
+                {
+                    continue;
+                }
+
+                var overlay = new RandomSelector<FloorOverlayTextureDefinition>(FloorOverlayTextures).Pick();
+                map.Set(position, map.Get(position).WithFloorOverlay(
+                    overlay.Texture,
+                    overlay.Scale,
+                    overlay.TextureRepeat
+                ));
+            }
         }
 
         private static void FillEmptyCells(Map map, int width, int height)

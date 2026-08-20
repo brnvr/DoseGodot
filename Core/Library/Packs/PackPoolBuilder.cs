@@ -18,6 +18,7 @@ namespace Dose.Core.Library.Packs
         IEnumerable<TextureDefinition> doorTextures,
         IEnumerable<TextureDefinition> lampTextures,
         IEnumerable<WallOverlayTextureDefinition> wallOverlays,
+        IEnumerable<FloorOverlayTextureDefinition> floorOverlays,
         PropPool props
     )
     {
@@ -28,6 +29,7 @@ namespace Dose.Core.Library.Packs
         readonly List<TextureDefinition> _doorTextures = [.. doorTextures];
         readonly List<TextureDefinition> _lampTextures = [.. lampTextures];
         readonly List<WallOverlayTextureDefinition> _wallOverlays = [.. wallOverlays];
+        readonly List<FloorOverlayTextureDefinition> _floorOverlays = [.. floorOverlays];
         readonly List<PropDefinition> _props = [.. props.Content];
 
         public PackPool Build()
@@ -75,6 +77,7 @@ namespace Dose.Core.Library.Packs
                     PoolFor(_doorTextures, id),
                     PoolFor(_lampTextures, id),
                     PoolFor(_wallOverlays, id),
+                    PoolFor(_floorOverlays, id),
                     PoolFor(_props, id)
                 );
 
@@ -112,6 +115,7 @@ namespace Dose.Core.Library.Packs
                 .Concat(_doorTextures)
                 .Concat(_lampTextures)
                 .Concat(_wallOverlays)
+                .Concat(_floorOverlays)
                 .Concat(_props);
         }
 

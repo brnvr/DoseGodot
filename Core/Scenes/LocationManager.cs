@@ -454,12 +454,11 @@ namespace Dose.Core.Scenes
 			var builders = new List<LocationBuilder> 
 			{ 
 				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, wallMaterial, BLOCK_SIZE, "WallMeshInstance"),
-				new LocationBaseMeshBuilder(
+				new LocationFloorMeshBuilder(
 					location,
 					_floorMesh,
 					unshadedBlackMaterial,
 					BLOCK_SIZE,
-					true,
 					"FloorMeshInstance",
 					LocationCollisionLayer.NavigationSource
 				),
@@ -705,6 +704,9 @@ namespace Dose.Core.Scenes
 				probabilityToBuildDoor: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
 				wallOverlayTextures: pack.GetWeightedWallOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Rooms)),
+				probabilityToSetFloorOverlay: new Probability(0.1),
+				floorOverlayTextures: pack.GetWeightedFloorOverlays()
 					.Where(overlay => overlay.CanPopulate(LocationRestriction.Rooms))
 			);
         }
@@ -724,6 +726,9 @@ namespace Dose.Core.Scenes
 				probabilityToBuildStairs: new Probability(0.1),
 				probabilityToSetWallOverlay: new Probability(0.1),
 				wallOverlayTextures: pack.GetWeightedWallOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Corridors)),
+				probabilityToSetFloorOverlay: new Probability(0.1),
+				floorOverlayTextures: pack.GetWeightedFloorOverlays()
 					.Where(overlay => overlay.CanPopulate(LocationRestriction.Corridors))
 			)
 			{

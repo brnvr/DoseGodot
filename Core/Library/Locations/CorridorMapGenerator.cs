@@ -19,7 +19,9 @@ namespace Dose.Core.Library.Locations
         Probability probabilityToBuildDoors,
         Probability probabilityToBuildStairs,
         Probability probabilityToSetWallOverlay,
-        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures
+        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures,
+        Probability probabilityToSetFloorOverlay,
+        IEnumerable<FloorOverlayTextureDefinition> floorOverlayTextures
     ) : IMapGenerator
     {
         const int CORRIDOR_CHUNK_LENGTH_CELLS = 5;
@@ -37,6 +39,8 @@ namespace Dose.Core.Library.Locations
         public Probability ProbabilityToBuildStairs { get; } = probabilityToBuildStairs;
         public Probability ProbabilityToSetWallOverlay { get; } = probabilityToSetWallOverlay;
         public IEnumerable<WallOverlayTextureDefinition> WallOverlayTextures { get; } = wallOverlayTextures;
+        public Probability ProbabilityToSetFloorOverlay { get; } = probabilityToSetFloorOverlay;
+        public IEnumerable<FloorOverlayTextureDefinition> FloorOverlayTextures { get; } = floorOverlayTextures;
 
         public Map GenerateMap()
         {
@@ -56,6 +60,8 @@ namespace Dose.Core.Library.Locations
             {
                 new MapEnsurer(map, MapCellType.Downstairs).EnsureAtLeastOne();
             }
+
+            SetFloorOverlays(map);
 
             return map;
         }
@@ -253,6 +259,29 @@ namespace Dose.Core.Library.Locations
                 overlay?.Scale ?? 1f,
                 overlay?.TextureRepeat ?? false
             );
+        }
+
+        void SetFloorOverlays(Map map)
+        {
+            if (!FloorOverlayTextures.Any())
+            {
+                return;
+            }
+
+            foreach (var position in map.GetFilledPositions())
+            {
+                if (!new RandomDecider(ProbabilityToSetFloorOverlay).Roll())
+                {
+                    continue;
+                }
+
+                var overlay = new RandomSelector<FloorOverlayTextureDefinition>(FloorOverlayTextures).Pick();
+                map.Set(position, map.Get(position).WithFloorOverlay(
+                    overlay.Texture,
+                    overlay.Scale,
+                    overlay.TextureRepeat
+                ));
+            }
         }
   
         Vector2I GetCenter()

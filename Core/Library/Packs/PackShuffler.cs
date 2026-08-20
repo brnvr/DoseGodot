@@ -67,6 +67,7 @@ namespace Dose.Core.Library.Packs
             readonly List<TextureDefinition> _doorTextures;
             readonly List<TextureDefinition> _lampTextures;
             readonly List<WallOverlayTextureDefinition> _wallOverlays;
+            readonly List<FloorOverlayTextureDefinition> _floorOverlays;
             readonly List<PropDefinition> _props;
 
             public bool HasResources =>
@@ -76,6 +77,7 @@ namespace Dose.Core.Library.Packs
                 || _doorTextures.Count > 0
                 || _lampTextures.Count > 0
                 || _wallOverlays.Count > 0
+                || _floorOverlays.Count > 0
                 || _props.Count > 0;
 
             public DonorResources(Pack donor, Pack mainPack)
@@ -98,6 +100,10 @@ namespace Dose.Core.Library.Packs
                     donor.WallOverlays.Content,
                     mainPack.GetWeightedWallOverlays()
                 );
+                _floorOverlays = ExceptAccessible(
+                    donor.FloorOverlays.Content,
+                    mainPack.GetWeightedFloorOverlays()
+                );
                 _props = ExceptAccessible(donor.Props.Content, mainPack.GetWeightedProps());
             }
 
@@ -111,6 +117,7 @@ namespace Dose.Core.Library.Packs
                 AddPullIfAvailable(_doorTextures, destination.DoorTextures, availablePulls);
                 AddPullIfAvailable(_lampTextures, destination.LampTextures, availablePulls);
                 AddPullIfAvailable(_wallOverlays, destination.WallOverlays, availablePulls);
+                AddPullIfAvailable(_floorOverlays, destination.FloorOverlays, availablePulls);
                 AddPullIfAvailable(_props, destination.Props, availablePulls);
 
                 new RandomSelector<Action>(availablePulls).Pick()();
@@ -153,6 +160,7 @@ namespace Dose.Core.Library.Packs
             public List<TextureDefinition> DoorTextures { get; } = [];
             public List<TextureDefinition> LampTextures { get; } = [];
             public List<WallOverlayTextureDefinition> WallOverlays { get; } = [];
+            public List<FloorOverlayTextureDefinition> FloorOverlays { get; } = [];
             public List<PropDefinition> Props { get; } = [];
 
             public bool HasImports =>
@@ -162,6 +170,7 @@ namespace Dose.Core.Library.Packs
                 || DoorTextures.Count > 0
                 || LampTextures.Count > 0
                 || WallOverlays.Count > 0
+                || FloorOverlays.Count > 0
                 || Props.Count > 0;
 
             public Pack Build()
@@ -176,6 +185,7 @@ namespace Dose.Core.Library.Packs
                     CombinedPool(mainPack.DoorTextures, DoorTextures),
                     CombinedPool(mainPack.LampTextures, LampTextures),
                     CombinedPool(mainPack.WallOverlays, WallOverlays),
+                    CombinedPool(mainPack.FloorOverlays, FloorOverlays),
                     CombinedPool(mainPack.Props, Props)
                 );
             }

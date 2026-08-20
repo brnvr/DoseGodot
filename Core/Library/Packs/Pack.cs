@@ -19,6 +19,7 @@ namespace Dose.Core.Library.Packs
         public PackResourcePool<TextureDefinition> DoorTextures { get; }
         public PackResourcePool<TextureDefinition> LampTextures { get; }
         public PackResourcePool<WallOverlayTextureDefinition> WallOverlays { get; }
+        public PackResourcePool<FloorOverlayTextureDefinition> FloorOverlays { get; }
         public PackResourcePool<PropDefinition> Props { get; }
 
         public Pack(
@@ -31,6 +32,7 @@ namespace Dose.Core.Library.Packs
             PackResourcePool<TextureDefinition> doorTextures,
             PackResourcePool<TextureDefinition> lampTextures,
             PackResourcePool<WallOverlayTextureDefinition> wallOverlays,
+            PackResourcePool<FloorOverlayTextureDefinition> floorOverlays,
             PackResourcePool<PropDefinition> props
         )
         {
@@ -43,6 +45,7 @@ namespace Dose.Core.Library.Packs
             DoorTextures = doorTextures;
             LampTextures = lampTextures;
             WallOverlays = wallOverlays;
+            FloorOverlays = floorOverlays;
             Props = props;
         }
 
@@ -64,6 +67,9 @@ namespace Dose.Core.Library.Packs
         public IEnumerable<WallOverlayTextureDefinition> GetWeightedWallOverlays() =>
             CombineWithParents(WallOverlays.GetWeightedList(), pack => pack.WallOverlays.GetWeightedList());
 
+        public IEnumerable<FloorOverlayTextureDefinition> GetWeightedFloorOverlays() =>
+            CombineWithParents(FloorOverlays.GetWeightedList(), pack => pack.FloorOverlays.GetWeightedList());
+
         public IEnumerable<PropDefinition> GetWeightedProps() =>
             CombineWithParents(Props.GetWeightedList(), pack => pack.Props.GetWeightedList());
 
@@ -84,6 +90,9 @@ namespace Dose.Core.Library.Packs
 
         public WallOverlayTextureDefinition? SelectWallOverlay(LocationRestriction restriction) =>
             Select(GetWeightedWallOverlays().Where(overlay => overlay.CanPopulate(restriction)));
+
+        public FloorOverlayTextureDefinition? SelectFloorOverlay(LocationRestriction restriction) =>
+            Select(GetWeightedFloorOverlays().Where(overlay => overlay.CanPopulate(restriction)));
 
         public PropDefinition? SelectProp(LocationRestriction restriction) =>
             Select(GetWeightedProps().Where(prop => prop.CanPopulate(restriction)));

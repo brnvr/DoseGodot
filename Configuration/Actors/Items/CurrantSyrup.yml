@@ -2,7 +2,7 @@
 Identifier: currant syrup
 Rarity: VeryCommon
 PackId: thisside
-Scale: 0.3
+Scale: 0.25
 TexturePath: "res://Media/Textures/Items/CurrantSyrup.png"
 Execute:
   - Action: MovePlayer

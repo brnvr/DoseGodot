@@ -3,7 +3,7 @@ Identifier: sheet music
 Rarity: VeryCommon
 PackId: thisside
 TexturePath: "res://Media/Textures/Items/SheetMusic_0.png"
-Scale: 0.3
+Scale: 0.25
 EquipedScale: 0.7
 Execute:
   - Action: MovePlayer
