@@ -23,11 +23,13 @@ namespace Dose.Core.Scenes
         const double MAX_OPENING = Math.PI / 2;
 
         MeshInstance3D? _mesh;
+        Label3D? _numberShadowLabel;
         Label3D? _numberLabel;
         StaticBody3D? _body;
         CollisionShape3D? _collisionShape;
         Area3D? _interactionArea;
         StandardMaterial3D? _material;
+        bool _numberFacesNegativeZ;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
@@ -59,6 +61,7 @@ namespace Dose.Core.Scenes
         void CacheNodes()
         {
             _mesh ??= GetNode<MeshInstance3D>("Mesh");
+            _numberShadowLabel ??= GetNode<Label3D>("Mesh/NumberShadow");
             _numberLabel ??= GetNode<Label3D>("Mesh/Number");
             _body ??= GetNode<StaticBody3D>("Body");
             _collisionShape ??= _body.GetNode<CollisionShape3D>("CollisionShape");
@@ -84,6 +87,8 @@ namespace Dose.Core.Scenes
 
         void SynchronizeLinkedVisuals(Door other)
         {
+            other.SetNumberSide(_numberFacesNegativeZ);
+
             if (Context?.Number is int number && other.Context?.Number == null)
             {
                 other.SetNumber(number);
@@ -112,6 +117,32 @@ namespace Dose.Core.Scenes
                 _numberLabel.Visible = number != null;
                 _numberLabel.Text = Context.FormattedNumber;
             }
+
+            if (_numberShadowLabel != null)
+            {
+                _numberShadowLabel.Visible = number != null;
+                _numberShadowLabel.Text = Context.FormattedNumber;
+            }
+        }
+
+        void SetNumberSide(bool facesNegativeZ)
+        {
+            _numberFacesNegativeZ = facesNegativeZ;
+            SetNumberLabelSide(_numberLabel, facesNegativeZ);
+            SetNumberLabelSide(_numberShadowLabel, facesNegativeZ);
+        }
+
+        static void SetNumberLabelSide(Label3D? label, bool facesNegativeZ)
+        {
+            if (label == null)
+            {
+                return;
+            }
+
+            var position = label.Position;
+            position.Z = Mathf.Abs(position.Z) * (facesNegativeZ ? -1 : 1);
+            label.Position = position;
+            label.Rotation = new Vector3(0, facesNegativeZ ? Mathf.Pi : 0, 0);
         }
 
         void SetMaterial(StandardMaterial3D material)
@@ -280,6 +311,7 @@ namespace Dose.Core.Scenes
             Location = args.Location;
             OpenDirection = args.OpenDirection;
             _locationManager = args.LocationManager;
+            SetNumberSide(args.NumberFacesNegativeZ);
 
             if (args.Material != null)
             {

@@ -399,6 +399,7 @@ namespace Dose.Core.Scenes
 				Location = location,
 				LocationManager = this,
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
+				NumberFacesNegativeZ = location.DoorClockDirection == ClockDirection.Counterclockwise,
 			};
 
 			var wallTexture = PickRandomTexture(

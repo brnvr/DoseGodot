@@ -27,6 +27,7 @@ namespace Dose.Core.Scenes
                     Material = null,
                     Location = this,
                     OpenDirection = ClockDirection.Clockwise,
+                    NumberFacesNegativeZ = false,
                     LocationManager = locationManager
                 });
             }
