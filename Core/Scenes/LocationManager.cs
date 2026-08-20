@@ -31,6 +31,7 @@ namespace Dose.Core.Scenes
 		readonly static Probability _probabilityToSetNpcEvent = new(0.25);
 		readonly static Probability _probabilityToSetLocationEvent = new (0.25);
 		readonly static Texture2D _blackTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/Common/black.png");
+		readonly static Texture2D _lampFloorOverlayTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/FloorOverlays/LightSpot.png");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
 		readonly static Mesh _floorMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Floor.glb");
@@ -461,6 +462,12 @@ namespace Dose.Core.Scenes
 					BLOCK_SIZE,
 					"FloorMeshInstance",
 					LocationCollisionLayer.NavigationSource
+				),
+				new LocationLampFloorOverlayBuilder(
+					location,
+					_lampFloorOverlayTexture,
+					BLOCK_SIZE,
+					"LampFloorOverlayMeshInstance"
 				),
 				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, false, "CeilingMeshInstance"),
 				new LocationSceneProvider

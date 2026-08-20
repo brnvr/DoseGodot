@@ -21,10 +21,13 @@ namespace Dose.Core.Library.Locations
             uniform sampler2D overlay_texture : source_color, filter_nearest, repeat_enable;
             uniform float overlay_scale = 1.0;
             uniform bool texture_repeat = false;
+            uniform vec2 floor_uv_min = vec2(0.0);
+            uniform vec2 floor_uv_size = vec2(1.0);
 
             void fragment() {
                 vec4 base_color = texture(base_texture, UV);
-                vec2 overlay_uv = (UV - vec2(0.5)) / overlay_scale + vec2(0.5);
+                vec2 floor_uv = (UV - floor_uv_min) / floor_uv_size;
+                vec2 overlay_uv = (floor_uv - vec2(0.5)) / overlay_scale + vec2(0.5);
                 float overlay_mask = 1.0;
 
                 if (!texture_repeat) {
@@ -42,6 +45,7 @@ namespace Dose.Core.Library.Locations
 
         readonly Dictionary<(Texture2D Texture, float Scale, bool TextureRepeat), SurfaceTool> _overlaySurfaceTools = [];
         readonly Shader _overlayShader = new() { Code = OVERLAY_SHADER_CODE };
+        readonly (Vector2 Min, Vector2 Size) _floorUvBounds = GetUvBounds(floorMesh);
         bool _hasPlainFloors;
 
         public int BlockSize { get; } = blockSize;
@@ -137,7 +141,34 @@ namespace Dose.Core.Library.Locations
             material.SetShaderParameter("overlay_texture", overlayTexture);
             material.SetShaderParameter("overlay_scale", overlayScale);
             material.SetShaderParameter("texture_repeat", textureRepeat);
+            material.SetShaderParameter("floor_uv_min", _floorUvBounds.Min);
+            material.SetShaderParameter("floor_uv_size", _floorUvBounds.Size);
             return material;
+        }
+
+        static (Vector2 Min, Vector2 Size) GetUvBounds(Mesh mesh)
+        {
+            var arrays = mesh.SurfaceGetArrays(0);
+            var uvs = arrays[(int)Mesh.ArrayType.TexUV].As<Vector2[]>();
+
+            if (uvs == null || uvs.Length == 0)
+            {
+                return (Vector2.Zero, Vector2.One);
+            }
+
+            var min = uvs[0];
+            var max = uvs[0];
+
+            foreach (var uv in uvs)
+            {
+                min = new Vector2(Mathf.Min(min.X, uv.X), Mathf.Min(min.Y, uv.Y));
+                max = new Vector2(Mathf.Max(max.X, uv.X), Mathf.Max(max.Y, uv.Y));
+            }
+
+            var size = max - min;
+            size.X = Mathf.IsZeroApprox(size.X) ? 1f : size.X;
+            size.Y = Mathf.IsZeroApprox(size.Y) ? 1f : size.Y;
+            return (min, size);
         }
     }
 }
