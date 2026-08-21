@@ -50,15 +50,20 @@ namespace Dose.Core.Library.Locations
             GenerateCorridor(map, startingPoint, selectedDirection);
 
             new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
+            RemoveStairsFromInvalidWalls(map);
 
             if (ShouldEnsureStairsUp)
             {
-                new MapEnsurer(map, MapCellType.Upstairs).EnsureAtLeastOne();
+                new MapEnsurer(map, MapCellType.Upstairs).EnsureAtLeastOne(
+                    (position, direction, _) => CanPlaceStairs(map, position, direction)
+                );
             }
 
             if (ShouldEnsureStairsDown)
             {
-                new MapEnsurer(map, MapCellType.Downstairs).EnsureAtLeastOne();
+                new MapEnsurer(map, MapCellType.Downstairs).EnsureAtLeastOne(
+                    (position, direction, _) => CanPlaceStairs(map, position, direction)
+                );
             }
 
             SetFloorOverlays(map);
@@ -282,6 +287,76 @@ namespace Dose.Core.Library.Locations
                     overlay.TextureRepeat
                 ));
             }
+        }
+
+        static void RemoveStairsFromInvalidWalls(Map map)
+        {
+            foreach (var position in map.GetFilledPositions())
+            {
+                var cell = map.Get(position);
+
+                foreach (var direction in AllDirections())
+                {
+                    var wall = cell.GetWall(direction);
+
+                    if ((wall?.Type == MapCellType.Upstairs || wall?.Type == MapCellType.Downstairs) &&
+                        !CanPlaceStairs(map, position, direction))
+                    {
+                        wall.Type = MapCellType.Solid;
+                    }
+                }
+            }
+        }
+
+        static bool CanPlaceStairs(Map map, Vector2I position, CardinalDirection wallDirection)
+        {
+            var tangent0 = NextDirection(wallDirection, ClockDirection.Clockwise);
+            var tangent1 = NextDirection(wallDirection, ClockDirection.Counterclockwise);
+            var continues0 = HasCollinearWall(map, position, wallDirection, tangent0);
+            var continues1 = HasCollinearWall(map, position, wallDirection, tangent1);
+
+            if (continues0 && continues1)
+            {
+                return true;
+            }
+
+            if (continues0 || continues1)
+            {
+                return false;
+            }
+
+            var connectedDirections = GetConnectedDirections(map, position);
+
+            return connectedDirections.Count == 1 &&
+                wallDirection == CardinalOpposite(connectedDirections[0]);
+        }
+
+        static bool HasCollinearWall(
+            Map map,
+            Vector2I position,
+            CardinalDirection wallDirection,
+            CardinalDirection tangentDirection
+        )
+        {
+            var neighborPosition = MoveTo(position, tangentDirection);
+
+            return map.TryGet(neighborPosition, out MapCell? neighbor) &&
+                neighbor?.GetWall(wallDirection) != null;
+        }
+
+        static List<CardinalDirection> GetConnectedDirections(Map map, Vector2I position)
+        {
+            var cell = map.Get(position);
+
+            return AllDirections()
+                .Where(direction =>
+                {
+                    var neighborPosition = MoveTo(position, direction);
+                    return cell.GetWall(direction) == null &&
+                        map.TryGet(neighborPosition, out MapCell? neighbor) &&
+                        neighbor != null;
+                })
+                .ToList();
         }
   
         Vector2I GetCenter()

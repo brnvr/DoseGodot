@@ -19,24 +19,48 @@ namespace Dose.Core.Library.Locations
             EnsureAtLeast(1);
         }
 
-        public void EnsureAtLeast(int count)
+        public void EnsureAtLeastOne(
+            Func<Vector2I, CardinalDirection, MapCellWall, bool> candidatePredicate
+        )
+        {
+            EnsureAtLeast(1, candidatePredicate);
+        }
+
+        public void EnsureAtLeast(
+            int count,
+            Func<Vector2I, CardinalDirection, MapCellWall, bool>? candidatePredicate = null
+        )
         {
             if (count < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(count), "Count must be at least one.");
             }
 
-            var walls = AllDirections()
-                .SelectMany(direction => Map.GetDefinedValues()
-                    .Select(cell => cell.GetWall(direction)))
-                .Where(wall => wall != null)
-                .Cast<MapCellWall>()
+            var walls = Map.GetFilledPositions()
+                .SelectMany(position => AllDirections()
+                    .Select(direction => (
+                        Position: position,
+                        Direction: direction,
+                        Wall: Map.Get(position).GetWall(direction)
+                    )))
+                .Where(candidate => candidate.Wall != null)
+                .Select(candidate => (
+                    candidate.Position,
+                    candidate.Direction,
+                    Wall: candidate.Wall!
+                ))
                 .ToList();
 
-            while (walls.Count(wall => Types.Contains(wall.Type)) < count)
+            while (walls.Count(candidate => Types.Contains(candidate.Wall.Type)) < count)
             {
                 var solidWalls = walls
-                    .Where(wall => wall.Type == MapCellType.Solid)
+                    .Where(candidate =>
+                        candidate.Wall.Type == MapCellType.Solid &&
+                        (candidatePredicate == null || candidatePredicate(
+                            candidate.Position,
+                            candidate.Direction,
+                            candidate.Wall
+                        )))
                     .ToList();
 
                 if (solidWalls.Count == 0)
@@ -45,7 +69,7 @@ namespace Dose.Core.Library.Locations
                     return;
                 }
 
-                var wall = new RandomSelector<MapCellWall>(solidWalls).Pick();
+                var wall = new RandomSelector<(Vector2I Position, CardinalDirection Direction, MapCellWall Wall)>(solidWalls).Pick().Wall;
                 wall.Type = new RandomSelector<MapCellType>(Types).Pick();
                 wall.OverlayTexture = null;
                 wall.OverlayTextureScale = 1f;
