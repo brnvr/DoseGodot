@@ -38,6 +38,12 @@ namespace Dose.Core.Library.Locations
 
             location.OnBuild(node);
 
+            if (node is IPortal portal)
+            {
+                portal.MapPosition = point;
+                portal.MapDirection = direction;
+            }
+
             node.Position = GetPosition(location, point, direction);
             node.RotateY(GetRotation(location, point, direction));
 

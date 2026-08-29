@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bm0d2mvnxfs2i"]
+[gd_scene load_steps=8 format=3 uid="uid://bm0d2mvnxfs2i"]
 
 [ext_resource type="Script" uid="uid://c2bv560c4mugm" path="res://Core/Scenes/Cursor.cs" id="1_1qbbr"]
 [ext_resource type="Script" uid="uid://cuinoaxdj4aet" path="res://Core/Scenes/UI.cs" id="1_nxvpl"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://Core/Scenes/EquipedItemDisplay.cs" id="4_equiped_item"]
 [ext_resource type="PackedScene" path="res://Configuration/Scenes/TextWithBackground.tscn" id="5_text_with_background"]
 [ext_resource type="Script" path="res://Core/Scenes/InventoryDisplay.cs" id="6_inventory_display"]
+[ext_resource type="Script" path="res://Core/Scenes/MapDisplay.cs" id="7_map_display"]
 
 [node name="UI" type="CanvasLayer"]
 layer = 1
@@ -130,19 +131,30 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="InventoryDisplay" type="VBoxContainer" parent="RightBar/CenterContainer"]
+[node name="SidebarContent" type="VBoxContainer" parent="RightBar/CenterContainer"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 128
+
+[node name="MapDisplay" type="Control" parent="RightBar/CenterContainer/SidebarContent"]
+custom_minimum_size = Vector2(154, 154)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("7_map_display")
+
+[node name="InventoryDisplay" type="VBoxContainer" parent="RightBar/CenterContainer/SidebarContent"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
 script = ExtResource("6_inventory_display")
 
-[node name="ItemDetails" type="VBoxContainer" parent="RightBar/CenterContainer/InventoryDisplay"]
-custom_minimum_size = Vector2(154, 106)
+[node name="ItemDetails" type="VBoxContainer" parent="RightBar/CenterContainer/SidebarContent/InventoryDisplay"]
+custom_minimum_size = Vector2(154, 0)
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 2
 
-[node name="Name" type="Label" parent="RightBar/CenterContainer/InventoryDisplay/ItemDetails"]
+[node name="Name" type="Label" parent="RightBar/CenterContainer/SidebarContent/InventoryDisplay/ItemDetails"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_font_sizes/font_size = 14
@@ -150,8 +162,8 @@ text = "Item name"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="Description" type="Label" parent="RightBar/CenterContainer/InventoryDisplay/ItemDetails"]
-custom_minimum_size = Vector2(0, 14)
+[node name="Description" type="Label" parent="RightBar/CenterContainer/SidebarContent/InventoryDisplay/ItemDetails"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
@@ -159,9 +171,9 @@ theme_override_font_sizes/font_size = 10
 text = "Item description"
 horizontal_alignment = 1
 autowrap_mode = 2
-max_lines_visible = 4
+max_lines_visible = 3
 
-[node name="EquipHint" type="Label" parent="RightBar/CenterContainer/InventoryDisplay/ItemDetails"]
+[node name="EquipHint" type="Label" parent="RightBar/CenterContainer/SidebarContent/InventoryDisplay/ItemDetails"]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 mouse_filter = 2
@@ -169,7 +181,7 @@ theme_override_colors/font_color = Color(0.65, 0.65, 0.65, 1)
 theme_override_font_sizes/font_size = 10
 horizontal_alignment = 1
 
-[node name="Items" type="GridContainer" parent="RightBar/CenterContainer/InventoryDisplay"]
+[node name="Items" type="GridContainer" parent="RightBar/CenterContainer/SidebarContent/InventoryDisplay"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/h_separation = 10

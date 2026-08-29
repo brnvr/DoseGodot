@@ -10,6 +10,7 @@ namespace Dose.Core.Scenes
 {
     public abstract partial class Location : Node3D, ILocation
     {
+        public Guid Id { get; } = Guid.NewGuid();
         public NavigationRegion3D? NavigationRegion { get; private set; }
 
         public enum LocationType

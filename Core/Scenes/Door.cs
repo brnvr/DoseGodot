@@ -4,6 +4,7 @@ using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,8 @@ namespace Dose.Core.Scenes
 
         [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
         public ILocation? Location { get; private set; }
+        public Vector2I MapPosition { get; set; }
+        public GeoPositioning.CardinalDirection MapDirection { get; set; }
         public IDoor? Linked { get; private set; }
         IActorContext? IActor.Context => Context;
         public DoorContext? Context { get; private set; }

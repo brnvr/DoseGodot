@@ -47,6 +47,8 @@ namespace Dose.Core.Scenes
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
+		public event Action<ILocation?, ILocation>? CurrentLocationChanged;
+		public MapRenderQueue MapRenderQueue { get; } = new(new MapRenderer());
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
@@ -305,6 +307,7 @@ namespace Dose.Core.Scenes
 			{
 				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
 			}
+			MapRenderQueue.Queue(location);
 
 			BuildLocation(location, pack);
 			PopulateLocation(
@@ -356,6 +359,7 @@ namespace Dose.Core.Scenes
 			{
 				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
 			}
+			MapRenderQueue.Queue(location);
 
 			BuildLocation(location, pack, allowCustomRoomLinks);
 			PopulateLocation(
@@ -620,6 +624,7 @@ namespace Dose.Core.Scenes
 
 		void SetCurrentLocation(ILocation? location)
         {
+			var previousLocation = _currentLocation;
 			SetPropInteractionCollisionsIgnored(_currentLocation, false);
 
 			if (_currentLocation is Node currentLocationNode && currentLocationNode.GetParent() == this)
@@ -631,6 +636,11 @@ namespace Dose.Core.Scenes
 
 			_currentLocation = location;
 			SetPropInteractionCollisionsIgnored(_currentLocation, true);
+
+			if (location != null)
+			{
+				CurrentLocationChanged?.Invoke(previousLocation, location);
+			}
         }
 
 		void SetPropInteractionCollisionsIgnored(ILocation? location, bool ignored)

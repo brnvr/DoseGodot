@@ -83,6 +83,7 @@ namespace Dose.Core.Scenes
             _itemName.Text = selectedItem.DisplayName;
             _itemDescription.Text = selectedItem.Description;
             _equipHint.Text = "";
+            _equipHint.Visible = !string.IsNullOrEmpty(_equipHint.Text);
         }
 
         static Control CreateItemTile(

@@ -21,9 +21,15 @@ using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Main : Node3D
+	public partial class Main : Node3D
 	{
 		const string TEXTURE_PATH = "Configuration/Textures";
+		UI? _ui;
+		Player? _player;
+		LocationManager? _locationManager;
+		WorldMap? _worldMap;
+		Vector2? _lastRenderedPlayerPosition;
+
 		public override void _Ready()
 		{
             var worldLightRig = new Node3D { Name = "WorldLightRig" };
@@ -65,6 +71,23 @@ namespace Dose.Core.Scenes
 			var postShader = GetNode<PostShader>("PostShader");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager");
+			var worldMap = new WorldMap(locationManager.MapRenderQueue);
+			_ui = ui;
+			_player = player;
+			_locationManager = locationManager;
+			_worldMap = worldMap;
+			locationManager.CurrentLocationChanged += async (previous, current) =>
+			{
+				worldMap.Visit(current, previous);
+				_lastRenderedPlayerPosition = null;
+				UpdateMapDisplay();
+				var image = await worldMap.GetImageAsync(current.Id);
+				if (image != null)
+				{
+					var locationId = current.Id;
+					Callable.From(() => DisplayRenderedMap(locationId, image)).CallDeferred();
+				}
+			};
 
             void SyncCursorType()
             {
@@ -225,6 +248,38 @@ namespace Dose.Core.Scenes
 			postShader.Initialize(palette);
 
 			AudioCollector.InitializeESpeak();
+		}
+
+		void DisplayRenderedMap(System.Guid locationId, Image image)
+		{
+			if (_locationManager?.CurrentLocation?.Id == locationId)
+			{
+				_ui?.DisplayMap(image);
+			}
+		}
+
+		public override void _Process(double delta)
+		{
+			UpdateMapDisplay();
+		}
+
+		void UpdateMapDisplay()
+		{
+			if (_ui == null || _player == null || _worldMap == null ||
+				_locationManager?.CurrentLocation is not IBuildableLocation { BlockSize: > 0 })
+			{
+				return;
+			}
+
+			var blockSize = ((IBuildableLocation)_locationManager.CurrentLocation).BlockSize;
+			var playerPosition = new Vector2(_player.GlobalPosition.X, _player.GlobalPosition.Z) / blockSize;
+			if (_lastRenderedPlayerPosition is Vector2 previous && previous.IsEqualApprox(playerPosition))
+			{
+				return;
+			}
+
+			_lastRenderedPlayerPosition = playerPosition;
+			_ui.CenterMapOn(_worldMap.GetCurrentPlayerPixel(playerPosition));
 		}
 
         // public override void _ExitTree()

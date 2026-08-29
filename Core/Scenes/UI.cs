@@ -20,6 +20,7 @@ namespace Dose.Core.Scenes
         EquipedItemDisplay _equipedItemDisplay = null!;
         Cursor _cursor = null!;
         InventoryDisplay _inventoryDisplay = null!;
+        MapDisplay _mapDisplay = null!;
         ColorRect _leftBar = null!;
         ColorRect _topBar = null!;
         ColorRect _bottomBar = null!;
@@ -35,7 +36,8 @@ namespace Dose.Core.Scenes
             _equipedItemDisplay = GetNode<EquipedItemDisplay>("EquipedItemDisplay");
             _cursor = GetNode<Cursor>("Cursor");
             _notificationCenter = GetNode<NotificationCenter>("Notifications");
-            _inventoryDisplay = GetNode<InventoryDisplay>("RightBar/CenterContainer/InventoryDisplay");
+            _inventoryDisplay = GetNode<InventoryDisplay>("RightBar/CenterContainer/SidebarContent/InventoryDisplay");
+            _mapDisplay = GetNode<MapDisplay>("RightBar/CenterContainer/SidebarContent/MapDisplay");
             _leftBar = GetNode<ColorRect>("LeftBar");
             _topBar = GetNode<ColorRect>("TopBar");
             _bottomBar = GetNode<ColorRect>("BottomBar");
@@ -121,6 +123,16 @@ namespace Dose.Core.Scenes
         )
         {
             _inventoryDisplay.UpdateItems(entries, selectedItem, equipedItem, pickedItem);
+        }
+
+        public void DisplayMap(Image image)
+        {
+            _mapDisplay.Display(image);
+        }
+
+        public void CenterMapOn(Vector2 imagePosition)
+        {
+            _mapDisplay.CenterOn(imagePosition);
         }
 
         public void Notify(string message, float duration = 2f)

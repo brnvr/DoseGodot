@@ -3,6 +3,7 @@ using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
+using Dose.Core.Library;
 using Godot;
 using System;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace Dose.Core.Scenes
         public abstract StairsDirection Direction { get; }   
         public IStairs? Linked { get; private set; }
         public ILocation? Location { get; private set; }
+        public Vector2I MapPosition { get; set; }
+        public GeoPositioning.CardinalDirection MapDirection { get; set; }
         public StairsContext? Context { get; private set; }
 
         IActorContext? IActor.Context => Context;
