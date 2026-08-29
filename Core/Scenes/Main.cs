@@ -80,12 +80,19 @@ namespace Dose.Core.Scenes
 			{
 				worldMap.Visit(current, previous);
 				_lastRenderedPlayerPosition = null;
-				UpdateMapDisplay();
 				var image = await worldMap.GetImageAsync(current.Id);
 				if (image != null)
 				{
 					var locationId = current.Id;
-					Callable.From(() => DisplayRenderedMap(locationId, image)).CallDeferred();
+					Callable.From(() =>
+					{
+						DisplayRenderedMap(locationId, image);
+						UpdateMapDisplay();
+					}).CallDeferred();
+				}
+				else
+				{
+					UpdateMapDisplay();
 				}
 			};
 
