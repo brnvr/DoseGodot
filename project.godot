@@ -25,6 +25,10 @@ window/stretch/mode="viewport"
 
 project/assembly_name="Dose"
 
+[gui]
+
+theme/custom_font="res://Configuration/Themes/DefaultFont.tres"
+
 [input]
 
 MoveForward={

@@ -10,6 +10,7 @@ namespace Dose.Core.Library.Actors
     {
         public required string Identifier { get; init; }
         public required string DisplayName { get; init; }
+        public string Description { get; init; } = "";
         public Rarity Rarity { get; init; }
         public required string PackId { get; init; }
         public LocationRestriction LocationRestriction { get; init; } = LocationRestriction.AnyLocation;

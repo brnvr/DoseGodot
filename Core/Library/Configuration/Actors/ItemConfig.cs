@@ -9,6 +9,7 @@ namespace Dose.Core.Library.Configuration.Actors
     {
         public required string Identifier { get; init; }
         public required string DisplayName { get; init; }
+        public string Description { get; init; } = "";
         public required string TexturePath { get; init; }
         public required string EquipedTexturePath { get; init; }
         public required string Rarity { get; init; }
@@ -26,6 +27,7 @@ namespace Dose.Core.Library.Configuration.Actors
             {
                 { nameof(Identifier), Identifier },
                 { nameof(DisplayName), DisplayName },
+                { nameof(Description), Description },
                 { nameof(TexturePath), TexturePath },
                 { nameof(EquipedTexturePath), EquipedTexturePath },
                 { nameof(Rarity), Rarity },

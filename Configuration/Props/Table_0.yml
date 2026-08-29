@@ -1,0 +1,8 @@
+TexturePath: res://Media/Textures/Environment/Props/Table_0.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+Scale: 0.7
+SurfaceOffset:
+  Horizontal: 0
+  Vertical: 0.25

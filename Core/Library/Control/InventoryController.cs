@@ -29,7 +29,7 @@ namespace Dose.Core.Library.Control
             Inventory.ItemAdded += (sender, e) =>
             {
                 GD.Print($"Added {e.ItemContext.DisplayName} to inventory.");
-                UpdateInventoryUI();
+                UpdateInventoryUI(e.ItemContext);
                 Notificator?.Notify($"Added {e.ItemContext.DisplayName} to inventory.", 2f);
             };
 
@@ -127,9 +127,9 @@ namespace Dose.Core.Library.Control
             UpdateInventoryUI();
         }
 
-        void UpdateInventoryUI()
+        void UpdateInventoryUI(ItemContext? pickedItem = null)
         {
-            UI.UpdateInventory(Inventory.Entries, CurrentItem, _equipedItem);
+            UI.UpdateInventory(Inventory.Entries, CurrentItem, _equipedItem, pickedItem);
         }
     }
 }

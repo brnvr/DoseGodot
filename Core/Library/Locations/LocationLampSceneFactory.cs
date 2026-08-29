@@ -1,12 +1,14 @@
 using Godot;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationLampSceneFactory(Texture2D texture, int blockSize)
+    public class LocationLampSceneFactory(Texture2D texture, ScaleFactor scale, int blockSize)
     : LocationBlockSceneFactory
     {
         public int BlockSize { get; } = blockSize;
         public Texture2D Texture { get; } = texture;
+        public ScaleFactor Scale { get; } = scale;
 
         protected override Vector3 GetPosition(IBuildableLocation location, Vector2I point)
         {
@@ -36,6 +38,18 @@ namespace Dose.Core.Library.Locations
             var material = GodotUtils.CreateBillboardMaterial(Texture);
 
             meshInstance.SetSurfaceOverrideMaterial(0, material);
+            ScaleFromTop(meshInstance);
+        }
+
+        void ScaleFromTop(MeshInstance3D meshInstance)
+        {
+            var meshTop = meshInstance.GetAabb().End.Y;
+            var topY = meshInstance.Position.Y + meshTop * meshInstance.Scale.Y;
+            var scaled = meshInstance.Scale * Scale.Value;
+            var position = meshInstance.Position;
+            position.Y = topY - meshTop * scaled.Y;
+            meshInstance.Scale = scaled;
+            meshInstance.Position = position;
         }
 
         protected override bool Predicate(MapCell cell)

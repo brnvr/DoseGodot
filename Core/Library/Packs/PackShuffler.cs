@@ -65,7 +65,7 @@ namespace Dose.Core.Library.Packs
             readonly List<NpcContext> _npcs;
             readonly List<TextureDefinition> _wallTextures;
             readonly List<TextureDefinition> _doorTextures;
-            readonly List<TextureDefinition> _lampTextures;
+            readonly List<LampTextureDefinition> _lampTextures;
             readonly List<WallOverlayTextureDefinition> _wallOverlays;
             readonly List<FloorOverlayTextureDefinition> _floorOverlays;
             readonly List<PropDefinition> _props;
@@ -158,7 +158,7 @@ namespace Dose.Core.Library.Packs
             public List<NpcContext> Npcs { get; } = [];
             public List<TextureDefinition> WallTextures { get; } = [];
             public List<TextureDefinition> DoorTextures { get; } = [];
-            public List<TextureDefinition> LampTextures { get; } = [];
+            public List<LampTextureDefinition> LampTextures { get; } = [];
             public List<WallOverlayTextureDefinition> WallOverlays { get; } = [];
             public List<FloorOverlayTextureDefinition> FloorOverlays { get; } = [];
             public List<PropDefinition> Props { get; } = [];

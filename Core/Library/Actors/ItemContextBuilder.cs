@@ -19,6 +19,7 @@ namespace Dose.Core.Library.Actors
             {
                 Identifier = itemConfig.Identifier,
                 DisplayName = itemConfig.DisplayName,
+                Description = itemConfig.Description,
                 Rarity = Enum.Parse<Rarity>(itemConfig.Rarity, true),
                 PackId = itemConfig.PackId,
                 LocationRestriction = itemConfig.LocationRestriction,

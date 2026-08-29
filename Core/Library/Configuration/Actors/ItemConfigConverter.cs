@@ -18,6 +18,7 @@ namespace Dose.Core.Library.Configuration.Actors
             {
                 Identifier = identifier,
                 DisplayName = GetOptional<string>(dict, nameof(ItemConfig.DisplayName)) ?? identifier,
+                Description = GetOptional<string>(dict, nameof(ItemConfig.Description)) ?? "",
                 TexturePath = texturePath,
                 EquipedTexturePath = GetOptional<string>(dict, nameof(ItemConfig.EquipedTexturePath)) ?? texturePath,
                 Rarity = GetRequired<string>(dict, nameof(ItemConfig.Rarity)),

@@ -400,7 +400,9 @@ namespace Dose.Core.Scenes
 				Location = location,
 				LocationManager = this,
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
-				NumberFacesNegativeZ = location.DoorClockDirection == ClockDirection.Counterclockwise,
+				NumberFacesNegativeZ = location.Type == Location.LocationType.Corridor
+					? location.DoorClockDirection == ClockDirection.Counterclockwise
+					: location.DoorClockDirection == ClockDirection.Clockwise,
 			};
 
 			var wallTexture = PickRandomTexture(
@@ -424,16 +426,18 @@ namespace Dose.Core.Scenes
 				BlackMaterial = unshadedBlackMaterial
 			};
 
-			var lampTexture = PickRandomTexture(
+			var lampTextureDefinition = PickRandom(
 				pack.GetWeightedLampTextures()
 					.Where(texture => texture.CanPopulate(locationRestriction))
 			);
 
-			if (lampTexture is null)
+			if (lampTextureDefinition is null)
 			{
 				GD.PushError("Lamp texture could not be selected.");
 				return;
 			}
+
+			var lampTexture = GD.Load<Texture2D>(lampTextureDefinition.TexturePath);
 			
 			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
 			(
@@ -446,11 +450,6 @@ namespace Dose.Core.Scenes
 			);
 
 			var shouldPullNumber = allowCustomRoomLinks && location.Type == Location.LocationType.Corridor;
-
-			var doorContext = new DoorContext
-            {
-                Number = shouldPullNumber ? ControlPlane.DoorNumberController?.PullNumber(237) : null
-            };
 
 			var builders = new List<LocationBuilder> 
 			{ 
@@ -500,6 +499,7 @@ namespace Dose.Core.Scenes
 				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory
 				(
 					lampTexture,
+					lampTextureDefinition.Scale,
 					BLOCK_SIZE
 				))
 			};

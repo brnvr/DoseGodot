@@ -16,7 +16,8 @@ namespace Dose.Core.Library.UI
         void UpdateInventory(
             IEnumerable<InventoryEntry> entries,
             ItemContext? selectedItem,
-            ItemContext? equipedItem
+            ItemContext? equipedItem,
+            ItemContext? pickedItem = null
         );
     }
 }

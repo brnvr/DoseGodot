@@ -16,7 +16,7 @@ namespace Dose.Core.Library.Packs
         ActorPool<NpcContext> npcs,
         IEnumerable<TextureDefinition> wallTextures,
         IEnumerable<TextureDefinition> doorTextures,
-        IEnumerable<TextureDefinition> lampTextures,
+        IEnumerable<LampTextureDefinition> lampTextures,
         IEnumerable<WallOverlayTextureDefinition> wallOverlays,
         IEnumerable<FloorOverlayTextureDefinition> floorOverlays,
         PropPool props
@@ -27,7 +27,7 @@ namespace Dose.Core.Library.Packs
         readonly List<NpcContext> _npcs = [.. npcs.Content];
         readonly List<TextureDefinition> _wallTextures = [.. wallTextures];
         readonly List<TextureDefinition> _doorTextures = [.. doorTextures];
-        readonly List<TextureDefinition> _lampTextures = [.. lampTextures];
+        readonly List<LampTextureDefinition> _lampTextures = [.. lampTextures];
         readonly List<WallOverlayTextureDefinition> _wallOverlays = [.. wallOverlays];
         readonly List<FloorOverlayTextureDefinition> _floorOverlays = [.. floorOverlays];
         readonly List<PropDefinition> _props = [.. props.Content];

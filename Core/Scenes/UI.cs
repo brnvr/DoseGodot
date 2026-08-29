@@ -116,10 +116,11 @@ namespace Dose.Core.Scenes
         public void UpdateInventory(
             IEnumerable<InventoryEntry> entries,
             ItemContext? selectedItem,
-            ItemContext? equipedItem
+            ItemContext? equipedItem,
+            ItemContext? pickedItem = null
         )
         {
-            _inventoryDisplay.UpdateItems(entries, selectedItem, equipedItem);
+            _inventoryDisplay.UpdateItems(entries, selectedItem, equipedItem, pickedItem);
         }
 
         public void Notify(string message, float duration = 2f)

@@ -5,39 +5,91 @@ using Godot;
 
 namespace Dose.Core.Scenes
 {
-    public partial class InventoryDisplay : GridContainer
+    public partial class InventoryDisplay : VBoxContainer
     {
         const float TILE_SIZE = 72f;
         const float TEXTURE_MARGIN = 8f;
+        const float PICKED_ITEM_SCALE = 1.25f;
+        const float PICKED_ITEM_GROW_DURATION = 0.12f;
+        const float PICKED_ITEM_SHRINK_DURATION = 0.16f;
 
         static readonly Color SelectedColor = new("ffd319");
+
+        VBoxContainer _itemDetails = null!;
+        Label _itemName = null!;
+        Label _itemDescription = null!;
+        Label _equipHint = null!;
+        GridContainer _items = null!;
+
+        public override void _Ready()
+        {
+            CacheNodes();
+        }
+
+        void CacheNodes()
+        {
+            _itemDetails ??= GetNode<VBoxContainer>("ItemDetails");
+            _itemName ??= GetNode<Label>("ItemDetails/Name");
+            _itemDescription ??= GetNode<Label>("ItemDetails/Description");
+            _equipHint ??= GetNode<Label>("ItemDetails/EquipHint");
+            _items ??= GetNode<GridContainer>("Items");
+        }
 
         public void UpdateItems(
             IEnumerable<InventoryEntry> entries,
             ItemContext? selectedItem,
-            ItemContext? equipedItem
+            ItemContext? equipedItem,
+            ItemContext? pickedItem = null
         )
         {
-            foreach (var child in GetChildren())
+            CacheNodes();
+            UpdateItemDetails(selectedItem);
+
+            foreach (var child in _items.GetChildren())
             {
-                RemoveChild(child);
+                _items.RemoveChild(child);
                 child.QueueFree();
             }
 
             foreach (var entry in entries)
             {
-                AddChild(CreateItemTile(
+                var tile = CreateItemTile(
                     entry,
                     entry.Item == selectedItem,
-                    entry.Item == equipedItem
-                ));
+                    entry.Item == equipedItem,
+                    out var texture
+                );
+                _items.AddChild(tile);
+
+                if (entry.Item == pickedItem)
+                {
+                    PlayPickedItemFeedback(texture);
+                }
             }
+        }
+
+        void UpdateItemDetails(ItemContext? selectedItem)
+        {
+            _itemDetails.Visible = selectedItem != null;
+
+            if (selectedItem == null)
+            {
+                _itemName.Text = "";
+                _itemDescription.Text = "";
+                _equipHint.Text = "";
+                return;
+            }
+
+            _itemName.Text = selectedItem.DisplayName;
+            _itemDescription.Text = selectedItem.Description;
+            _equipHint.Text = "";
         }
 
         static Control CreateItemTile(
             InventoryEntry entry,
             bool selected,
-            bool equiped
+            bool equiped,
+            out TextureRect texture
         )
         {
             var tile = new Control
@@ -50,13 +102,14 @@ namespace Dose.Core.Scenes
             selectedOutline.Visible = selected;
             tile.AddChild(selectedOutline);
 
-            var texture = new TextureRect
+            texture = new TextureRect
             {
                 Texture = entry.Item.Texture,
                 ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
                 StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
                 TextureFilter = CanvasItem.TextureFilterEnum.Nearest,
                 MouseFilter = MouseFilterEnum.Ignore,
+                PivotOffset = Vector2.One * ((TILE_SIZE - TEXTURE_MARGIN * 2) / 2),
                 OffsetLeft = TEXTURE_MARGIN,
                 OffsetTop = TEXTURE_MARGIN,
                 OffsetRight = TILE_SIZE - TEXTURE_MARGIN,
@@ -108,6 +161,23 @@ namespace Dose.Core.Scenes
             }
 
             return tile;
+        }
+
+        static void PlayPickedItemFeedback(TextureRect texture)
+        {
+            var tween = texture.CreateTween();
+            tween.TweenProperty(
+                texture,
+                "scale",
+                Vector2.One * PICKED_ITEM_SCALE,
+                PICKED_ITEM_GROW_DURATION
+            ).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+            tween.TweenProperty(
+                texture,
+                "scale",
+                Vector2.One,
+                PICKED_ITEM_SHRINK_DURATION
+            ).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.InOut);
         }
 
         static Panel CreateOutline(Color color, int width, float inset = 0)

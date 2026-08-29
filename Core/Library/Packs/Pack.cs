@@ -17,7 +17,7 @@ namespace Dose.Core.Library.Packs
         public PackResourcePool<NpcContext> Npcs { get; }
         public PackResourcePool<TextureDefinition> WallTextures { get; }
         public PackResourcePool<TextureDefinition> DoorTextures { get; }
-        public PackResourcePool<TextureDefinition> LampTextures { get; }
+        public PackResourcePool<LampTextureDefinition> LampTextures { get; }
         public PackResourcePool<WallOverlayTextureDefinition> WallOverlays { get; }
         public PackResourcePool<FloorOverlayTextureDefinition> FloorOverlays { get; }
         public PackResourcePool<PropDefinition> Props { get; }
@@ -30,7 +30,7 @@ namespace Dose.Core.Library.Packs
             PackResourcePool<NpcContext> npcs,
             PackResourcePool<TextureDefinition> wallTextures,
             PackResourcePool<TextureDefinition> doorTextures,
-            PackResourcePool<TextureDefinition> lampTextures,
+            PackResourcePool<LampTextureDefinition> lampTextures,
             PackResourcePool<WallOverlayTextureDefinition> wallOverlays,
             PackResourcePool<FloorOverlayTextureDefinition> floorOverlays,
             PackResourcePool<PropDefinition> props
@@ -61,7 +61,7 @@ namespace Dose.Core.Library.Packs
         public IEnumerable<TextureDefinition> GetWeightedDoorTextures() =>
             CombineWithParents(DoorTextures.GetWeightedList(), pack => pack.DoorTextures.GetWeightedList());
 
-        public IEnumerable<TextureDefinition> GetWeightedLampTextures() =>
+        public IEnumerable<LampTextureDefinition> GetWeightedLampTextures() =>
             CombineWithParents(LampTextures.GetWeightedList(), pack => pack.LampTextures.GetWeightedList());
 
         public IEnumerable<WallOverlayTextureDefinition> GetWeightedWallOverlays() =>
@@ -85,7 +85,7 @@ namespace Dose.Core.Library.Packs
         public TextureDefinition? SelectDoorTexture(LocationRestriction restriction) =>
             Select(GetWeightedDoorTextures().Where(texture => texture.CanPopulate(restriction)));
 
-        public TextureDefinition? SelectLampTexture(LocationRestriction restriction) =>
+        public LampTextureDefinition? SelectLampTexture(LocationRestriction restriction) =>
             Select(GetWeightedLampTextures().Where(texture => texture.CanPopulate(restriction)));
 
         public WallOverlayTextureDefinition? SelectWallOverlay(LocationRestriction restriction) =>

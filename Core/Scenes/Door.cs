@@ -29,7 +29,6 @@ namespace Dose.Core.Scenes
         CollisionShape3D? _collisionShape;
         Area3D? _interactionArea;
         StandardMaterial3D? _material;
-        bool _numberFacesNegativeZ;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
@@ -87,13 +86,11 @@ namespace Dose.Core.Scenes
 
         void SynchronizeLinkedVisuals(Door other)
         {
-            other.SetNumberSide(_numberFacesNegativeZ);
-
-            if (Context?.Number is int number && other.Context?.Number == null)
+            if (Context?.Number is int number)
             {
                 other.SetNumber(number);
             }
-            else if (other.Context?.Number is int otherNumber && Context?.Number == null)
+            else if (other.Context?.Number is int otherNumber)
             {
                 SetNumber(otherNumber);
             }
@@ -127,7 +124,6 @@ namespace Dose.Core.Scenes
 
         void SetNumberSide(bool facesNegativeZ)
         {
-            _numberFacesNegativeZ = facesNegativeZ;
             SetNumberLabelSide(_numberLabel, facesNegativeZ);
             SetNumberLabelSide(_numberShadowLabel, facesNegativeZ);
         }

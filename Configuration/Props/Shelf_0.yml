@@ -1,0 +1,9 @@
+TexturePath: res://Media/Textures/Environment/Props/Shelf_0.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+Scale: 1.5
+SurfaceOffset:
+  Horizontal: 0
+  Vertical: 0.075
+MaxDistanceFromWall: 0

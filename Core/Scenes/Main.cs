@@ -113,11 +113,11 @@ namespace Dose.Core.Scenes
 				configConverter: new TextureConfigConverter()
 			).Load();
 
-			var lampTexturePool = new WeightedPool<TextureDefinition>
+			var lampTexturePool = new WeightedPool<LampTextureDefinition>
 			(
 				configPath: Path.Join(TEXTURE_PATH, "Environment/Lamps"),
-				builder: new TextureDefinitionBuilder(),
-				configConverter: new TextureConfigConverter()
+				builder: new LampTextureDefinitionBuilder(),
+				configConverter: new LampTextureConfigConverter()
 			).Load();
 
 			var doorTexturePool = new WeightedPool<TextureDefinition>
