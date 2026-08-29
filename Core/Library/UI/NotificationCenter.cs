@@ -1,44 +1,63 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
 namespace Dose.Core.Library.UI
 {
-    public partial class NotificationCenter(IUI ui) : Node, IEnumerable<Notification>, IUIComponent
+    public partial class NotificationCenter : VBoxContainer
     {
-        readonly List<Notification> _notifications = [];
+        const float ENTRY_OFFSET = 6f;
+        const float ENTRY_DURATION = 0.3f;
+        const float FADE_DURATION = 0.25f;
 
-        public IUI UI { get; } = ui;
-
-        public void Add(Notification notification)
+        public void ShowNotification(string message, float duration)
         {
-            _notifications.Add(notification);
-
-            notification.Expired += (e, args) =>
+            var entry = new MarginContainer
             {
-                _notifications.Remove(notification);
-                OnUIEvent(UI);
+                MouseFilter = MouseFilterEnum.Ignore,
+                SizeFlagsHorizontal = SizeFlags.ExpandFill
             };
 
-            OnUIEvent(UI);
+            var label = new Label
+            {
+                Text = message,
+                AutowrapMode = TextServer.AutowrapMode.WordSmart,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Center,
+                MouseFilter = MouseFilterEnum.Ignore,
+                SizeFlagsHorizontal = SizeFlags.ExpandFill,
+                SelfModulate = new Color(1, 1, 1, 0)
+            };
+            label.AddThemeFontSizeOverride("font_size", 10);
+
+            entry.AddChild(label);
+            AddChild(entry);
+            MoveChild(entry, 0);
+
+            Animate(entry, label, Mathf.Max(duration, 0f));
         }
 
-        public IEnumerator<Notification> GetEnumerator()
+        async void Animate(MarginContainer entry, Label label, float duration)
         {
-            return _notifications.GetEnumerator();
-        }
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
-        public void OnUIEvent(IUI ui)
-        {
-            var notificationsStr = string.Join("\n", _notifications.Select(n => n.Message));
+            if (!GodotObject.IsInstanceValid(entry) || !entry.IsInsideTree())
+            {
+                return;
+            }
 
-            ui.SetLabelValue("Notifications", notificationsStr);
-        }
+            var finalPosition = label.Position;
+            label.Position = finalPosition + new Vector2(0, ENTRY_OFFSET);
+            label.SelfModulate = Colors.White;
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
+            var tween = CreateTween().SetPauseMode(Tween.TweenPauseMode.Process);
+
+            tween.TweenProperty(label, "position", finalPosition, ENTRY_DURATION)
+                .SetTrans(Tween.TransitionType.Cubic)
+                .SetEase(Tween.EaseType.Out);
+            tween.TweenInterval(duration);
+            tween.TweenProperty(entry, "modulate:a", 0f, FADE_DURATION)
+                .SetTrans(Tween.TransitionType.Quad)
+                .SetEase(Tween.EaseType.In);
+            tween.TweenCallback(Callable.From(entry.QueueFree));
         }
     }
 }

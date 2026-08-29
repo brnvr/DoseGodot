@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Dose.Core.Library.Numbers;
 using Dose.Core.Library.Randomness;
 using Godot;
@@ -7,11 +9,23 @@ using static Dose.Core.Library.Locations.MapCellWall;
 
 namespace Dose.Core.Library.Locations
 {
-    public class RoomMapGenerator(int minSize, int maxSize, Probability probabilityToBuildDoor) : IMapGenerator
+    public class RoomMapGenerator(
+        int minSize,
+        int maxSize,
+        Probability probabilityToBuildDoor,
+        Probability probabilityToSetWallOverlay,
+        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures,
+        Probability probabilityToSetFloorOverlay,
+        IEnumerable<FloorOverlayTextureDefinition> floorOverlayTextures
+    ) : IMapGenerator
     {
         public int MinSize { get; } = minSize;
         public int MaxSize { get; } = maxSize;
         public Probability ProbabilityToBuildDoor { get; } = probabilityToBuildDoor;
+        public Probability ProbabilityToSetWallOverlay { get; } = probabilityToSetWallOverlay;
+        public IEnumerable<WallOverlayTextureDefinition> WallOverlayTextures { get; } = wallOverlayTextures;
+        public Probability ProbabilityToSetFloorOverlay { get; } = probabilityToSetFloorOverlay;
+        public IEnumerable<FloorOverlayTextureDefinition> FloorOverlayTextures { get; } = floorOverlayTextures;
 
         public Map GenerateMap()
         {
@@ -25,10 +39,23 @@ namespace Dose.Core.Library.Locations
             new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
 
             FillEmptyCells(map, width, height);
+            SetFloorOverlays(map);
 
-            map.Set(map.Center, map.CenterCell.WithLamp());
+            AddCentralLamp(map, width, height);
     
             return map;
+        }
+
+        static void AddCentralLamp(Map map, int width, int height)
+        {
+            var center = new Vector2((width - 1) / 2f, (height - 1) / 2f);
+            var position = new Vector2I(
+                Mathf.FloorToInt(center.X),
+                Mathf.FloorToInt(center.Y)
+            );
+            var offset = center - new Vector2(position.X, position.Y);
+
+            map.Set(position, map.Get(position).WithLamp(offset));
         }
 
         public void GenerateWall(Map map, Vector2I point, CardinalDirection direction)
@@ -42,7 +69,16 @@ namespace Dose.Core.Library.Locations
 
             var shouldBuildDoor = new RandomDecider(ProbabilityToBuildDoor).Roll();
             var type = shouldBuildDoor ? MapCellType.Doorway : MapCellType.Solid;
-            var cell = (existingCell ?? new MapCell()).WithWall(wallDirection, new MapCellWall(type));
+            var overlay = PickWallOverlayTexture(type);
+            var cell = (existingCell ?? new MapCell()).WithWall(
+                wallDirection,
+                new MapCellWall(
+                    type,
+                    overlay?.Texture,
+                    overlay?.Scale ?? 1f,
+                    overlay?.TextureRepeat ?? false
+                )
+            );
 
             map.Set(point, cell);
 
@@ -59,6 +95,41 @@ namespace Dose.Core.Library.Locations
             var nextDirection = NextDirection(direction, ClockDirection.Clockwise);
 
             GenerateWall(map, point, nextDirection);
+        }
+
+        WallOverlayTextureDefinition? PickWallOverlayTexture(MapCellType type)
+        {
+            if (type != MapCellType.Solid || !WallOverlayTextures.Any())
+            {
+                return null;
+            }
+
+            return new RandomDecider(ProbabilityToSetWallOverlay).Roll()
+                ? new RandomSelector<WallOverlayTextureDefinition>(WallOverlayTextures).Pick()
+                : null;
+        }
+
+        void SetFloorOverlays(Map map)
+        {
+            if (!FloorOverlayTextures.Any())
+            {
+                return;
+            }
+
+            foreach (var position in map.GetFilledPositions())
+            {
+                if (!new RandomDecider(ProbabilityToSetFloorOverlay).Roll())
+                {
+                    continue;
+                }
+
+                var overlay = new RandomSelector<FloorOverlayTextureDefinition>(FloorOverlayTextures).Pick();
+                map.Set(position, map.Get(position).WithFloorOverlay(
+                    overlay.Texture,
+                    overlay.Scale,
+                    overlay.TextureRepeat
+                ));
+            }
         }
 
         private static void FillEmptyCells(Map map, int width, int height)

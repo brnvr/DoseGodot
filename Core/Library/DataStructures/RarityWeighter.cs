@@ -10,7 +10,10 @@ namespace Dose.Core.Library.DataStructures
 
         public WeightedList<T> Weight()
         {
-            return new WeightedList<T>([.. Items.Select(item => (item, (int)item.Rarity))]);
+            return new WeightedList<T>([.. Items.Select(item => (
+                item,
+                item.Rarity == Rarity.Force ? 1 : (int)item.Rarity
+            ))]);
         }
     }
 }

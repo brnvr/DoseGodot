@@ -8,7 +8,7 @@ namespace Dose.Core.Library.Configuration.Dialogues
     {
         public override DisplayOptionsNode FromDict(Dictionary<string, object?> dict)
         {
-            var optionsRaw = GetRequired<IEnumerable<object>>(dict, "options");
+            var optionsRaw = GetRequired<IEnumerable<object>>(dict, nameof(DisplayOptionsNodeArgs.Options));
 
             var options = optionsRaw.Select(o => (Dictionary<string, object?>)o);
 
@@ -18,8 +18,8 @@ namespace Dose.Core.Library.Configuration.Dialogues
                 {
                     Options = options.Select(option => new DisplayOptionsNodeOption
                     {
-                        Text = option["text"] as string ?? throw new FormatException($"Invalid text in {nameof(DisplayOptionsNode)}"),
-                        Next = option["next"] as string ?? throw new FormatException($"Invalid next in {nameof(DisplayOptionsNode)}")
+                        Text = option[nameof(DisplayOptionsNodeOption.Text)] as string ?? throw new FormatException($"Invalid text in {nameof(DisplayOptionsNode)}"),
+                        Next = option[nameof(DisplayOptionsNodeOption.Next)] as string ?? throw new FormatException($"Invalid next in {nameof(DisplayOptionsNode)}")
                     })
                 }
             };

@@ -13,12 +13,14 @@ using Dose.Core.ActorArgs;
 using Dose.Core.Library.GameEvents;
 using System.Linq;
 using Dose.Core.Library;
+using Dose.Core.Library.Packs;
 namespace Dose.Core.Scenes
 {
 
 	public partial class LocationManager : Node, ILocationManager
 	{
 		const int BLOCK_SIZE = 4;
+		const float LOCATION_RANDOMNESS = 0.3f;
 		const string ROOM_CATEGORY = "room";
 		const string CORRIDOR_CATEGORY = "corridor";
 		const string CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY = "corridorWithStairsUpEnsured";
@@ -29,6 +31,7 @@ namespace Dose.Core.Scenes
 		readonly static Probability _probabilityToSetNpcEvent = new(0.25);
 		readonly static Probability _probabilityToSetLocationEvent = new (0.25);
 		readonly static Texture2D _blackTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/Common/black.png");
+		readonly static Texture2D _lampFloorOverlayTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/FloorOverlays/LightSpot.png");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
 		readonly static Mesh _doorwayMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Doorway.glb");
 		readonly static Mesh _floorMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Floor.glb");
@@ -36,22 +39,18 @@ namespace Dose.Core.Scenes
 		readonly static PackedScene _occluderScene = GD.Load<PackedScene>("res://Configuration/Scenes/LocationOccluder.tscn");
 		readonly static PackedScene _doorScene = GD.Load<PackedScene>("res://Configuration/Scenes/Door.tscn");
 		readonly static PackedScene _lampScene = GD.Load<PackedScene>("res://Configuration/Scenes/Lamp.tscn");
-		readonly static PackedScene _buildableLocationScne = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
+		readonly static PackedScene _buildableLocationScene = GD.Load<PackedScene>("res://Configuration/Scenes/BuildableLocation.tscn");
 		readonly static PackedScene _stairsUpScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsUp.tscn");
 		readonly static PackedScene _stairsDownScene = GD.Load<PackedScene>("res://Configuration/Scenes/StairsDown.tscn");
 
 		ILocation? _currentLocation;
-		ActorPool<ItemContext>? _itemPool;
-		ActorPool<NpcContext>? _npcPool;
-		WeightedPool<TextureDefinition>? _wallTexturePool;
-		WeightedPool<TextureDefinition>? _lampTexturePool;
-		WeightedPool<TextureDefinition>? _doorTexturePool;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
 		IEnumerable<IGameEvent<Location>>? _locationEvents;
 
 		public IControlPlane? ControlPlane { get; private set; }
 		public Player? Player { get; private set; }
+		public PackPool? PackPool { get; private set; }
 		
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
@@ -65,27 +64,19 @@ namespace Dose.Core.Scenes
 		public LocationManager Initialize(
 			IControlPlane controlPlane,
 			Player player,
-			ActorPool<ItemContext> itemPool,
-			ActorPool<NpcContext> npcPool,
-			WeightedPool<TextureDefinition> wallTexturePool,
-			WeightedPool<TextureDefinition> doorTexturePool,
-			WeightedPool<TextureDefinition> lampTexturePool,
+			PackPool packPool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
 			IEnumerable<IGameEvent<Location>> locationEvents
 		)
         {
 			Player = player;
 			ControlPlane = controlPlane;
-			_itemPool = itemPool;
-			_npcPool = npcPool;
-			_wallTexturePool = wallTexturePool;
-			_doorTexturePool = doorTexturePool;
-			_lampTexturePool = lampTexturePool;
+			PackPool = packPool;
 			_npcEvents = npcEvents;
 			_locationEvents = locationEvents;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
 			{
-				{ ROOM_CATEGORY, CreateRoom },
+				{ ROOM_CATEGORY, direction => CreateRoom(direction) },
 				{ CORRIDOR_CATEGORY, direction => CreateCorridor(direction) },
 				{ CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsUp: true) },
 				{ CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY, direction => CreateCorridor(direction, shouldEnsureStairsDown: true) }
@@ -93,28 +84,12 @@ namespace Dose.Core.Scenes
 
 			CurrentLocation = _locationQueue.PopNextLocation(CORRIDOR_CATEGORY, ClockDirection.Clockwise);
 
-			// if (ControlPlane?.DoorNumberController != null)
-			// {
-			// 	foreach (var customRoomCtx in ControlPlane.DoorNumberController.CustomRoomPool.AvailableContexts)
-			// 	{
-			// 		if (customRoomCtx.Location is not CustomRoom customRoom)
-			// 		{
-			// 			GD.PushWarning($"{customRoomCtx.Location} is not of type {nameof(CustomRoom)} and will not be initialized.");
-			// 			continue;
-			// 		}
-
-			// 		customRoom.Initialize(BLOCK_SIZE, this);
-			// 	}
-			// }
-
-			//player.QuestBook.Add(new FindItemQuest(_itemPool.AvailableContexts.ToList()[0]));
-
             return this;
         }
 
 		string GetNextLocationCategory(IPortal portal)
 		{
-			if (_currentLocation == null)
+			if (CurrentLocation == null)
 				return ROOM_CATEGORY;
 
 			if (portal is IStairs stairs)
@@ -127,7 +102,7 @@ namespace Dose.Core.Scenes
 			}
 				
 
-			if (_currentLocation is not BuildableLocation currentLocation)
+			if (CurrentLocation is not BuildableLocation currentLocation)
 				return ROOM_CATEGORY;
 
 			if (currentLocation.Type == Location.LocationType.Corridor)
@@ -147,7 +122,7 @@ namespace Dose.Core.Scenes
 		public ILocation? BuildNextLocation(IPortal portal)
 		{
 			var category = GetNextLocationCategory(portal);
-			var clockDirection = _currentLocation is IBuildableLocation buildable? ClockOpposite(buildable.DoorClockDirection) : ClockDirection.Clockwise;
+			var clockDirection = CurrentLocation is IBuildableLocation buildable? ClockOpposite(buildable.DoorClockDirection) : ClockDirection.Clockwise;
 
 			if (_locationQueue == null)
 			{
@@ -157,22 +132,168 @@ namespace Dose.Core.Scenes
 
 			if (category == null) return null;
 
-			CurrentLocation = _locationQueue.PopNextLocation(category, clockDirection);
+			var mustPreserveFrontier = CountReachableUnlinkedPortals() <= 1;
+			var nextLocation = mustPreserveFrontier
+				? CreateFrontierSafeLocation(category, clockDirection, portal)
+				: _locationQueue.PopNextLocation(category, clockDirection);
 
-			return CurrentLocation;
+			if (nextLocation == null)
+			{
+				return null;
+			}
+
+			if (mustPreserveFrontier && !HasCompatibleEntranceAndExit(nextLocation, portal))
+			{
+				GD.PushError("Failed to generate a location that preserves an unexplored portal.");
+				return null;
+			}
+
+			AttachLocation(nextLocation, visible: false);
+
+			return nextLocation;
 		}
 
-		BuildableLocation? CreateRoom(ClockDirection clockDirection)
+		ILocation? CreateFrontierSafeLocation(string category, ClockDirection clockDirection, IPortal incomingPortal)
+		{
+			var minimumDoorways = incomingPortal is IDoor ? 2 : 1;
+
+			return category switch
+			{
+				ROOM_CATEGORY => CreateRoom(
+					clockDirection,
+					minimumDoorways: 2
+				),
+				CORRIDOR_CATEGORY => CreateCorridor(
+					clockDirection,
+					minimumDoorways: minimumDoorways,
+					allowCustomRoomLinks: false
+				),
+				CORRIDOR_WITH_STAIRS_UP_ENSURED_CATEGORY => CreateCorridor(
+					clockDirection,
+					shouldEnsureStairsUp: true,
+					minimumDoorways: minimumDoorways,
+					allowCustomRoomLinks: false
+				),
+				CORRIDOR_WITH_STAIRS_DOWN_ENSURED_CATEGORY => CreateCorridor(
+					clockDirection,
+					shouldEnsureStairsDown: true,
+					minimumDoorways: minimumDoorways,
+					allowCustomRoomLinks: false
+				),
+				_ => null
+			};
+		}
+
+		int CountReachableUnlinkedPortals()
+		{
+			if (CurrentLocation == null)
+			{
+				return 0;
+			}
+
+			Queue<ILocation> locations = new();
+			HashSet<ILocation> visited = [];
+			var frontierCount = 0;
+			locations.Enqueue(CurrentLocation);
+
+			while (locations.TryDequeue(out var location))
+			{
+				if (!visited.Add(location))
+				{
+					continue;
+				}
+
+				foreach (var locationPortal in GetPortals(location))
+				{
+					if (locationPortal.Linked == null)
+					{
+						frontierCount++;
+					}
+					else if (locationPortal.Linked.Location != null)
+					{
+						locations.Enqueue(locationPortal.Linked.Location);
+					}
+				}
+			}
+
+			return frontierCount;
+		}
+
+		static bool HasCompatibleEntranceAndExit(ILocation location, IPortal incomingPortal)
+		{
+			if (location is BuildableLocation { Map: not null } buildableLocation)
+			{
+				var portalTypes = buildableLocation.Map.GetFilledPositions()
+					.SelectMany(position => AllDirections()
+						.Select(direction => buildableLocation.Map.Get(position).GetWall(direction)?.Type))
+					.Where(type => type == MapCellWall.MapCellType.Doorway ||
+						type == MapCellWall.MapCellType.Upstairs ||
+						type == MapCellWall.MapCellType.Downstairs)
+					.Cast<MapCellWall.MapCellType>()
+					.ToList();
+
+				return portalTypes.Count >= 2 && portalTypes.Any(type =>
+				{
+					if (incomingPortal is not IStairs stairs)
+					{
+						return incomingPortal is IDoor && type == MapCellWall.MapCellType.Doorway;
+					}
+
+					return stairs.Direction switch
+					{
+						StairsDirection.Up => type == MapCellWall.MapCellType.Downstairs,
+						StairsDirection.Down => type == MapCellWall.MapCellType.Upstairs,
+						_ => false
+					};
+				});
+			}
+
+			var portals = GetPortals(location)
+				.Where(portal => portal.Linked == null)
+				.ToList();
+
+			return portals.Count >= 2 && portals.Any(portal => AreCompatible(incomingPortal, portal));
+		}
+
+		static bool AreCompatible(IPortal source, IPortal candidate)
+		{
+			if (source is IStairs sourceStairs)
+			{
+				return candidate is IStairs candidateStairs &&
+					sourceStairs.Direction != candidateStairs.Direction;
+			}
+
+			return source is IDoor && candidate is IDoor;
+		}
+
+		static IEnumerable<IPortal> GetPortals(ILocation location)
+		{
+			return location is Node locationNode
+				? locationNode.GetChildren().OfType<IPortal>()
+				: [];
+		}
+
+		BuildableLocation? CreateRoom(
+			ClockDirection clockDirection,
+			int minimumDoorways = 1
+		)
 		{
 			if (ControlPlane == null)
             {
 				GD.PushError($"{nameof(LocationManager)} has no defined {nameof(IControlPlane)}.");
-                return null;
-            }
+				return null;
+			}
 
-			IMapGenerator mapGenerator = GenerateRoomMap();
+			var pack = SelectPack();
 
-			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(
+			if (pack == null)
+			{
+				return null;
+			}
+
+			IMapGenerator mapGenerator = GenerateRoomMap(pack);
+
+			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
 				BLOCK_SIZE,
 				clockDirection,
@@ -180,15 +301,29 @@ namespace Dose.Core.Scenes
 				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
 			);
 
-			BuildLocation(location);
-			PopulateLocation(location);
+			if (location.Map != null)
+			{
+				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
+			}
+
+			BuildLocation(location, pack);
+			PopulateLocation(
+				location,
+				CreatePackSelectionSession(pack, LocationRestriction.Rooms)
+			);
 		
 			//location.CreateFlippedBack();
 
 			return location;
 		}
 
-		BuildableLocation? CreateCorridor(ClockDirection clockDirection, bool shouldEnsureStairsUp = false, bool shouldEnsureStairsDown = false)
+		BuildableLocation? CreateCorridor(
+			ClockDirection clockDirection,
+			bool shouldEnsureStairsUp = false,
+			bool shouldEnsureStairsDown = false,
+			int minimumDoorways = 1,
+			bool allowCustomRoomLinks = true
+		)
 		{
 			if (ControlPlane == null)
             {
@@ -196,9 +331,20 @@ namespace Dose.Core.Scenes
                 return null;
             }
 
-			IMapGenerator mapGenerator = GenerateCorridorMap(shouldEnsureStairsUp, shouldEnsureStairsDown);
+			var pack = SelectPack();
 
-			var location = _buildableLocationScne.Instantiate<BuildableLocation>().Initialize(
+			if (pack == null)
+			{
+				return null;
+			}
+
+			IMapGenerator mapGenerator = GenerateCorridorMap(
+				pack,
+				shouldEnsureStairsUp,
+				shouldEnsureStairsDown
+			);
+
+			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
 				BLOCK_SIZE,
 				clockDirection,
@@ -206,28 +352,23 @@ namespace Dose.Core.Scenes
 				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
 			);
 
-			BuildLocation(location);
-			PopulateLocation(location);
+			if (location.Map != null)
+			{
+				new MapEnsurer(location.Map, MapCellWall.MapCellType.Doorway).EnsureAtLeast(minimumDoorways);
+			}
+
+			BuildLocation(location, pack, allowCustomRoomLinks);
+			PopulateLocation(
+				location,
+				CreatePackSelectionSession(pack, LocationRestriction.Corridors)
+			);
 		
 			//location.CreateFlippedBack();
 
 			return location;
 		}
 
-		static Vector2 GetLampOffset(BuildableLocation location)
-		{
-			if (location.Type == Location.LocationType.Corridor || location.Map == null)
-			{
-				return Vector2.Zero;
-			}
-
-			var xOffset = location.Map.HorizontalCells % 2 == 0 ? -0.5f : 0f;
-			var yOffset = location.Map.VerticalCells % 2 == 0 ? -0.5f : 0f;
-
-			return new Vector2(xOffset, yOffset);
-		}
-
-		void BuildLocation(BuildableLocation location)
+		void BuildLocation(BuildableLocation location, Pack pack, bool allowCustomRoomLinks = true)
 		{
 			if (ControlPlane == null)
             {
@@ -237,7 +378,11 @@ namespace Dose.Core.Scenes
 
 			var doorNumberController = location.Type == Location.LocationType.Corridor ? ControlPlane.DoorNumberController : null;
 			
-			var doorTexture = PickRandomTexture(_doorTexturePool?.GetWeightedList());
+			var locationRestriction = GetLocationRestriction(location);
+			var doorTexture = PickRandomTexture(
+				pack.GetWeightedDoorTextures()
+					.Where(texture => texture.CanPopulate(locationRestriction))
+			);
 
 			if (doorTexture is null)
 			{
@@ -245,20 +390,25 @@ namespace Dose.Core.Scenes
 				return;
 			}
 
+			var doorMaterial = CreatePlainMaterial(doorTexture);
+			doorMaterial.CullMode = BaseMaterial3D.CullModeEnum.Disabled;
+			doorMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.PerPixel;
+
 			var doorArgs = new DoorArgs
 			{
-				Material = CreatePlainMaterial(doorTexture),
+				Material = doorMaterial,
 				Location = location,
 				LocationManager = this,
 				OpenDirection = ClockOpposite(location.DoorClockDirection),
+				NumberFacesNegativeZ = location.Type == Location.LocationType.Corridor
+					? location.DoorClockDirection == ClockDirection.Counterclockwise
+					: location.DoorClockDirection == ClockDirection.Clockwise,
 			};
 
-			var stairsArgs = new StairsArgs
-			{
-				Location = location
-			};
-
-			var wallTexture = PickRandomTexture(_wallTexturePool?.GetWeightedList());
+			var wallTexture = PickRandomTexture(
+				pack.GetWeightedWallTextures()
+					.Where(texture => texture.CanPopulate(locationRestriction))
+			);
 
 			if (wallTexture is null)
 			{
@@ -266,13 +416,28 @@ namespace Dose.Core.Scenes
 				return;
 			}
 
-			var lampTexture = PickRandomTexture(_lampTexturePool?.GetWeightedList());
+			var wallMaterial = CreatePlainMaterial(wallTexture);
+			var unshadedBlackMaterial = CreatePlainMaterial(_blackTexture);
+			unshadedBlackMaterial.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
+			var stairsArgs = new StairsArgs
+			{
+				Location = location,
+				WallMaterial = wallMaterial,
+				BlackMaterial = unshadedBlackMaterial
+			};
 
-			if (lampTexture is null)
+			var lampTextureDefinition = PickRandom(
+				pack.GetWeightedLampTextures()
+					.Where(texture => texture.CanPopulate(locationRestriction))
+			);
+
+			if (lampTextureDefinition is null)
 			{
 				GD.PushError("Lamp texture could not be selected.");
 				return;
 			}
+
+			var lampTexture = GD.Load<Texture2D>(lampTextureDefinition.TexturePath);
 			
 			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
 			(
@@ -281,21 +446,29 @@ namespace Dose.Core.Scenes
 				_doorwayMesh,
 				_floorMesh,
 				_ceilingMesh,
-				CreatePlainMaterial(_blackTexture)
+				unshadedBlackMaterial
 			);
 
-			var shouldPullNumber = location.Type == Location.LocationType.Corridor;
-
-			var doorContext = new DoorContext
-            {
-                Number = shouldPullNumber ? ControlPlane.DoorNumberController?.PullNumber(237) : null
-            };
+			var shouldPullNumber = allowCustomRoomLinks && location.Type == Location.LocationType.Corridor;
 
 			var builders = new List<LocationBuilder> 
 			{ 
-				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, CreatePlainMaterial(wallTexture), BLOCK_SIZE, "WallMeshInstance"),
-				new LocationBaseMeshBuilder(location, _floorMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, "FloorMeshInstance"),
-				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, "CeilingMeshInstance"),
+				new LocationWallMeshBuilder(location, _wallMesh, _doorwayMesh, wallMaterial, BLOCK_SIZE, "WallMeshInstance"),
+				new LocationFloorMeshBuilder(
+					location,
+					_floorMesh,
+					unshadedBlackMaterial,
+					BLOCK_SIZE,
+					"FloorMeshInstance",
+					LocationCollisionLayer.NavigationSource
+				),
+				new LocationLampFloorOverlayBuilder(
+					location,
+					_lampFloorOverlayTexture,
+					BLOCK_SIZE,
+					"LampFloorOverlayMeshInstance"
+				),
+				new LocationBaseMeshBuilder(location, _ceilingMesh, CreatePlainMaterial(_blackTexture), BLOCK_SIZE, false, "CeilingMeshInstance"),
 				new LocationSceneProvider
 				(
 					location,
@@ -326,8 +499,8 @@ namespace Dose.Core.Scenes
 				new LocationSceneProvider(location, _lampScene, new LocationLampSceneFactory
 				(
 					lampTexture,
-					BLOCK_SIZE,
-					GetLampOffset(location)
+					lampTextureDefinition.Scale,
+					BLOCK_SIZE
 				))
 			};
 
@@ -378,85 +551,178 @@ namespace Dose.Core.Scenes
 			return PickRandom(values);
 		}
 
-		void PopulateLocation(BuildableLocation location)
+		void PopulateLocation(
+			BuildableLocation location,
+			PackSelectionSession selectionSession
+		)
 		{
-			if (_itemPool == null)
-			{
-				GD.PushWarning($"{nameof(_itemPool)} is null");
-				return;
-			}
-
-			if (_npcPool == null)
-			{
-				GD.PushWarning($"{nameof(_npcPool)} is null");
-				return;
-			}
-
-			var itemSelector = new ActorPoolSelector<Item, ItemContext, ItemArgs>(_itemPool);
-			var npcSelector = new ActorPoolSelector<Npc, NpcContext, NpcArgs>(_npcPool);
-
 			var itemArgs = new ItemArgs();
-			var npcArgs = new NpcArgs
-			{
-				Player = Player,
-				GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
-			};
-
-			var itemPopulator = new LocationPopulator<Item, ItemContext, ItemArgs>(
+			var populatedPositions = GetReservedActorPositions(location);
+			var propPopulator = new TargetLocationPopulator(
 				location,
-				itemSelector,
+				selectionSession.SelectProp,
 				new Probability(0.5),
-				itemArgs,
 				BLOCK_SIZE
 			);
+			var generatedProps = propPopulator
+				.Populate(populatedPositions, out populatedPositions)
+				.OfType<Prop>()
+				.ToList();
+			var props = generatedProps
+				.Concat(location.FindChildren("*", "", true, false).OfType<Prop>())
+				.Distinct()
+				.ToList();
 
-			var npcPopulator = new LocationPopulator<Npc, NpcContext, NpcArgs>(
+			var itemPopulator = new ItemLocationPopulator(
 				location,
-				npcSelector,
+				() => selectionSession.SelectItem(itemArgs),
 				new Probability(0.5),
-				npcArgs,
+				BLOCK_SIZE,
+				props
+			);
+			itemPopulator.Populate(populatedPositions, out populatedPositions);
+
+			var npcPopulator = new TargetLocationPopulator(
+				location,
+				() => selectionSession.SelectNpc(new NpcArgs
+				{
+					Player = Player,
+					GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
+				}),
+				new Probability(0.5),
 				BLOCK_SIZE
 			);
+			npcPopulator.Populate(populatedPositions, out _);
+		}
 
-			var populators = new List<LocationPopulator>
+		static HashSet<Vector2I> GetReservedActorPositions(BuildableLocation location)
+		{
+			if (location.Map == null)
 			{
-				itemPopulator,
-				npcPopulator
-			};
-
-			HashSet<Vector2I> populatedPositions = [];
-
-			foreach (var populator in populators)
-			{
-				populator.Populate(populatedPositions, out populatedPositions);
+				return [];
 			}
+
+			return
+            [
+                .. location.Map.GetFilledPositions()
+					.Where(position => AllDirections().Any(direction =>
+					{
+						var wallType = location.Map.Get(position).GetWall(direction)?.Type;
+
+						return wallType == MapCellWall.MapCellType.Doorway ||
+							wallType == MapCellWall.MapCellType.Upstairs ||
+							wallType == MapCellWall.MapCellType.Downstairs;
+					}))
+,
+                location.Map.Center,
+            ];
 		}
 
 		void SetCurrentLocation(ILocation? location)
         {
-			if (_currentLocation is Node currentLocationNode)
+			SetPropInteractionCollisionsIgnored(_currentLocation, false);
+
+			if (_currentLocation is Node currentLocationNode && currentLocationNode.GetParent() == this)
             {
-				RemoveChild(currentLocationNode);
+                RemoveChild(currentLocationNode);
             }
 
-			if (location is Node locationNode)
-            {
-				AddChild(locationNode);
-            }
+			AttachLocation(location, visible: true);
 
 			_currentLocation = location;
+			SetPropInteractionCollisionsIgnored(_currentLocation, true);
         }
 
-		static RoomMapGenerator GenerateRoomMap()
+		void SetPropInteractionCollisionsIgnored(ILocation? location, bool ignored)
+		{
+			if (Player == null || location is not Node locationNode)
+			{
+				return;
+			}
+
+			foreach (var prop in locationNode.FindChildren("*", "", true, false).OfType<Prop>())
+			{
+				Player.SetInteractionCollisionsIgnored(prop, ignored);
+			}
+		}
+
+		void AttachLocation(ILocation? location, bool visible)
+		{
+			if (location is not Node3D locationNode)
+			{
+				return;
+			}
+
+			locationNode.Visible = visible;
+
+			if (locationNode.GetParent() != this)
+			{
+				AddChild(locationNode);
+			}
+
+			if (location is Location { NavigationRegion: null } concreteLocation)
+			{
+				concreteLocation.InitializeNavigationRegion();
+			}
+		}
+
+		Pack? SelectPack()
+		{
+			if (PackPool == null)
+			{
+				GD.PushError($"{nameof(PackPool)} is null.");
+				return null;
+			}
+
+			var pack = PackPool.Select(LOCATION_RANDOMNESS);
+
+			if (pack == null)
+			{
+				GD.PushError("No Pack could be selected.");
+			}
+
+			return pack;
+		}
+
+		PackSelectionSession CreatePackSelectionSession(
+			Pack pack,
+			LocationRestriction locationRestriction
+		)
+		{
+			return PackPool?.CreateSelectionSession(pack, locationRestriction)
+				?? throw new InvalidOperationException($"{nameof(PackPool)} is null.");
+		}
+
+		static LocationRestriction GetLocationRestriction(Location location)
+		{
+			return location.Type switch
+			{
+				Location.LocationType.Room => LocationRestriction.Rooms,
+				Location.LocationType.Corridor => LocationRestriction.Corridors,
+				_ => throw new InvalidOperationException("Location type is not defined.")
+			};
+		}
+
+		RoomMapGenerator GenerateRoomMap(Pack pack)
         {
             return new RoomMapGenerator(
 				minSize: 2,
-				maxSize: 10,
-				probabilityToBuildDoor: new Probability(0.1)
+				maxSize: 8,
+				probabilityToBuildDoor: new Probability(0.1),
+				probabilityToSetWallOverlay: new Probability(0.1),
+				wallOverlayTextures: pack.GetWeightedWallOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Rooms)),
+				probabilityToSetFloorOverlay: new Probability(0.1),
+				floorOverlayTextures: pack.GetWeightedFloorOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Rooms))
 			);
         }
 
-        static CorridorMapGenerator GenerateCorridorMap(bool shouldEnsureStairsUp, bool shouldEnsureStairsDown)
+        CorridorMapGenerator GenerateCorridorMap(
+			Pack pack,
+			bool shouldEnsureStairsUp,
+			bool shouldEnsureStairsDown
+		)
         {
             return new CorridorMapGenerator(
 				horizontalCells: 500,
@@ -464,7 +730,13 @@ namespace Dose.Core.Scenes
 				probabilityToExtendCorridor: new Probability(0.5),
 				probabilityToBifurcate: new Probability(0.15),
 				probabilityToBuildDoors: new Probability(0.4),
-				probabilityToBuildStairs: new Probability(0.1)
+				probabilityToBuildStairs: new Probability(0.1),
+				probabilityToSetWallOverlay: new Probability(0.1),
+				wallOverlayTextures: pack.GetWeightedWallOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Corridors)),
+				probabilityToSetFloorOverlay: new Probability(0.1),
+				floorOverlayTextures: pack.GetWeightedFloorOverlays()
+					.Where(overlay => overlay.CanPopulate(LocationRestriction.Corridors))
 			)
 			{
 				ShouldEnsureStairsUp = shouldEnsureStairsUp,

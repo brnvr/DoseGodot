@@ -7,6 +7,10 @@ namespace Dose.Core.Library.Locations
     public record MapCell
     {
         public bool HasLamp { get; private set; }
+        public Vector2 LampOffset { get; private set; }
+        public Texture2D? FloorOverlayTexture { get; private set; }
+        public float FloorOverlayTextureScale { get; private set; } = 1f;
+        public bool FloorOverlayTextureRepeat { get; private set; }
         public MapCellWall? EastWall { get; private set; }
         public MapCellWall? WestWall { get; private set; }
         public MapCellWall? NorthWall { get; private set; }
@@ -45,6 +49,21 @@ namespace Dose.Core.Library.Locations
             _ => throw new ArgumentOutOfRangeException(nameof(direction))
         };
         
-        public MapCell WithLamp() => this with { HasLamp = true };
+        public MapCell WithLamp(Vector2 offset = default) => this with
+        {
+            HasLamp = true,
+            LampOffset = offset
+        };
+
+        public MapCell WithFloorOverlay(
+            Texture2D? texture,
+            float scale = 1f,
+            bool textureRepeat = false
+        ) => this with
+        {
+            FloorOverlayTexture = texture,
+            FloorOverlayTextureScale = scale,
+            FloorOverlayTextureRepeat = textureRepeat
+        };
     }
 }

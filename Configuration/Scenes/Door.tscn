@@ -1,12 +1,14 @@
-[gd_scene load_steps=7 format=4 uid="uid://dnho7pjdlaykl"]
+[gd_scene load_steps=9 format=4 uid="uid://dnho7pjdlaykl"]
 
 [ext_resource type="Script" uid="uid://cpwffvy6lvbjt" path="res://Core/Scenes/Door.cs" id="1_nnp71"]
 [ext_resource type="Texture2D" uid="uid://bfxfasfpo7pr1" path="res://Media/Textures/Environment/Doors/Door_Door_Apartment_01_red.png" id="2_8teuf"]
+[ext_resource type="FontFile" uid="uid://8d1hm53yffsw" path="res://Media/Fonts/antique_book_cover.otf" id="3_door_number"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_348lp"]
 resource_name = "Material"
 cull_mode = 2
 albedo_texture = ExtResource("2_8teuf")
+metallic_specular = 0.0
 roughness = 0.5
 texture_filter = 2
 
@@ -46,6 +48,9 @@ shadow_mesh = SubResource("ArrayMesh_acll8")
 data = PackedVector3Array(0.26639998, 0.67179996, 0, 0, 0, 0, -0.0409, 0.67179996, 0, 0.26639998, 0.67179996, 0, 0.22549999, 0, 0, 0, 0, 0)
 backface_collision = true
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(1.5, 3, 0.5)
+
 [node name="Door" type="Node3D"]
 script = ExtResource("1_nnp71")
 
@@ -54,8 +59,34 @@ transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
 mesh = SubResource("ArrayMesh_setf7")
 skeleton = NodePath("")
 
+[node name="NumberShadow" type="Label3D" parent="Mesh"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0.1125, 0.45, 0.00375)
+modulate = Color(0, 0, 0, 1)
+double_sided = false
+pixel_size = 0.005
+offset = Vector2(0, -1.5)
+outline_size = 0
+font = ExtResource("3_door_number")
+font_size = 36
+
+[node name="Number" type="Label3D" parent="Mesh"]
+transform = Transform3D(0.25, 0, 0, 0, 0.25, 0, 0, 0, 0.25, 0.1125, 0.45, 0.00375)
+modulate = Color(0.827451, 0.827451, 0.827451, 1)
+double_sided = false
+pixel_size = 0.005
+outline_size = 0
+font = ExtResource("3_door_number")
+font_size = 36
+render_priority = 1
+
 [node name="Body" type="StaticBody3D" parent="."]
 
 [node name="CollisionShape" type="CollisionShape3D" parent="Body"]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
 shape = SubResource("ConcavePolygonShape3D_mw28t")
+
+[node name="InteractionArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+position = Vector3(0.45, 1.35, 0)
+shape = SubResource("BoxShape3D_interaction")

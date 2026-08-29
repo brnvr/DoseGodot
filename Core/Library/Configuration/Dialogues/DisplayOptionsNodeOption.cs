@@ -11,8 +11,8 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             return new Dictionary<string, object?>
             {
-                { "text", Text },
-                { "next", Next }
+                { nameof(Text), Text },
+                { nameof(Next), Next }
             };
         }
     }

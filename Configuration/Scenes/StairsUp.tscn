@@ -1,9 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://bn1geieeho828"]
+[gd_scene load_steps=5 format=3 uid="uid://bn1geieeho828"]
 
 [ext_resource type="PackedScene" uid="uid://xmia3f60u8ow" path="res://Media/3DAssets/Environment/StairsUp.glb" id="1_qahmx"]
 [ext_resource type="Script" uid="uid://d2wa8yo6kc4c" path="res://Core/Scenes/StairsUp.cs" id="2_va2ao"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qahmx"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
 
 [node name="StairsUp" instance=ExtResource("1_qahmx")]
 script = ExtResource("2_va2ao")
@@ -16,3 +18,9 @@ transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Body" index="0"]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 2, -2)
 shape = SubResource("BoxShape3D_qahmx")
+
+[node name="InteractionArea" type="Area3D" parent="." index="2"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" index="0"]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 2, -2)
+shape = SubResource("BoxShape3D_interaction")

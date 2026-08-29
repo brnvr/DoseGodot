@@ -23,8 +23,12 @@ namespace Dose.Core.Scenes
         const double MAX_OPENING = Math.PI / 2;
 
         MeshInstance3D? _mesh;
+        Label3D? _numberShadowLabel;
+        Label3D? _numberLabel;
         StaticBody3D? _body;
         CollisionShape3D? _collisionShape;
+        Area3D? _interactionArea;
+        StandardMaterial3D? _material;
         float _yRotationStart;
         float _opening;
         readonly float _rotateSpeed = Mathf.DegToRad(5);
@@ -49,11 +53,18 @@ namespace Dose.Core.Scenes
 
         public override void _Ready()
         {
-            _mesh = GetNode<MeshInstance3D>("Mesh");
-            _body = GetNode<StaticBody3D>("Body");
-            _collisionShape = _body.GetNode<CollisionShape3D>("CollisionShape");
-            
-            _yRotationStart = _mesh.Rotation.Y;
+            CacheNodes();
+            _yRotationStart = _mesh!.Rotation.Y;
+        }
+
+        void CacheNodes()
+        {
+            _mesh ??= GetNode<MeshInstance3D>("Mesh");
+            _numberShadowLabel ??= GetNode<Label3D>("Mesh/NumberShadow");
+            _numberLabel ??= GetNode<Label3D>("Mesh/Number");
+            _body ??= GetNode<StaticBody3D>("Body");
+            _collisionShape ??= _body.GetNode<CollisionShape3D>("CollisionShape");
+            _interactionArea ??= GetNode<Area3D>("InteractionArea");
         }
 
         public void Link(Door other)
@@ -69,7 +80,71 @@ namespace Dose.Core.Scenes
             }
 
             Linked = other;
+            SynchronizeLinkedVisuals(other);
             other.Link(this);
+        }
+
+        void SynchronizeLinkedVisuals(Door other)
+        {
+            if (Context?.Number is int number)
+            {
+                other.SetNumber(number);
+            }
+            else if (other.Context?.Number is int otherNumber)
+            {
+                SetNumber(otherNumber);
+            }
+
+            if (_material != null && other._material == null)
+            {
+                other.SetMaterial(_material);
+            }
+            else if (other._material != null && _material == null)
+            {
+                SetMaterial(other._material);
+            }
+        }
+
+        void SetNumber(int? number)
+        {
+            Context = new DoorContext { Number = number };
+
+            if (_numberLabel != null)
+            {
+                _numberLabel.Visible = number != null;
+                _numberLabel.Text = Context.FormattedNumber;
+            }
+
+            if (_numberShadowLabel != null)
+            {
+                _numberShadowLabel.Visible = number != null;
+                _numberShadowLabel.Text = Context.FormattedNumber;
+            }
+        }
+
+        void SetNumberSide(bool facesNegativeZ)
+        {
+            SetNumberLabelSide(_numberLabel, facesNegativeZ);
+            SetNumberLabelSide(_numberShadowLabel, facesNegativeZ);
+        }
+
+        static void SetNumberLabelSide(Label3D? label, bool facesNegativeZ)
+        {
+            if (label == null)
+            {
+                return;
+            }
+
+            var position = label.Position;
+            position.Z = Mathf.Abs(position.Z) * (facesNegativeZ ? -1 : 1);
+            label.Position = position;
+            label.Rotation = new Vector3(0, facesNegativeZ ? Mathf.Pi : 0, 0);
+        }
+
+        void SetMaterial(StandardMaterial3D material)
+        {
+            _material = material;
+            _mesh?.SetSurfaceOverrideMaterial(0, material);
         }
 
         public void Unlink()
@@ -201,6 +276,10 @@ namespace Dose.Core.Scenes
             if (_mesh == null) return;
 
             _mesh.Rotation = new Vector3(0, _yRotationStart + _opening, 0);
+            if (_interactionArea != null)
+            {
+                _interactionArea.Rotation = _mesh.Rotation;
+            }
         }
 
         void EnableCollision()
@@ -221,17 +300,21 @@ namespace Dose.Core.Scenes
 
         public void Initialize(DoorContext context, DoorArgs args)
         {
+            CacheNodes();
             _opening = 0;
             State = DoorState.Closed;
             Context = context;
             Location = args.Location;
             OpenDirection = args.OpenDirection;
             _locationManager = args.LocationManager;
+            SetNumberSide(args.NumberFacesNegativeZ);
 
             if (args.Material != null)
             {
-                _mesh?.SetSurfaceOverrideMaterial(0, args.Material);
+                SetMaterial(args.Material);
             }
+
+            SetNumber(context.Number);
         }
     }
 }

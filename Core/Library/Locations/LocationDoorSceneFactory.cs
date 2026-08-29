@@ -150,7 +150,7 @@ namespace Dose.Core.Library.Locations
                     return node;
                 }
 
-                node.CallDeferred(Node.MethodName.AddChild, occluder);
+                node.AddChild(occluder);
 
                 return node;
             }

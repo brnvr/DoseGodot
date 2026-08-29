@@ -41,5 +41,6 @@ namespace Dose.Core.Scenes
             midAction?.Invoke();
             await FadeIn(speed);
         }
+
     }
 }

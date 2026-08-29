@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Core/Scenes/TextWithBackground.cs" id="1_text_with_background"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_background"]
+bg_color = Color(0, 0, 0, 0)
+
+[node name="TextWithBackground" type="CenterContainer"]
+visible = false
+mouse_filter = 2
+script = ExtResource("1_text_with_background")
+
+[node name="Background" type="PanelContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_background")
+
+[node name="MarginContainer" type="MarginContainer" parent="Background"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 3
+
+[node name="Text" type="Label" parent="Background/MarginContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+autowrap_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,7 +1,9 @@
 ---
-identifier: Doorman
-texturePath: res://Media/Textures/Npcs/Doorman/Idle_000.png
-voice: mb-us2
-rarity: VeryCommon
-dialoguesDir: Configuration/Dialogues/Agnes
-availableDialogues: [SomeDialogue]
+Identifier: Doorman
+TexturePath: res://Media/Textures/Npcs/Doorman/Idle_000.png
+Voice: mb-us2
+Rarity: VeryCommon
+PackId: thisside
+Scale: 1.08
+DialoguesDir: Configuration/Dialogues/Agnes
+AvailableDialogues: [SomeDialogue]

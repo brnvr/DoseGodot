@@ -17,7 +17,11 @@ namespace Dose.Core.Library.Locations
         Probability probabilityToExtendCorridor,
         Probability probabilityToBifurcate,
         Probability probabilityToBuildDoors,
-        Probability probabilityToBuildStairs
+        Probability probabilityToBuildStairs,
+        Probability probabilityToSetWallOverlay,
+        IEnumerable<WallOverlayTextureDefinition> wallOverlayTextures,
+        Probability probabilityToSetFloorOverlay,
+        IEnumerable<FloorOverlayTextureDefinition> floorOverlayTextures
     ) : IMapGenerator
     {
         const int CORRIDOR_CHUNK_LENGTH_CELLS = 5;
@@ -33,6 +37,10 @@ namespace Dose.Core.Library.Locations
         public Probability ProbabilityToBifurcate { get; } = probabilityToBifurcate;
         public Probability ProbabilityToBuildDoors { get; } = probabilityToBuildDoors;
         public Probability ProbabilityToBuildStairs { get; } = probabilityToBuildStairs;
+        public Probability ProbabilityToSetWallOverlay { get; } = probabilityToSetWallOverlay;
+        public IEnumerable<WallOverlayTextureDefinition> WallOverlayTextures { get; } = wallOverlayTextures;
+        public Probability ProbabilityToSetFloorOverlay { get; } = probabilityToSetFloorOverlay;
+        public IEnumerable<FloorOverlayTextureDefinition> FloorOverlayTextures { get; } = floorOverlayTextures;
 
         public Map GenerateMap()
         {
@@ -42,21 +50,28 @@ namespace Dose.Core.Library.Locations
             GenerateCorridor(map, startingPoint, selectedDirection);
 
             new MapEnsurer(map, MapCellType.Doorway).EnsureAtLeastOne();
+            RemoveStairsFromInvalidWalls(map);
 
             if (ShouldEnsureStairsUp)
             {
-                new MapEnsurer(map, MapCellType.Upstairs).EnsureAtLeastOne();
+                new MapEnsurer(map, MapCellType.Upstairs).EnsureAtLeastOne(
+                    (position, direction, _) => CanPlaceStairs(map, position, direction)
+                );
             }
 
             if (ShouldEnsureStairsDown)
             {
-                new MapEnsurer(map, MapCellType.Downstairs).EnsureAtLeastOne();
+                new MapEnsurer(map, MapCellType.Downstairs).EnsureAtLeastOne(
+                    (position, direction, _) => CanPlaceStairs(map, position, direction)
+                );
             }
+
+            SetFloorOverlays(map);
 
             return map;
         }
 
-        static void GenerateIntersection(Map map, Vector2I point)
+        void GenerateIntersection(Map map, Vector2I point)
         {
             var baseCell = BuildCellWalls(new MapCell(), AllDirections());
 
@@ -179,10 +194,10 @@ namespace Dose.Core.Library.Locations
             return ChooseNextDirection(map, point, availableDirections.Except([selectedDirection]));
         }
 
-        static MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
+        MapCell BuildCellWalls(MapCell cell, IEnumerable<CardinalDirection> wallDirections)
         {
             var wallDirection = wallDirections.First();
-            var wall = new MapCellWall(MapCellType.Solid);
+            var wall = BuildWall(MapCellType.Solid);
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -219,7 +234,7 @@ namespace Dose.Core.Library.Locations
             var buildOrientation = OrientationFromDirection(direction);
             var wallOrientation = OrientationFromDirection(wallDirection);
             var hasDoor = (buildOrientation != wallOrientation) && ((shouldBuildDoors0 && _directions0.Contains(wallDirection)) || (shouldBuildDoors1 && _directions1.Contains(wallDirection)));
-            var wall = new MapCellWall(DecideMapCellType(hasDoor));
+            var wall = BuildWall(DecideMapCellType(hasDoor));
             var newCell = cell.WithWall(wallDirection, wall);
 
             var remainingWallDirections = wallDirections.Except([wallDirection]);
@@ -231,6 +246,118 @@ namespace Dose.Core.Library.Locations
 
             return BuildCellWalls(newCell, direction, hasDoors0, hasDoors1, iteration, remainingWallDirections);
         } 
+
+        MapCellWall BuildWall(MapCellType type)
+        {
+            WallOverlayTextureDefinition? overlay = null;
+
+            if (type == MapCellType.Solid &&
+                WallOverlayTextures.Any() &&
+                new RandomDecider(ProbabilityToSetWallOverlay).Roll())
+            {
+                overlay = new RandomSelector<WallOverlayTextureDefinition>(WallOverlayTextures).Pick();
+            }
+
+            return new MapCellWall(
+                type,
+                overlay?.Texture,
+                overlay?.Scale ?? 1f,
+                overlay?.TextureRepeat ?? false
+            );
+        }
+
+        void SetFloorOverlays(Map map)
+        {
+            if (!FloorOverlayTextures.Any())
+            {
+                return;
+            }
+
+            foreach (var position in map.GetFilledPositions())
+            {
+                if (!new RandomDecider(ProbabilityToSetFloorOverlay).Roll())
+                {
+                    continue;
+                }
+
+                var overlay = new RandomSelector<FloorOverlayTextureDefinition>(FloorOverlayTextures).Pick();
+                map.Set(position, map.Get(position).WithFloorOverlay(
+                    overlay.Texture,
+                    overlay.Scale,
+                    overlay.TextureRepeat
+                ));
+            }
+        }
+
+        static void RemoveStairsFromInvalidWalls(Map map)
+        {
+            foreach (var position in map.GetFilledPositions())
+            {
+                var cell = map.Get(position);
+
+                foreach (var direction in AllDirections())
+                {
+                    var wall = cell.GetWall(direction);
+
+                    if ((wall?.Type == MapCellType.Upstairs || wall?.Type == MapCellType.Downstairs) &&
+                        !CanPlaceStairs(map, position, direction))
+                    {
+                        wall.Type = MapCellType.Solid;
+                    }
+                }
+            }
+        }
+
+        static bool CanPlaceStairs(Map map, Vector2I position, CardinalDirection wallDirection)
+        {
+            var tangent0 = NextDirection(wallDirection, ClockDirection.Clockwise);
+            var tangent1 = NextDirection(wallDirection, ClockDirection.Counterclockwise);
+            var continues0 = HasCollinearWall(map, position, wallDirection, tangent0);
+            var continues1 = HasCollinearWall(map, position, wallDirection, tangent1);
+
+            if (continues0 && continues1)
+            {
+                return true;
+            }
+
+            if (continues0 || continues1)
+            {
+                return false;
+            }
+
+            var connectedDirections = GetConnectedDirections(map, position);
+
+            return connectedDirections.Count == 1 &&
+                wallDirection == CardinalOpposite(connectedDirections[0]);
+        }
+
+        static bool HasCollinearWall(
+            Map map,
+            Vector2I position,
+            CardinalDirection wallDirection,
+            CardinalDirection tangentDirection
+        )
+        {
+            var neighborPosition = MoveTo(position, tangentDirection);
+
+            return map.TryGet(neighborPosition, out MapCell? neighbor) &&
+                neighbor?.GetWall(wallDirection) != null;
+        }
+
+        static List<CardinalDirection> GetConnectedDirections(Map map, Vector2I position)
+        {
+            var cell = map.Get(position);
+
+            return AllDirections()
+                .Where(direction =>
+                {
+                    var neighborPosition = MoveTo(position, direction);
+                    return cell.GetWall(direction) == null &&
+                        map.TryGet(neighborPosition, out MapCell? neighbor) &&
+                        neighbor != null;
+                })
+                .ToList();
+        }
   
         Vector2I GetCenter()
         {

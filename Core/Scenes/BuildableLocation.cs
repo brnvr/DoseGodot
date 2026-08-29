@@ -18,7 +18,7 @@ namespace Dose.Core.Scenes
 
         public void OnBuild(Node node)
         {
-            CallDeferred(Node.MethodName.AddChild, node);
+            AddChild(node);
         }
 
         public override void _Process(double delta)

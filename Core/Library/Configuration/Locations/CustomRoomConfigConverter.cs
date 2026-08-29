@@ -8,8 +8,8 @@ namespace Dose.Core.Library.Configuration.Locations
         {
             return new CustomRoomConfig
             {
-                ScenePath = GetRequired<string>(dict, "scenePath"),
-                RoomNumber = int.Parse(GetRequired<string>(dict, "roomNumber"))
+                ScenePath = GetRequired<string>(dict, nameof(CustomRoomConfig.ScenePath)),
+                RoomNumber = int.Parse(GetRequired<string>(dict, nameof(CustomRoomConfig.RoomNumber)))
             };
         }
     }

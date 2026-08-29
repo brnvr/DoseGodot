@@ -1,0 +1,6 @@
+TexturePath: res://Media/Textures/Environment/WallOverlays/Fireplace_0.png
+Rarity: VeryCommon
+PackId: thisside
+Scale: 1
+TextureRepeat: false
+LocationRestriction: Rooms

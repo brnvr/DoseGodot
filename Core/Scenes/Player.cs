@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Control;
@@ -9,6 +10,7 @@ using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Quests;
+using Dose.Core.Library.UI;
 using Dose.Core.QuestArgs;
 using Dose.Core.Quests;
 using Godot;
@@ -21,6 +23,27 @@ namespace Dose.Core.Scenes
         public class MovedToLocationArgs(ILocation location)
         {
             public ILocation Location { get; } = location;
+        }
+
+        public class DoorTransitionArgs(float rotationDelta)
+        {
+            public float RotationDelta { get; } = rotationDelta;
+        }
+
+        public class SelectedItemChangedArgs(ItemContext? item)
+        {
+            public ItemContext? Item { get; } = item;
+        }
+
+        public class InteractionAvailabilityChangedArgs(bool canInteract)
+        {
+            public bool CanInteract { get; } = canInteract;
+        }
+
+        public class InteractionTargetChangedArgs(IActor<Player>? target)
+        {
+            public IActor<Player>? Target { get; } = target;
+            public bool HasTarget => Target != null;
         }
 
         enum MoveState
@@ -37,18 +60,28 @@ namespace Dose.Core.Scenes
             Curious,
             Talking,
             Locked,
-            HoldingItem,
+            EquipedItem,
             QuestBookOpened
         }
 
-        class AutoMoveParameters(Vector3 position, float speed)
+        class AutoMoveParameters(
+            Vector3 position,
+            float speed,
+            float arrivalTolerance = 0,
+            bool snapToTarget = true,
+            bool ignoreCollisions = false
+        )
         {
             public float Speed { get; } = speed;
             public Vector3 Position { get; } = position;
+            public float ArrivalTolerance { get; } = arrivalTolerance;
+            public bool SnapToTarget { get; } = snapToTarget;
+            public bool IgnoreCollisions { get; } = ignoreCollisions;
             public EventHandler? Completed { get; set; }
         }
        
-        const float RAY_LENGTH = 2.3f;
+        const float RAY_LENGTH = 3.1f;
+        const float DOOR_TRANSITION_INSET = 0.3f;
         
         RayCast3D? _rayCast;
         float _cameraAngle = 0f;
@@ -57,6 +90,7 @@ namespace Dose.Core.Scenes
         AutoMoveParameters? _autoMoveParameters;
         Node3D? _head;
         Camera3D? _view;
+        Vector2 _cameraViewportSize;
         IActor<Player>? _currentTarget;
         IControlPlane? _controlPlane;
         MoveState _moveState = MoveState.Locked;
@@ -66,7 +100,13 @@ namespace Dose.Core.Scenes
         public Inventory Inventory { get; } = [];
         public QuestBook QuestBook { get; } = [];
         public ItemContext? SelectedItem { get; private set; }
+        public bool HasInteractionTarget => _currentTarget != null;
         public EventHandler<MovedToLocationArgs>? MovedToLocation { get; set; }
+        public EventHandler<DoorTransitionArgs>? DoorTransitionStarted { get; set; }
+        public EventHandler<SelectedItemChangedArgs>? SelectedItemChanged { get; set; }
+        public EventHandler<InteractionAvailabilityChangedArgs>? InteractionAvailabilityChanged { get; set; }
+        public EventHandler<InteractionTargetChangedArgs>? InteractionTargetChanged { get; set; }
+        public EventHandler? ItemInteractionRejected { get; set; }
 
         public override void _Ready()
         {
@@ -74,8 +114,10 @@ namespace Dose.Core.Scenes
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
             _view = GetNode<Camera3D>("Head/View");
+            UpdateCameraProjection();
             _rayCast = GetNode<RayCast3D>("Head/View/RayCast3D");
             _rayCast.TargetPosition = new Vector3(0, 0, -RAY_LENGTH);
+            GlobalPosition += Vector3.Up * 0.05f;
             
             Inventory.ItemAdded += (sender, e) =>
             {
@@ -87,15 +129,21 @@ namespace Dose.Core.Scenes
 
             Inventory.ItemDropped += (sender, e) =>
             {
+                if (SelectedItem == e.ItemContext && !Inventory.Exists(e.ItemContext))
+                {
+                    UnselectItem();
+                }
+
                 if (!Inventory.Any())
                 {
-                    _interactionState = InteractionState.Curious;
+                    SetInteractionState(InteractionState.Curious);
                 }  
             };
         }
 
         public override void _Process(double delta)
         {
+            UpdateCameraProjection();
             ProcessInteract();
             ProcessInventory();
             ProcessDialogue();
@@ -132,7 +180,7 @@ namespace Dose.Core.Scenes
             if (dialogueRunner.Dialogue is Dialogue)
             {
                 _moveState = MoveState.Focused;
-                _interactionState = InteractionState.Talking;
+                SetInteractionState(InteractionState.Talking);
             }
             
             UpdateDialogue();
@@ -141,6 +189,34 @@ namespace Dose.Core.Scenes
         public bool CanSeek()
         {
             return CanLook() && _moveState != MoveState.Focused;
+        }
+
+        void UpdateCameraProjection()
+        {
+            if (_view == null)
+            {
+                return;
+            }
+
+            var viewportSize = GetViewport().GetVisibleRect().Size;
+
+            if (viewportSize.IsEqualApprox(_cameraViewportSize) || viewportSize.Y <= 0)
+            {
+                return;
+            }
+
+            _cameraViewportSize = viewportSize;
+
+            var verticalSize = 2f * _view.Near * Mathf.Tan(Mathf.DegToRad(_view.Fov) * 0.5f);
+            var halfHeight = verticalSize * 0.5f;
+            var halfWidth = halfHeight * viewportSize.Aspect();
+            var offset = new Vector2(
+                (UIScreenLayout.RightBarWidthRatio - UIScreenLayout.LeftBarWidthRatio) * halfWidth,
+                (UIScreenLayout.TopBarHeightRatio - UIScreenLayout.BottomBarHeightRatio) * halfHeight
+            );
+
+            _view.KeepAspect = Camera3D.KeepAspectEnum.Height;
+            _view.SetFrustum(verticalSize, offset, _view.Near, _view.Far);
         }
 
         public bool CanMove()
@@ -160,6 +236,27 @@ namespace Dose.Core.Scenes
             return _interactionState != InteractionState.Locked && _interactionState != InteractionState.QuestBookOpened;
         }
 
+        void SetInteractionState(InteractionState state)
+        {
+            var couldInteract = CanInteract();
+            _interactionState = state;
+            var canInteract = CanInteract();
+
+            if (couldInteract && !canInteract)
+            {
+                _currentTarget = null;
+                UpdateTarget();
+            }
+
+            if (couldInteract != canInteract)
+            {
+                InteractionAvailabilityChanged?.Invoke(
+                    this,
+                    new InteractionAvailabilityChangedArgs(canInteract)
+                );
+            }
+        }
+
         public bool CanSwitchItem()
         {
             return _interactionState == InteractionState.Curious;
@@ -167,7 +264,7 @@ namespace Dose.Core.Scenes
 
         public bool CanSelectItem()
         {
-            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.HoldingItem;
+            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.EquipedItem;
         }
 
         bool CanCloseQuestBook()
@@ -177,7 +274,7 @@ namespace Dose.Core.Scenes
         
         bool CanOpenQuestBook()
         {
-            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.HoldingItem;
+            return _interactionState == InteractionState.Curious || _interactionState == InteractionState.EquipedItem;
         }
 
         public void ProgressDialogue()
@@ -186,7 +283,7 @@ namespace Dose.Core.Scenes
             {
                 GD.PushWarning("Dialogue dialogueRunner is null. Can't progress dialogue.");
                 _moveState = MoveState.Free;
-                _interactionState = InteractionState.Curious;
+                SetInteractionState(InteractionState.Curious);
                 _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 return;
@@ -194,9 +291,15 @@ namespace Dose.Core.Scenes
 
             if (!DialogueRunner.GoToNextNode())
             {
+                var completedShortDialogue = DialogueRunner.Dialogue is ShortDialogue;
                 DialogueRunner = null;
-                _moveState = MoveState.Free;
-                _interactionState = InteractionState.Curious;
+
+                if (!completedShortDialogue)
+                {
+                    _moveState = MoveState.Free;
+                    SetInteractionState(InteractionState.Curious);
+                }
+
                 _controlPlane?.DialogueController?.OnDialogueEnd();
 
                 UpdateTarget();
@@ -217,23 +320,49 @@ namespace Dose.Core.Scenes
             if (_moveState != MoveState.Auto) return;
             if (_autoMoveParameters == null) return;
 
-            var distance = _autoMoveParameters.Position - GlobalPosition;
+            var targetPosition = _autoMoveParameters.Position;
+            var flatTarget = new Vector3(targetPosition.X, GlobalPosition.Y, targetPosition.Z);
+            var displacement = flatTarget - GlobalPosition;
+            var flatDisplacement = new Vector3(displacement.X, 0, displacement.Z);
+            var distance = flatDisplacement.Length();
 
-            Velocity = distance.Normalized() * _autoMoveParameters.Speed;
+            var arrivalDistance = _autoMoveParameters.IgnoreCollisions
+                ? _autoMoveParameters.ArrivalTolerance
+                : Mathf.Max(
+                    _autoMoveParameters.Speed * delta,
+                    _autoMoveParameters.ArrivalTolerance
+                );
 
-            if (distance.Length() <= _autoMoveParameters.Speed * delta)
+            if (distance <= arrivalDistance)
             {
-                var completedCallback = _autoMoveParameters.Completed;
+                if (_autoMoveParameters.SnapToTarget)
+                {
+                    GlobalPosition = new Vector3(targetPosition.X, GlobalPosition.Y, targetPosition.Z);
+                }
 
+                var completedCallback = _autoMoveParameters.Completed;
                 _moveState = MoveState.Free;
                 _autoMoveParameters = null;
-                completedCallback?.Invoke(_autoMoveParameters, new EventArgs());
+                completedCallback?.Invoke(this, EventArgs.Empty);
 
                 return;
             }
-            
+
+            Velocity = flatDisplacement.Normalized() * _autoMoveParameters.Speed;
+            Velocity = new Vector3(Velocity.X, 0, Velocity.Z);
+
+            if (_autoMoveParameters.IgnoreCollisions)
+            {
+                GlobalPosition = GlobalPosition.MoveToward(
+                    flatTarget,
+                    _autoMoveParameters.Speed * delta
+                );
+
+                return;
+            }
+
             MoveAndSlide();
-            Push(20f);
+            Push(1f);
         }
 
         void Push(float impulse, bool ignoreY = true)
@@ -249,44 +378,76 @@ namespace Dose.Core.Scenes
                     if (ignoreY)
                     {
                         push.Y = 0;
-                        push = push.Normalized();
                     }
 
-                    body.ApplyCentralImpulse(push * impulse);
+                    if (push.Length() < 0.001f)
+                    {
+                        continue;
+                    }
+
+                    body.ApplyCentralImpulse(push.Normalized() * impulse);
                 }
             }
         }
 
         public void OnDoorOpened(IDoor door)
         {
-            _interactionState = InteractionState.Locked;
+            _moveState = MoveState.Locked;
+            SetInteractionState(InteractionState.Locked);
 
             Transform3D? local = null;
+            float? sourceDoorYaw = null;
             
             if (door is Door doorNode)
             {
                 local = doorNode.GlobalTransform.AffineInverse() * GlobalTransform;
+                sourceDoorYaw = doorNode.GlobalTransform.Basis.GetEuler().Y;
             }
 
-            _controlPlane?.LocationController?.UpdateLocation(door);
+            if (_controlPlane?.LocationController != null)
+            {
+                _controlPlane.LocationController.UpdateLocation(door);
+            }
             
 
             if (local != null && door.Linked is Door linkedDoorNode)
             {
+                if (sourceDoorYaw != null)
+                {
+                    var destinationDoorYaw = linkedDoorNode.GlobalTransform.Basis.GetEuler().Y;
+                    var rotationDelta = Mathf.Wrap(
+                        destinationDoorYaw - sourceDoorYaw.Value,
+                        -Mathf.Pi,
+                        Mathf.Pi
+                    );
+                    DoorTransitionStarted?.Invoke(this, new DoorTransitionArgs(rotationDelta));
+                }
+
                 GlobalTransform = linkedDoorNode.GlobalTransform * (Transform3D)local;
 
                 var targetPosition = linkedDoorNode.GetHingeCenter();
-                var parameters = new AutoMoveParameters(targetPosition, 5f);
+                var parameters = new AutoMoveParameters(
+                    targetPosition,
+                    5f,
+                    arrivalTolerance: DOOR_TRANSITION_INSET,
+                    snapToTarget: false
+                );
                 parameters.Completed += (sender, e) =>
                 {
                     //door.OpenDirection = ClockOpposite(door.OpenDirection);
                     var sign = door.OpenDirection == ClockDirection.Clockwise ? 1 : -1;
-                    var parameters = new AutoMoveParameters(targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign, 5f);
+                    var insideTarget = targetPosition + linkedDoorNode.GlobalTransform.Basis.Z * 2f * sign;
 
-                    parameters.Completed += (sender, e) => {
+                    var bridgeParameters = new AutoMoveParameters(
+                        insideTarget,
+                        5f,
+                        snapToTarget: false,
+                        ignoreCollisions: true
+                    );
+                    bridgeParameters.Completed += (sender, e) => {
                         linkedDoorNode.TryClose();
 
-                        _interactionState = InteractionState.Curious;
+                        SetInteractionState(InteractionState.Curious);
 
                         if (door.Linked.Location != null)
                         {
@@ -294,13 +455,18 @@ namespace Dose.Core.Scenes
                         }
                     };
 
-                    AutoMoveTo(parameters);
+                    AutoMoveTo(bridgeParameters);
                 };
 
                 AutoMoveTo(parameters);
 
                 linkedDoorNode.TryOpen();
+
+                return;
             }
+
+            _moveState = MoveState.Free;
+            SetInteractionState(InteractionState.Curious);
         }
 
 
@@ -314,6 +480,7 @@ namespace Dose.Core.Scenes
         void UpdateTarget()
         {
             _controlPlane?.InteractivityController?.OnTargetChange(_currentTarget);
+            InteractionTargetChanged?.Invoke(this, new InteractionTargetChangedArgs(_currentTarget));
         }
 
         void LookAt(Vector3 to, double delta)
@@ -390,7 +557,7 @@ namespace Dose.Core.Scenes
             if (!CanOpenQuestBook()) return;
 
             UnselectItem();
-            _interactionState = InteractionState.QuestBookOpened;
+            SetInteractionState(InteractionState.QuestBookOpened);
             _controlPlane?.QuestBookController?.OnQuestBookOpened();
         }
 
@@ -398,8 +565,38 @@ namespace Dose.Core.Scenes
         {
             if (!CanCloseQuestBook()) return;
 
-            _interactionState = InteractionState.Curious;
+            SetInteractionState(InteractionState.Curious);
             _controlPlane?.QuestBookController?.OnQuestBookClosed();  
+        }
+
+        public void SetInteractionCollisionsIgnored(Node root, bool ignored)
+        {
+            if (_rayCast == null)
+            {
+                return;
+            }
+
+            AddExceptions(root);
+
+            void AddExceptions(Node node)
+            {
+                if (node is CollisionObject3D collisionObject)
+                {
+                    if (ignored)
+                    {
+                        _rayCast.AddException(collisionObject);
+                    }
+                    else
+                    {
+                        _rayCast.RemoveException(collisionObject);
+                    }
+                }
+
+                foreach (var child in node.GetChildren())
+                {
+                    AddExceptions(child);
+                }
+            }
         }
 
         void ProcessSeek()
@@ -459,7 +656,7 @@ namespace Dose.Core.Scenes
 
             if (CanSelectItem() && Input.IsActionJustPressed("InventorySelect"))
             {
-                if (_interactionState == InteractionState.HoldingItem)
+                if (_interactionState == InteractionState.EquipedItem)
                 {
                     UnselectItem();
                 }
@@ -473,14 +670,16 @@ namespace Dose.Core.Scenes
         void UnselectItem()
         {
             SelectedItem = null;
-            _interactionState = InteractionState.Curious;
+            SelectedItemChanged?.Invoke(this, new SelectedItemChangedArgs(SelectedItem));
+            SetInteractionState(InteractionState.Curious);
             _controlPlane?.InventoryController?.OnActiveItemUnselected();
         }
 
         void SelectItem()
         {
             SelectedItem = _controlPlane?.InventoryController?.CurrentItem;
-            _interactionState = InteractionState.HoldingItem;
+            SelectedItemChanged?.Invoke(this, new SelectedItemChangedArgs(SelectedItem));
+            SetInteractionState(InteractionState.EquipedItem);
             _controlPlane?.InventoryController?.OnActiveItemSet();
         }
 
@@ -569,34 +768,86 @@ namespace Dose.Core.Scenes
                     ProgressDialogue();
                     break;
 
-                case InteractionState.HoldingItem:
-                    if (_currentTarget != null) UseItemWith(_currentTarget);
+                case InteractionState.EquipedItem:
+                    if (_currentTarget != null)
+                    {
+                        UseItemWith(_currentTarget);
+                    }
+                    else
+                    {
+                        ExecuteSelectedItem();
+                    }
                     break;
             }          
         }
 
-        void UseItemWith(IActor<Player> actor)
+        void ExecuteSelectedItem()
         {
-            var item = _controlPlane?.InventoryController?.CurrentItem;
+            var item = SelectedItem;
 
             if (item == null)
             {
-                GD.PushWarning($"Player is not holding any item. Skipping {nameof(UseItemWith)}.");
+                GD.PushWarning($"Player does not have an equiped item. Skipping {nameof(ExecuteSelectedItem)}.");
                 return;
             }
 
-            if (actor.Context == null)
+            var executed = false;
+
+            foreach (var executable in item.Execute)
             {
-                GD.PushWarning($"Actor context is undefined. Skipping {nameof(UseItemWith)}.");
+                executable.Execute(this);
+                executed = true;
+            }
+
+            if (executed && !item.KeepAfterUse)
+            {
+                Inventory.Drop(item);
+            }
+        }
+
+        void UseItemWith(IActor<Player> actor)
+        {
+            var item = SelectedItem;
+
+            if (item == null)
+            {
+                GD.PushWarning($"Player does not have an equiped item. Skipping {nameof(UseItemWith)}.");
                 return;
             }
 
-            foreach (var op in item.InteractWith)
+            if (actor.Context is not NpcContext npcContext)
             {
-                if (op.TryInteract(item, actor.Context))
+                ItemInteractionRejected?.Invoke(this, EventArgs.Empty);
+                return;
+            }
+
+            var hasMatchingInteraction = false;
+            var rejected = false;
+
+            foreach (var op in npcContext.InteractWith)
+            {
+                var result = op.Interact(item, actor);
+
+                if (result == ItemInteractionResult.NotApplicable)
                 {
-                    GD.Print($"Interacted with actor \"{actor.Context.Identifier}\" using item \"{item.Identifier}\".");
+                    continue;
                 }
+
+                hasMatchingInteraction = true;
+
+                if (result == ItemInteractionResult.Accepted)
+                {
+                    GD.Print($"Interacted with NPC \"{npcContext.Identifier}\" using item \"{item.Identifier}\".");
+                }
+                else
+                {
+                    rejected = true;
+                }
+            }
+
+            if (!hasMatchingInteraction || rejected)
+            {
+                ItemInteractionRejected?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -620,11 +871,30 @@ namespace Dose.Core.Scenes
         public void UseStairs(IStairs stairs)
         {
             _moveState = MoveState.Locked;
-            _interactionState = InteractionState.Locked;
+            SetInteractionState(InteractionState.Locked);
+            _controlPlane?.InteractivityController?.SetTargetCaptionEnabled(false);
 
-            _ = FadeTransition.Instance?.Fade(() =>
+            var fadeTransition = FadeTransition.Instance;
+
+            if (fadeTransition == null)
             {
-                _controlPlane?.LocationController?.UpdateLocation(stairs);
+                _moveState = MoveState.Free;
+                SetInteractionState(InteractionState.Curious);
+                _controlPlane?.InteractivityController?.SetTargetCaptionEnabled(true);
+                return;
+            }
+
+            _ = CompleteStairsTransition(stairs, fadeTransition);
+        }
+
+        async Task CompleteStairsTransition(IStairs stairs, FadeTransition fadeTransition)
+        {
+            await fadeTransition.Fade(() =>
+            {
+                if (_controlPlane?.LocationController != null)
+                {
+                    _controlPlane.LocationController.UpdateLocation(stairs);
+                }
 
                 if (stairs is Stairs stairsNode && stairsNode.Linked is Stairs linked)
                 {
@@ -646,11 +916,15 @@ namespace Dose.Core.Scenes
                         var localBasis = linked.GlobalTransform.Basis.Inverse() * linked.GlobalTransform.Basis;
                         _head.Rotation = (localBasis * Basis.FromEuler(new Vector3(0, Mathf.Pi, 0))).GetEuler();
                     }
-
-                    _moveState = MoveState.Free;
-                    _interactionState = InteractionState.Curious;
                 }
+
+                _moveState = MoveState.Free;
+                SetInteractionState(InteractionState.Curious);
             }, 2);
+
+            _currentTarget = null;
+            UpdateTarget();
+            _controlPlane?.InteractivityController?.SetTargetCaptionEnabled(true);
         }
     }
 }

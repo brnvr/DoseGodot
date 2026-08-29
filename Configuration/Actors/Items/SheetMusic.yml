@@ -1,15 +1,13 @@
 ---
-identifier: sheet music
-rarity: VeryCommon
-texturePath: "res://Media/Textures/Placehoders/Item.png"
-execute:
-  - action: movePlayer
-    args:
+Identifier: sheet music
+Rarity: VeryCommon
+PackId: thisside
+TexturePath: "res://Media/Textures/Items/SheetMusic_0.png"
+Scale: 0.2
+EquipedScale: 0.7
+Execute:
+  - Action: MovePlayer
+    Args:
       x: 1,
       y: 0,
       z: 1
-interactWith:
-  - actor: Agnes
-    action: receive
-    args:
-      arg0: value

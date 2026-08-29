@@ -11,12 +11,12 @@ namespace Dose.Core.Library.Configuration.Dialogues
         {
             var dict = new Dictionary<string, object?>
             {
-                { "lines", Lines }
+                { nameof(Lines), Lines }
             };
 
             if (Next != null)
             {
-                dict.Add("next", Next);
+                dict.Add(nameof(Next), Next);
             }
 
             return dict;

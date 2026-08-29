@@ -14,6 +14,8 @@ namespace Dose.Core.Library.Locations
             {
                 TexturePath = config.TexturePath,
                 Rarity = Enum.Parse<Rarity>(config.Rarity),
+                PackId = config.PackId,
+                LocationRestriction = config.LocationRestriction,
             };
         }
 

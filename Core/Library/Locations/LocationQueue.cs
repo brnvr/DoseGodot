@@ -89,9 +89,9 @@ class LocationQueue(int maxLocationsPerType, Dictionary<string, Func<ClockDirect
         }
     }
 
-    async Task Refill(string category, ClockDirection direction)
+    Task Refill(string category, ClockDirection direction)
     {
-        await Task.Run(async () =>
+        return Task.Run(() =>
         {
             //await Task.Delay(5000);
             var newLocation = categoryFuncMap[category](direction);

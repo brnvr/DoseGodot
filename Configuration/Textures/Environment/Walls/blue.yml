@@ -1,2 +1,3 @@
-rarity: VeryCommon
-texturePath: res://Media/Textures/Environment/Walls/blue.png
+Rarity: VeryCommon
+PackId: thisside
+TexturePath: res://Media/Textures/Environment/Walls/blue.png

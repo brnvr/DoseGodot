@@ -24,7 +24,7 @@ namespace Dose.Core.Library.DataStructures
         public Pool<T> Load()
         {
             _content.Clear();
-            var files = Directory.GetFiles(ConfigPath);
+            var files = Directory.GetFiles(ConfigPath, "*.yml");
             var deserializer = new DeserializerBuilder().Build();
 
             foreach (var file in files)

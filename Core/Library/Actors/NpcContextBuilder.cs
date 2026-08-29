@@ -8,12 +8,17 @@ using Dose.Core.Library.Configuration.Actors;
 using Dose.Core.Library.Configuration.Dialogues;
 using Dose.Core.Library.DataStructures.Dialogues;
 using Dose.Core.Library.ESpeak;
+using Dose.Core.Library.Interactivity;
 using Godot;
 
 namespace Dose.Core.Library.Actors
 {
-    public class NpcContextBuilder(IEnumerable<NpcContextBuilderAction> actions) : IObjectFromConfigBuilder<NpcContext>
+    public class NpcContextBuilder(
+        IEnumerable<NpcContextBuilderAction> actions,
+        Dictionary<string, IActionPerformer> itemInteractionPerformerMap
+    ) : IObjectFromConfigBuilder<NpcContext>
     {
+        public Dictionary<string, IActionPerformer> ItemInteractionPerformerMap { get; } = itemInteractionPerformerMap;
         public DialogueConfigConverter DialogueConfigConverter = new(actions.ToDictionary(a => a.Key, a => a.DialogueNodeConverter));
         public DialogueBuilder DialogueBuilder = new(
             actions.ToDictionary(a => a.Key, a => a.DialogueNodeBuilder),
@@ -34,10 +39,19 @@ namespace Dose.Core.Library.Actors
                 Identifier = npcConfig.Identifier,
                 DisplayName = npcConfig.DisplayName,
                 Rarity = Enum.Parse<Rarity>(npcConfig.Rarity, true),
+                PackId = npcConfig.PackId,
+                LocationRestriction = npcConfig.LocationRestriction,
                 Texture = ResourceLoader.Load<Texture2D>(npcConfig.TexturePath),
                 Voice = new Voice(npcConfig.Voice, 16000),
                 DialogueMap = GetDialogueMap(npcConfig),
-                AvailableDialogueKeys = npcConfig.AvailableDialogues
+                AvailableDialogueKeys = npcConfig.AvailableDialogues,
+                InteractWith = npcConfig.InteractWith.Select(config => new ItemInteractionOperator
+                {
+                    ItemIdentifier = config.Item,
+                    Performer = ItemInteractionPerformerMap[config.Action],
+                    Args = config.Args
+                }),
+                Scale = npcConfig.Scale
             };
         }
 

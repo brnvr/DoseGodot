@@ -1,0 +1,7 @@
+TexturePath: res://Media/Textures/Environment/Props/FloorLamp_0.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+MinDistanceFromWall: 0
+MaxDistanceFromWall: 0
+MaxDistanceFromCorner: 0.2

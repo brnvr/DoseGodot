@@ -1,10 +1,64 @@
-[gd_scene load_steps=3 format=3 uid="uid://bm0d2mvnxfs2i"]
+[gd_scene load_steps=7 format=3 uid="uid://bm0d2mvnxfs2i"]
 
 [ext_resource type="Script" uid="uid://c2bv560c4mugm" path="res://Core/Scenes/Cursor.cs" id="1_1qbbr"]
 [ext_resource type="Script" uid="uid://cuinoaxdj4aet" path="res://Core/Scenes/UI.cs" id="1_nxvpl"]
+[ext_resource type="Script" path="res://Core/Library/UI/NotificationCenter.cs" id="3_notifications"]
+[ext_resource type="Script" path="res://Core/Scenes/EquipedItemDisplay.cs" id="4_equiped_item"]
+[ext_resource type="PackedScene" path="res://Configuration/Scenes/TextWithBackground.tscn" id="5_text_with_background"]
+[ext_resource type="Script" path="res://Core/Scenes/InventoryDisplay.cs" id="6_inventory_display"]
 
 [node name="UI" type="CanvasLayer"]
+layer = 1
 script = ExtResource("1_nxvpl")
+
+[node name="EquipedItemDisplay" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_equiped_item")
+
+[node name="ItemAnchor" type="Control" parent="EquipedItemDisplay"]
+layout_mode = 1
+anchors_preset = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="EquipMotion" type="Control" parent="EquipedItemDisplay/ItemAnchor"]
+layout_mode = 0
+mouse_filter = 2
+
+[node name="TargetMotion" type="Control" parent="EquipedItemDisplay/ItemAnchor/EquipMotion"]
+layout_mode = 0
+mouse_filter = 2
+
+[node name="FeedbackMotion" type="Control" parent="EquipedItemDisplay/ItemAnchor/EquipMotion/TargetMotion"]
+layout_mode = 0
+pivot_offset = Vector2(0, -192)
+mouse_filter = 2
+
+[node name="SwayMotion" type="Control" parent="EquipedItemDisplay/ItemAnchor/EquipMotion/TargetMotion/FeedbackMotion"]
+layout_mode = 0
+pivot_offset = Vector2(0, -192)
+mouse_filter = 2
+
+[node name="Texture" type="TextureRect" parent="EquipedItemDisplay/ItemAnchor/EquipMotion/TargetMotion/FeedbackMotion/SwayMotion"]
+layout_mode = 0
+offset_left = -192.0
+offset_top = -384.0
+offset_right = 192.0
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
 
 [node name="Cursor" type="Control" parent="."]
 layout_mode = 3
@@ -13,56 +67,125 @@ offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_1qbbr")
 
-[node name="DialogueCaption" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
-theme_override_font_sizes/font_size = 8
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="LeftBar" type="ColorRect" parent="."]
+layout_mode = 3
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
-[node name="NameCaption" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
-theme_override_font_sizes/font_size = 8
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="TopBar" type="ColorRect" parent="."]
+layout_mode = 3
+anchor_right = 1.0
+grow_horizontal = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
-[node name="Inventory" type="Label" parent="."]
-offset_top = 54.0
-offset_right = 82.0
-offset_bottom = 94.0
-theme_override_font_sizes/font_size = 8
-text = "No items"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="BottomBar" type="ColorRect" parent="."]
+layout_mode = 3
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
-[node name="Notifications" type="Label" parent="."]
-offset_left = 349.0
-offset_top = 58.0
-offset_right = 431.0
-offset_bottom = 98.0
-theme_override_font_sizes/font_size = 8
-text = "Notifications"
-horizontal_alignment = 2
-vertical_alignment = 1
+[node name="DialogueCaption" parent="BottomBar" instance=ExtResource("5_text_with_background")]
+layout_mode = 3
+anchor_left = 0.05
+anchor_right = 0.95
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="CurrentItem" type="Label" parent="."]
-offset_top = 108.0
-offset_right = 82.0
-offset_bottom = 148.0
-theme_override_font_sizes/font_size = 8
-text = "No items"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="NameCaption" parent="BottomBar" instance=ExtResource("5_text_with_background")]
+layout_mode = 3
+anchor_left = 0.05
+anchor_right = 0.95
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="ActiveItem" type="Label" parent="."]
-offset_top = 145.0
-offset_right = 82.0
-offset_bottom = 185.0
-theme_override_font_sizes/font_size = 8
-text = "No item selected"
+[node name="RightBar" type="ColorRect" parent="."]
+layout_mode = 3
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="RightBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="InventoryDisplay" type="VBoxContainer" parent="RightBar/CenterContainer"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 20
+script = ExtResource("6_inventory_display")
+
+[node name="ItemDetails" type="VBoxContainer" parent="RightBar/CenterContainer/InventoryDisplay"]
+custom_minimum_size = Vector2(154, 106)
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="Name" type="Label" parent="RightBar/CenterContainer/InventoryDisplay/ItemDetails"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/font_size = 14
+text = "Item name"
 horizontal_alignment = 1
-vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="RightBar/CenterContainer/InventoryDisplay/ItemDetails"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 10
+text = "Item description"
+horizontal_alignment = 1
+autowrap_mode = 2
+max_lines_visible = 4
+
+[node name="EquipHint" type="Label" parent="RightBar/CenterContainer/InventoryDisplay/ItemDetails"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.65, 0.65, 0.65, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="Items" type="GridContainer" parent="RightBar/CenterContainer/InventoryDisplay"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 2
+
+[node name="Notifications" type="VBoxContainer" parent="."]
+layout_mode = 3
+anchor_left = 0.7
+anchor_top = 0.08
+anchor_right = 1.0
+anchor_bottom = 0.08
+grow_vertical = 1
+mouse_filter = 2
+theme_override_constants/separation = 4
+script = ExtResource("3_notifications")
 
 [node name="QuestBook" type="Label" parent="."]
 offset_left = 168.0

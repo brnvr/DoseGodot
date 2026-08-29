@@ -29,7 +29,7 @@ namespace Dose.Core.Scenes
         {
             if (MeshInstance == null || Context == null)
             {
-                GD.PushWarning($"{nameof(Npc)} not initialized. Skipping {nameof(UpdateTexture)}.");
+                GD.PushWarning($"{GetType().Name} not initialized. Skipping {nameof(UpdateTexture)}.");
 
                 return;
             }

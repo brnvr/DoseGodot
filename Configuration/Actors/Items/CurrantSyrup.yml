@@ -1,10 +1,15 @@
 ---
-identifier: currant syrup
-rarity: VeryCommon
-texturePath: "res://Media/Textures/Placehoders/Item.png"
-execute:
-  - action: movePlayer
-    args:
+Identifier: currant syrup
+Description: >-
+  Currant-flavored beverage. The people in this building seem 
+  specially fond of it.
+Rarity: VeryCommon
+PackId: thisside
+Scale: 0.2
+TexturePath: "res://Media/Textures/Items/CurrantSyrup.png"
+Execute:
+  - Action: MovePlayer
+    Args:
       x: 1,
       y: 0,
       z: 1

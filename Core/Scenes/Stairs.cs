@@ -4,6 +4,8 @@ using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
 using Godot;
+using System;
+using System.Linq;
 
 namespace Dose.Core.Scenes
 {
@@ -51,6 +53,48 @@ namespace Dose.Core.Scenes
         {
             Context = context;
             Location = args.Location;
+
+            foreach (var meshInstance in FindChildren("*", "MeshInstance3D", true, false)
+                .OfType<MeshInstance3D>())
+            {
+                var mesh = meshInstance.Mesh;
+
+                if (mesh == null)
+                {
+                    continue;
+                }
+
+                for (var surfaceIndex = 0; surfaceIndex < mesh.GetSurfaceCount(); surfaceIndex++)
+                {
+                    var importedMaterial = mesh.SurfaceGetMaterial(surfaceIndex);
+                    var activeMaterial = meshInstance.GetActiveMaterial(surfaceIndex);
+                    var surfaceName = mesh is ArrayMesh arrayMesh
+                        ? arrayMesh.SurfaceGetName(surfaceIndex)
+                        : null;
+
+                    bool HasName(string name) =>
+                        string.Equals(surfaceName, name, StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(
+                            importedMaterial?.ResourceName,
+                            name,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                        || string.Equals(
+                            activeMaterial?.ResourceName,
+                            name,
+                            StringComparison.OrdinalIgnoreCase
+                        );
+
+                    if (HasName("Walls"))
+                    {
+                        meshInstance.SetSurfaceOverrideMaterial(surfaceIndex, args.WallMaterial);
+                    }
+                    else if (HasName("Black"))
+                    {
+                        meshInstance.SetSurfaceOverrideMaterial(surfaceIndex, args.BlackMaterial);
+                    }
+                }
+            }
         }
     }
 }

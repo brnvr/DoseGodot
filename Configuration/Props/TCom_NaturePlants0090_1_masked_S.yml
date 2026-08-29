@@ -1,0 +1,7 @@
+TexturePath: res://Media/Textures/Environment/Props/TCom_NaturePlants0090_1_masked_S.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+MinDistanceFromWall: 0
+MaxDistanceFromWall: 0
+MaxDistanceFromCorner: 0.2

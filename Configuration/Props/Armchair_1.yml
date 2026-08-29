@@ -1,0 +1,6 @@
+TexturePath: res://Media/Textures/Environment/Props/Armchair_1.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+Scale: 0.7
+MinDistanceFromWall: 0.2

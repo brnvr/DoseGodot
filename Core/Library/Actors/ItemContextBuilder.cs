@@ -4,7 +4,6 @@ using System.Linq;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Actors;
-using Dose.Core.Library.Interactivity;
 using Dose.Core.Scenes;
 using Godot;
 
@@ -20,21 +19,21 @@ namespace Dose.Core.Library.Actors
             {
                 Identifier = itemConfig.Identifier,
                 DisplayName = itemConfig.DisplayName,
+                Description = itemConfig.Description,
                 Rarity = Enum.Parse<Rarity>(itemConfig.Rarity, true),
+                PackId = itemConfig.PackId,
+                LocationRestriction = itemConfig.LocationRestriction,
                 Texture = ResourceLoader.Load<Texture2D>(itemConfig.TexturePath),
+                EquipedTexture = ResourceLoader.Load<Texture2D>(itemConfig.EquipedTexturePath),
                 MaxQuantity = itemConfig.MaxQuantity ?? -1,
                 Execute = itemConfig.Execute.Select(config => new Executable
                 {
                     Performer = ActionPerformerMap[config.Action],
                     Args = config.Args
                 }),
-                InteractWith = itemConfig.InteractWith.Select(config => new InteractionOperator
-                {
-                    ActorIdentifier = config.Actor,
-                    Performer = ActionPerformerMap[config.Action],
-                    Args = config.Args
-                }),
-                KeepAfterUse = itemConfig.KeepAfterUse
+                KeepAfterUse = itemConfig.KeepAfterUse,
+                Scale = itemConfig.Scale,
+                EquipedScale = itemConfig.EquipedScale
             };
         }
 

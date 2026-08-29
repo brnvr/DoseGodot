@@ -1,13 +1,14 @@
 using Godot;
+using Dose.Core.Library.Numbers;
 
 namespace Dose.Core.Library.Locations
 {
-    public class LocationLampSceneFactory(Texture2D texture, int blockSize, Vector2 offset)
+    public class LocationLampSceneFactory(Texture2D texture, ScaleFactor scale, int blockSize)
     : LocationBlockSceneFactory
     {
-        public Vector2 Offset { get; } = offset;
         public int BlockSize { get; } = blockSize;
         public Texture2D Texture { get; } = texture;
+        public ScaleFactor Scale { get; } = scale;
 
         protected override Vector3 GetPosition(IBuildableLocation location, Vector2I point)
         {
@@ -16,7 +17,13 @@ namespace Dose.Core.Library.Locations
                 return Vector3.Zero;
             }
 
-            return new Vector3(point.X + Offset.X - location.Map.CenterX, 0, point.Y + Offset.Y - location.Map.CenterY) * BlockSize;
+            var offset = location.Map.Get(point).LampOffset;
+
+            return new Vector3(
+                point.X + offset.X - location.Map.CenterX,
+                0,
+                point.Y + offset.Y - location.Map.CenterY
+            ) * BlockSize;
         }
 
         protected override float GetRotation(IBuildableLocation location, Vector2I point)
@@ -31,6 +38,18 @@ namespace Dose.Core.Library.Locations
             var material = GodotUtils.CreateBillboardMaterial(Texture);
 
             meshInstance.SetSurfaceOverrideMaterial(0, material);
+            ScaleFromTop(meshInstance);
+        }
+
+        void ScaleFromTop(MeshInstance3D meshInstance)
+        {
+            var meshTop = meshInstance.GetAabb().End.Y;
+            var topY = meshInstance.Position.Y + meshTop * meshInstance.Scale.Y;
+            var scaled = meshInstance.Scale * Scale.Value;
+            var position = meshInstance.Position;
+            position.Y = topY - meshTop * scaled.Y;
+            meshInstance.Scale = scaled;
+            meshInstance.Position = position;
         }
 
         protected override bool Predicate(MapCell cell)

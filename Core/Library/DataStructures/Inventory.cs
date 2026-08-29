@@ -16,6 +16,8 @@ namespace Dose.Core.Library.DataStructures
 
         public EventHandler<InventoryItemAddedEventArgs>? ItemAdded { get; set; }
         public EventHandler<InventoryItemDroppedEventArgs>? ItemDropped { get; set; }
+        public IEnumerable<InventoryEntry> Entries =>
+            _records.Select(record => new InventoryEntry(record.ItemContext, record.Quantity));
         
         public void Add(IItem item)
         {

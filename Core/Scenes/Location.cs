@@ -10,7 +10,7 @@ namespace Dose.Core.Scenes
 {
     public abstract partial class Location : Node3D, ILocation
     {
-        public NavigationRegion3D NavigationRegion { get; } = new NavigationRegion3D();
+        public NavigationRegion3D? NavigationRegion { get; private set; }
 
         public enum LocationType
         {
@@ -19,11 +19,51 @@ namespace Dose.Core.Scenes
 
         public abstract LocationType? Type { get; }
 
-        public override void _Ready()
+        public virtual Location InitializeNavigationRegion(string floorNodeName = "FloorMeshInstance")
         {
-            AddChild(NavigationRegion);
+            var floorNode = FindChild(floorNodeName, owned: false);
+            
+            if (floorNode == null) 
+            {
+                GD.PushWarning($"Child not found: {floorNodeName}");
+                return this;
+            }
 
-            base._Ready();
+            if (NavigationRegion != null)
+            {
+                GD.PushWarning($"{nameof(NavigationRegion)} has already been initialized.");
+                return this;
+            }
+    
+            NavigationRegion = new NavigationRegion3D
+            { 
+                NavigationMesh = new NavigationMesh
+                {
+                    GeometryParsedGeometryType = NavigationMesh.ParsedGeometryType.StaticColliders,
+                    GeometryCollisionMask = LocationCollisionLayer.NavigationSource
+                }
+            };
+
+            AddChild(NavigationRegion);
+            
+            var sourceData = new NavigationMeshSourceGeometryData3D();
+
+            NavigationServer3D.ParseSourceGeometryData(
+                NavigationRegion.NavigationMesh,
+                sourceData,
+                floorNode
+            );
+
+            NavigationServer3D.BakeFromSourceGeometryData(
+                NavigationRegion.NavigationMesh,
+                sourceData
+            );
+
+            // GD.Print($"Source has data: {sourceData.HasData()}");
+            // GD.Print($"Source vertices: {sourceData.GetVertices().Length}");
+            // GD.Print($"Source indices: {sourceData.GetIndices().Length}");
+
+            return this;
         }
 
         public TPortal SelectRandomPortal<TPortal>(Func<TPortal, bool>? predicate = null) where TPortal : IPortal

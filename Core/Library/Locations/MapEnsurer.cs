@@ -16,36 +16,64 @@ namespace Dose.Core.Library.Locations
 
         public void EnsureAtLeastOne()
         {
-            var allCells = Map.GetDefinedValues();
+            EnsureAtLeast(1);
+        }
 
-            var wallOfType = AllDirections()
-                .SelectMany(dir => allCells
-                    .Select(cell => cell.GetWall(dir))
-                    .Where(w => w is not null && Types.Contains(w.Type)))
-                .FirstOrDefault();
+        public void EnsureAtLeastOne(
+            Func<Vector2I, CardinalDirection, MapCellWall, bool> candidatePredicate
+        )
+        {
+            EnsureAtLeast(1, candidatePredicate);
+        }
 
-            if (wallOfType == null)
+        public void EnsureAtLeast(
+            int count,
+            Func<Vector2I, CardinalDirection, MapCellWall, bool>? candidatePredicate = null
+        )
+        {
+            if (count < 1)
             {
-                var wall = AllDirections()
-                    .Where(dir => allCells.First().GetWall(dir)?.Type == MapCellType.Solid)
-                    .Select(dir => allCells.First().GetWall(dir))
-                    .FirstOrDefault();
-                    
-                if (wall == null)
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be at least one.");
+            }
+
+            var walls = Map.GetFilledPositions()
+                .SelectMany(position => AllDirections()
+                    .Select(direction => (
+                        Position: position,
+                        Direction: direction,
+                        Wall: Map.Get(position).GetWall(direction)
+                    )))
+                .Where(candidate => candidate.Wall != null)
+                .Select(candidate => (
+                    candidate.Position,
+                    candidate.Direction,
+                    Wall: candidate.Wall!
+                ))
+                .ToList();
+
+            while (walls.Count(candidate => Types.Contains(candidate.Wall.Type)) < count)
+            {
+                var solidWalls = walls
+                    .Where(candidate =>
+                        candidate.Wall.Type == MapCellType.Solid &&
+                        (candidatePredicate == null || candidatePredicate(
+                            candidate.Position,
+                            candidate.Direction,
+                            candidate.Wall
+                        )))
+                    .ToList();
+
+                if (solidWalls.Count == 0)
                 {
-                    GD.PushWarning("No walls found. Can't ensure a wall type.");
+                    GD.PushWarning($"Not enough solid walls to ensure {count} portal walls.");
                     return;
                 }
-                
+
+                var wall = new RandomSelector<(Vector2I Position, CardinalDirection Direction, MapCellWall Wall)>(solidWalls).Pick().Wall;
                 wall.Type = new RandomSelector<MapCellType>(Types).Pick();
-            }
-            else
-            {
-                // TODO: Update ensurer logic
-                // if (!allCells.Any(cell => AllDirections().Any(dir => cell.GetWall(dir)?.DoorType != MapCellDoorType.Locked)))
-                // {
-                //     wallOfType.DoorType = MapCellDoorType.Open;
-                // }
+                wall.OverlayTexture = null;
+                wall.OverlayTextureScale = 1f;
+                wall.OverlayTextureRepeat = false;
             }
         }
     }

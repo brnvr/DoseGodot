@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 using Dose.Core.ActionPerformers;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Common;
@@ -13,6 +14,10 @@ using Dose.Core.Library.GameEvents;
 using Dose.Core.Library.DataStructures;
 using System.IO;
 using Dose.Core.Library.Loaders;
+using Dose.Core.Library.Configuration.Props;
+using Dose.Core.Library.Props;
+using Dose.Core.Library.Configuration.Packs;
+using Dose.Core.Library.Packs;
 
 namespace Dose.Core.Scenes
 {
@@ -21,7 +26,15 @@ namespace Dose.Core.Scenes
 		const string TEXTURE_PATH = "Configuration/Textures";
 		public override void _Ready()
 		{
+            var worldLightRig = new Node3D { Name = "WorldLightRig" };
+            AddChild(worldLightRig);
+
             List<DirectionalLight3D> lights = [
+				new DirectionalLight3D
+				{
+					RotationDegrees = new Vector3(-90, 0, 0),
+					LightEnergy = 1.25f
+				},
 				new DirectionalLight3D
 				{
 					RotationDegrees = new Vector3(0, 0, 0)
@@ -44,7 +57,7 @@ namespace Dose.Core.Scenes
 
             foreach (var light in lights)
 			{
-				AddChild(light);
+				worldLightRig.AddChild(light);
 			}
 
 			var ui = GetNode<UI>("UI");
@@ -52,7 +65,38 @@ namespace Dose.Core.Scenes
 			var postShader = GetNode<PostShader>("PostShader");
 			var controlPlane = GetNode<ControlPlane>("ControlPlane");
 			var locationManager = GetNode<LocationManager>("LocationManager");
-			var locationOccluder = GetNode<LocationOccluder>("LocationOccluder");
+
+            void SyncCursorType()
+            {
+                ui.SetCursorType(
+                    player.CanInteract() && player.SelectedItem == null
+                        ? Cursor.Types.Dot
+                        : null
+                );
+            }
+
+            player.SelectedItemChanged += (sender, e) =>
+            {
+                ui.SetEquipedItem(e.Item?.EquipedTexture, e.Item?.EquipedScale ?? 1f);
+                ui.SetEquipedItemTargeted(e.Item != null && player.HasInteractionTarget);
+                SyncCursorType();
+            };
+            player.DoorTransitionStarted += (sender, e) =>
+            {
+                worldLightRig.RotateY(e.RotationDelta);
+            };
+            player.InteractionAvailabilityChanged += (sender, e) =>
+            {
+                SyncCursorType();
+            };
+            player.InteractionTargetChanged += (sender, e) =>
+            {
+                ui.SetEquipedItemTargeted(e.HasTarget);
+            };
+            player.ItemInteractionRejected += (sender, e) =>
+            {
+                ui.PlayRejectedItemInteractionFeedback();
+            };
 
 			List<IGameEvent<Npc>> npcEvents = [
 				new DisappearOnDistanceEvent<Npc>(player, 10)
@@ -69,11 +113,11 @@ namespace Dose.Core.Scenes
 				configConverter: new TextureConfigConverter()
 			).Load();
 
-			var lampTexturePool = new WeightedPool<TextureDefinition>
+			var lampTexturePool = new WeightedPool<LampTextureDefinition>
 			(
 				configPath: Path.Join(TEXTURE_PATH, "Environment/Lamps"),
-				builder: new TextureDefinitionBuilder(),
-				configConverter: new TextureConfigConverter()
+				builder: new LampTextureDefinitionBuilder(),
+				configConverter: new LampTextureConfigConverter()
 			).Load();
 
 			var doorTexturePool = new WeightedPool<TextureDefinition>
@@ -83,6 +127,20 @@ namespace Dose.Core.Scenes
 				configConverter: new TextureConfigConverter()
 			).Load();
 
+			var wallOverlayTexturePool = new WeightedPool<WallOverlayTextureDefinition>
+			(
+				configPath: Path.Join(TEXTURE_PATH, "Environment/WallOverlays"),
+				builder: new WallOverlayTextureBuilder(),
+				configConverter: new WallOverlayTextureConfigConverter()
+			).Load();
+
+			var floorOverlayTexturePool = new WeightedPool<FloorOverlayTextureDefinition>
+			(
+				configPath: Path.Join(TEXTURE_PATH, "Environment/FloorOverlays"),
+				builder: new FloorOverlayTextureBuilder(),
+				configConverter: new FloorOverlayTextureConfigConverter()
+			).Load();
+
 			var itemPool = new ActorPool<ItemContext>
 			(
 				configPath: "Configuration/Actors/Items",
@@ -90,10 +148,11 @@ namespace Dose.Core.Scenes
 				configConverter: new ItemConfigConverter(),
 				contextBuilder: new ItemContextBuilder(new Dictionary<string, IActionPerformer>
 				{
-					{ "movePlayer", new MovePlayerPerformer(player) },
-					{ "receive", new ReceivePerformer(player) }
+					{ "MovePlayer", new MovePlayerPerformer(player) }
 				})
 			).Load();
+
+            var currantSyrup = itemPool.Content.Single(item => item.Identifier == "currant syrup");
 			
 			var npcPool = new ActorPool<NpcContext>
 			(
@@ -111,7 +170,11 @@ namespace Dose.Core.Scenes
 						onFinish: player.ProgressDialogue
 					)),
 					new("displayOptions", new DisplayOptionsNodeConverter(), new DialogueOptionsBuilder())
-				])
+				], new Dictionary<string, IActionPerformer>
+				{
+					{ "Receive", new ReceivePerformer(player) },
+					{ "RejectWithDialogue", new RejectWithDialoguePerformer(player) }
+				})
 			).Load();
 
 			var customRoomPool = new Pool<CustomRoomContext?>
@@ -121,20 +184,44 @@ namespace Dose.Core.Scenes
 				builder: new CustomRoomContextBuilder()
 			).Load();
 
+			var propPool = new PropPool
+			(
+				configPath: "Configuration/Props",
+				propScene: GD.Load<PackedScene>("res://Configuration/Scenes/Prop.tscn"),
+				configConverter: new PropConfigConverter(),
+				builder: new PropDefinitionBuilder()
+			).Load();
+
+			var packConfigs = new Pool<PackConfig>
+			(
+				configPath: "Configuration/Packs",
+				configConverter: new PackConfigConverter(),
+				builder: new PackConfigBuilder()
+			).Load();
+
+			var packPool = new PackPoolBuilder(
+				packConfigs.Content,
+				itemPool,
+				npcPool,
+				wallTexturePool.Content,
+				doorTexturePool.Content,
+				lampTexturePool.Content,
+				wallOverlayTexturePool.Content,
+				floorOverlayTexturePool.Content,
+				propPool
+			).Build();
+
 			controlPlane.Initialize(ui, player, locationManager, customRoomPool, new CustomRoomLoader<CustomRoom>());
 			locationManager.Initialize
 			(
 				controlPlane,
 				player,
-				itemPool,
-				npcPool,
-				wallTexturePool,
-				doorTexturePool,
-				lampTexturePool,
+				packPool,
 				npcEvents,
 				locationEvents
 			);
 			player.Initialize(controlPlane);
+            player.Inventory.Add(currantSyrup);
 			postShader.Initialize(palette);
 
 			AudioCollector.InitializeESpeak();

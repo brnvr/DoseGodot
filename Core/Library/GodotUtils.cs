@@ -87,6 +87,7 @@ namespace Dose.Core.Library
             {
                 AlbedoTexture = texture,
                 BillboardMode = BaseMaterial3D.BillboardModeEnum.FixedY,
+                BillboardKeepScale = true,
                 Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
                 TextureFilter = BaseMaterial3D.TextureFilterEnum.Nearest,
                 ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,

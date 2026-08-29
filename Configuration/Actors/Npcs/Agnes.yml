@@ -1,7 +1,18 @@
 ---
-identifier: Agnes
-texturePath: res://Media/Textures/Npcs/Agnes/Idle_000.png
-voice: mb-us1
-rarity: VeryCommon
-dialoguesDir: Configuration/Dialogues/Agnes
-availableDialogues: [SomeDialogue]
+Identifier: Agnes
+TexturePath: res://Media/Textures/Npcs/Agnes/Idle_000.png
+Voice: mb-us1
+Rarity: VeryCommon
+PackId: thisside
+DialoguesDir: Configuration/Dialogues/Agnes
+Scale: 0.985
+AvailableDialogues: [SomeDialogue]
+InteractWith:
+  - Item: sheet music
+    Action: Receive
+    Args:
+      arg0: value
+  - Item: currant syrup
+    Action: RejectWithDialogue
+    Args:
+      line: "I don't like it."

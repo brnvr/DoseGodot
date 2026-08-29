@@ -1,2 +1,3 @@
-rarity: VeryCommon
-texturePath: res://Media/Textures/Environment/Doors/Door_Door_Apartment_01_red.png
+Rarity: VeryCommon
+PackId: thisside
+TexturePath: res://Media/Textures/Environment/Doors/Door_Door_Apartment_01_red.png

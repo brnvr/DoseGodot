@@ -8,11 +8,15 @@ using Godot;
 
 namespace Dose.Core.Interactions
 {
-    public class TalkInteraction<TInteractor>(TInteractor interactor) : IInteraction<TInteractor>
+    public class TalkInteraction<TInteractor>(
+        TInteractor interactor,
+        IDialogue? dialogue = null
+    ) : IInteraction<TInteractor>
     {
         public string DisplayName => "talk";
 
         public TInteractor Interactor { get; } = interactor;
+        public IDialogue? Dialogue { get; } = dialogue;
 
         public void Perform(IActor subject)
         {
@@ -21,16 +25,16 @@ namespace Dose.Core.Interactions
                 if (subject is ITalkable talkable)
                 {
                     var canTalk = true;
-                    var dialogue = talkable.GetDialogue();
+                    var selectedDialogue = Dialogue ?? talkable.GetDialogue();
 
-                    if (dialogue == null)
+                    if (selectedDialogue == null)
                     {
                         return;
                     }
 
                     var dialogueId = Guid.NewGuid().ToString();
 
-                    var dialogueRunner = new DialogueRunner(dialogue, (sender, e) =>
+                    var dialogueRunner = new DialogueRunner(selectedDialogue, (sender, e) =>
                     {
                         if (subject is ISpeakable speakable)
                         {
