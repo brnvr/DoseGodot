@@ -1,21 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://cbqb4bugioblo"]
+[gd_scene format=3 uid="uid://cbqb4bugioblo"]
 
 [ext_resource type="Script" uid="uid://calpgqajp03lj" path="res://Core/Scenes/Player.cs" id="1_4flbx"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_kyqiw"]
 radius = 0.25
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" unique_id=1512785127]
 script = ExtResource("1_4flbx")
 
-[node name="Head" type="Node3D" parent="."]
+[node name="Head" type="Node3D" parent="." unique_id=929593942]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.73, 0)
 
-[node name="View" type="Camera3D" parent="Head"]
+[node name="View" type="Camera3D" parent="Head" unique_id=750773827]
+fov = 95
 
-[node name="RayCast3D" type="RayCast3D" parent="Head/View"]
+[node name="RayCast3D" type="RayCast3D" parent="Head/View" unique_id=314621066]
 collide_with_areas = true
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1214612314]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CylinderShape3D_kyqiw")
