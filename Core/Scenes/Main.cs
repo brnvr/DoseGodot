@@ -23,7 +23,6 @@ namespace Dose.Core.Scenes
 {
 	public partial class Main : Node3D
 	{
-		const string TEXTURE_PATH = "Configuration/Textures";
 		UI? _ui;
 		Player? _player;
 		LocationManager? _locationManager;
@@ -138,35 +137,35 @@ namespace Dose.Core.Scenes
 
 			var wallTexturePool = new WeightedPool<TextureDefinition>
 			(
-				configPath: Path.Join(TEXTURE_PATH, "Environment/Walls"),
+				configPath: "Configuration/Environment/Walls",
 				builder: new TextureDefinitionBuilder(),
 				configConverter: new TextureConfigConverter()
 			).Load();
 
 			var lampTexturePool = new WeightedPool<LampTextureDefinition>
 			(
-				configPath: Path.Join(TEXTURE_PATH, "Environment/Lamps"),
+				configPath: "Configuration/Environment/Lamps",
 				builder: new LampTextureDefinitionBuilder(),
 				configConverter: new LampTextureConfigConverter()
 			).Load();
 
 			var doorTexturePool = new WeightedPool<TextureDefinition>
 			(
-				configPath: Path.Join(TEXTURE_PATH, "Environment/Doors"),
+				configPath: "Configuration/Environment/Doors",
 				builder: new TextureDefinitionBuilder(),
 				configConverter: new TextureConfigConverter()
 			).Load();
 
 			var wallOverlayTexturePool = new WeightedPool<WallOverlayTextureDefinition>
 			(
-				configPath: Path.Join(TEXTURE_PATH, "Environment/WallOverlays"),
+				configPath: "Configuration/Environment/WallOverlays",
 				builder: new WallOverlayTextureBuilder(),
 				configConverter: new WallOverlayTextureConfigConverter()
 			).Load();
 
 			var floorOverlayTexturePool = new WeightedPool<FloorOverlayTextureDefinition>
 			(
-				configPath: Path.Join(TEXTURE_PATH, "Environment/FloorOverlays"),
+				configPath: "Configuration/Environment/FloorOverlays",
 				builder: new FloorOverlayTextureBuilder(),
 				configConverter: new FloorOverlayTextureConfigConverter()
 			).Load();
