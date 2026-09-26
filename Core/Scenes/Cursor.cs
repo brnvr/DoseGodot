@@ -34,6 +34,7 @@ namespace Dose.Core.Scenes
             TextureFilter = TextureFilterEnum.Nearest;
             Size = GetViewportRect().Size;
             ZIndex = 1000;
+            GetViewport().SizeChanged += OnViewportSizeChanged;
         }
 
         public void SetCursorType(CursorType? type)
@@ -62,7 +63,15 @@ namespace Dose.Core.Scenes
             DrawTextureRect(Type.Texture, destination, false);
         }
 
-        public override void _Process(double delta)
+        public override void _Input(InputEvent @event)
+        {
+            if (@event is InputEventMouseMotion && Input.MouseMode != Input.MouseModeEnum.Captured)
+            {
+                QueueRedraw();
+            }
+        }
+
+        void OnViewportSizeChanged()
         {
             Size = GetViewportRect().Size;
             QueueRedraw();

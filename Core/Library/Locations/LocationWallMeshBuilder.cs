@@ -50,7 +50,7 @@ namespace Dose.Core.Library.Locations
             { MapCellType.Doorway, doorwayMesh }
         }.ToFrozenDictionary();
         readonly Dictionary<(Texture2D Texture, float Scale, bool TextureRepeat), SurfaceTool> _overlaySurfaceTools = [];
-        readonly Shader _overlayShader = new() { Code = OVERLAY_SHADER_CODE };
+        static readonly Shader _overlayShader = new() { Code = OVERLAY_SHADER_CODE };
         bool _hasPlainWalls;
 
         public int BlockSize { get; } = blockSize;

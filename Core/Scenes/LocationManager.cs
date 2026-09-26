@@ -57,6 +57,11 @@ namespace Dose.Core.Scenes
 
 		public ILocation? CurrentLocation { get => _currentLocation; set { SetCurrentLocation(value); } }
 
+		public override void _Process(double delta)
+		{
+			_locationQueue?.ProcessPendingRefill();
+		}
+
 		public override void _ExitTree()
         {
             CurrentLocation?.Clear(-1);
@@ -443,7 +448,7 @@ namespace Dose.Core.Scenes
 				return;
 			}
 
-			var lampTexture = GD.Load<Texture2D>(lampTextureDefinition.TexturePath);
+			var lampTexture = lampTextureDefinition.Texture;
 			
 			var occluderFactory = new LocationOccluderFactory<LocationOccluder>
 			(
@@ -525,7 +530,7 @@ namespace Dose.Core.Scenes
 				return null;
 			}
 
-			return GD.Load<Texture2D>(textureDefinition.TexturePath);
+			return textureDefinition.Texture;
 		}
 
 		static T? PickRandom<T>(IEnumerable<T>? values)

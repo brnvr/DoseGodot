@@ -61,7 +61,8 @@ void fragment()
         vec3 palette_color =
             texture(palette_texture, uv).rgb;
 
-        float d = distance(color, palette_color);
+        vec3 difference = color - palette_color;
+        float d = dot(difference, difference);
 
         if (d < best_distance)
         {

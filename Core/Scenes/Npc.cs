@@ -34,6 +34,8 @@ namespace Dose.Core.Scenes
         public override void _Ready()
         {
             _navigationAgent = GetNode<NavigationAgent3D>("NavigationAgent");
+            SetProcess(GameEvent != null);
+            SetPhysicsProcess(false);
         }
 
 
@@ -174,6 +176,7 @@ namespace Dose.Core.Scenes
             _following?.Stop();
             _following = null;
             _lastNavigationTarget = null;
+            SetPhysicsProcess(false);
 
             if (_collisionDisabledForFollow)
             {
@@ -190,6 +193,7 @@ namespace Dose.Core.Scenes
             if (_navigationAgent == null) return;
 
             _followSpeed = speed;
+            SetPhysicsProcess(true);
 
             if (_lastNavigationTarget?.IsEqualApprox(target.GlobalPosition) == true)
             {
@@ -203,6 +207,7 @@ namespace Dose.Core.Scenes
         public void Stop()
         {
             LinearVelocity = new Vector3(0, LinearVelocity.Y, 0);
+            SetPhysicsProcess(false);
         }
 
         public bool HasReached(Player target)

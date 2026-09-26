@@ -32,7 +32,7 @@ namespace Dose.Core.Scenes
         StandardMaterial3D? _material;
         float _yRotationStart;
         float _opening;
-        readonly float _rotateSpeed = Mathf.DegToRad(5);
+        readonly float _rotateSpeed = Mathf.DegToRad(300);
         ILocationManager? _locationManager;
 
         [Export] public ClockDirection OpenDirection { get; set; } = ClockDirection.Clockwise;
@@ -58,6 +58,7 @@ namespace Dose.Core.Scenes
         {
             CacheNodes();
             _yRotationStart = _mesh!.Rotation.Y;
+            SetProcess(false);
         }
 
         void CacheNodes()
@@ -187,11 +188,16 @@ namespace Dose.Core.Scenes
                 case DoorState.Opening:
                     var target = OpenDirection == ClockDirection.Clockwise ? MAX_OPENING : -MAX_OPENING;
 
-                    _opening = (float)new LinearInterpolator(_opening, target, _rotateSpeed).Interpolate();
+                    _opening = new LinearInterpolator(
+                        _opening,
+                        (float)target,
+                        _rotateSpeed * (float)delta
+                    ).Interpolate();
 
-                    if (_opening >= MAX_OPENING)
+                    if (Mathf.IsEqualApprox(_opening, (float)target))
                     {
                         State = DoorState.Open;
+                        SetProcess(false);
                     }
 
                     UpdateRotation();
@@ -199,11 +205,17 @@ namespace Dose.Core.Scenes
                     break;
 
                 case DoorState.Closing:
-                    _opening = (float)new LinearInterpolator(_opening, 0, _rotateSpeed).Interpolate();
+                    _opening = new LinearInterpolator(
+                        _opening,
+                        0,
+                        _rotateSpeed * (float)delta
+                    ).Interpolate();
 
-                    if (_opening == 0)
+                    if (Mathf.IsZeroApprox(_opening))
                     {
+                        _opening = 0;
                         State = DoorState.Closed;
+                        SetProcess(false);
                     }
 
                     UpdateRotation();
@@ -223,6 +235,7 @@ namespace Dose.Core.Scenes
             }
 
             State = DoorState.Opening;
+            SetProcess(true);
             if (disableCollision) DisableCollision();
             
             return true;
@@ -238,6 +251,7 @@ namespace Dose.Core.Scenes
 
             EnableCollision();
             State = DoorState.Closing;
+            SetProcess(true);
 
             return true;
         }

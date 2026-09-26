@@ -44,7 +44,7 @@ namespace Dose.Core.Library.Locations
             """;
 
         readonly Dictionary<(Texture2D Texture, float Scale, bool TextureRepeat), SurfaceTool> _overlaySurfaceTools = [];
-        readonly Shader _overlayShader = new() { Code = OVERLAY_SHADER_CODE };
+        static readonly Shader _overlayShader = new() { Code = OVERLAY_SHADER_CODE };
         readonly (Vector2 Min, Vector2 Size) _floorUvBounds = GetUvBounds(floorMesh);
         bool _hasPlainFloors;
 

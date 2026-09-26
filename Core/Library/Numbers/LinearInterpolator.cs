@@ -1,14 +1,15 @@
 using System;
+using Godot;
 
 namespace Dose.Core.Library.Numbers
 {
-    public class LinearInterpolator : IInterpolator<double>
+    public readonly struct LinearInterpolator : IInterpolator<float>
     {
-        public double Value { get; }
-        public double Target { get; }
-        public double Delta { get; }
+        public float Value { get; }
+        public float Target { get; }
+        public float Delta { get; }
 
-        public LinearInterpolator(double value, double target, double delta)
+        public LinearInterpolator(float value, float target, float delta)
         {
             if (delta < 0)
             {
@@ -20,13 +21,6 @@ namespace Dose.Core.Library.Numbers
             Delta = delta;
         }
 
-        public double Interpolate()
-        {
-            return Math.Clamp(
-                Value + Math.Sign(Target - Value) * Delta,
-                Math.Min(Value, Target),
-                Math.Max(Value, Target)
-            );
-        }
+        public float Interpolate() => Mathf.MoveToward(Value, Target, Delta);
     }
 }

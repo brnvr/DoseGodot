@@ -27,14 +27,15 @@ namespace Dose.Core.Scenes
 		Player? _player;
 		LocationManager? _locationManager;
 		WorldMap? _worldMap;
-		Vector2? _lastRenderedPlayerPosition;
+		Vector2I? _lastRenderedMapPixel;
 
 		public override void _Ready()
 		{
             var worldLightRig = new Node3D { Name = "WorldLightRig" };
             AddChild(worldLightRig);
 
-            List<DirectionalLight3D> lights = [
+            List<DirectionalLight3D> lights =
+            [
 				new DirectionalLight3D
 				{
 					RotationDegrees = new Vector3(-90, 0, 0),
@@ -50,14 +51,14 @@ namespace Dose.Core.Scenes
 				},
 				new DirectionalLight3D
 				{
-					RotationDegrees = new Vector3(0, 90, 0), 
+					RotationDegrees = new Vector3(0, 90, 0),
 					LightEnergy = 0.25f
 				},
 				new DirectionalLight3D
 				{
-					RotationDegrees = new Vector3(0, 270, 0), 
+					RotationDegrees = new Vector3(0, 270, 0),
 					LightEnergy = 0.25f
-				},
+				}
 			];
 
             foreach (var light in lights)
@@ -78,7 +79,7 @@ namespace Dose.Core.Scenes
 			locationManager.CurrentLocationChanged += async (previous, current) =>
 			{
 				worldMap.Visit(current, previous);
-				_lastRenderedPlayerPosition = null;
+				_lastRenderedMapPixel = null;
 				var image = await worldMap.GetImageAsync(current.Id);
 				if (image != null)
 				{
@@ -282,13 +283,15 @@ namespace Dose.Core.Scenes
 
 			var blockSize = ((IBuildableLocation)_locationManager.CurrentLocation).BlockSize;
 			var playerPosition = new Vector2(_player.GlobalPosition.X, _player.GlobalPosition.Z) / blockSize;
-			if (_lastRenderedPlayerPosition is Vector2 previous && previous.IsEqualApprox(playerPosition))
+			var mapPosition = _worldMap.GetCurrentPlayerPixel(playerPosition);
+			var mapPixel = new Vector2I(Mathf.RoundToInt(mapPosition.X), Mathf.RoundToInt(mapPosition.Y));
+			if (_lastRenderedMapPixel == mapPixel)
 			{
 				return;
 			}
 
-			_lastRenderedPlayerPosition = playerPosition;
-			_ui.CenterMapOn(_worldMap.GetCurrentPlayerPixel(playerPosition));
+			_lastRenderedMapPixel = mapPixel;
+			_ui.CenterMapOn(mapPixel);
 		}
 
         // public override void _ExitTree()

@@ -15,13 +15,9 @@ namespace Dose.Core.Scenes
         const float DARK_OVERLAY_OPACITY = 0.5f;
 
         readonly List<ILocationEvent> _gameEvents = [];
-        bool _active;
+        bool _eventsActive;
         ColorRect? _darkOverlay;
-        IEnumerable<MeshInstance3D> LightPoints => FindChildren(
-            LIGHT_POINTS_NODE_NAME,
-            recursive: true,
-            owned: false
-        ).OfType<MeshInstance3D>();
+        MeshInstance3D[] _lightPoints = [];
 
         public Guid Id { get; } = Guid.NewGuid();
         public NavigationRegion3D? NavigationRegion { get; private set; }
@@ -36,27 +32,17 @@ namespace Dose.Core.Scenes
 
         public override void _Ready()
         {
-            var canvasLayer = new CanvasLayer
-            {
-                Name = "DarkOverlayLayer",
-                Layer = 0
-            };
-            AddChild(canvasLayer);
-
-            _darkOverlay = new ColorRect
-            {
-                Name = "DarkOverlay",
-                Color = new Color(0f, 0f, 0f, DARK_OVERLAY_OPACITY),
-                MouseFilter = Godot.Control.MouseFilterEnum.Ignore,
-                Visible = false
-            };
-            canvasLayer.AddChild(_darkOverlay);
-            _darkOverlay.SetAnchorsAndOffsetsPreset(Godot.Control.LayoutPreset.FullRect);
+            _lightPoints = [.. FindChildren(
+                LIGHT_POINTS_NODE_NAME,
+                recursive: true,
+                owned: false
+            ).OfType<MeshInstance3D>()];
+            SetProcess(false);
         }
 
         public override void _Process(double delta)
         {
-            if (!_active)
+            if (!_eventsActive)
             {
                 return;
             }
@@ -72,12 +58,14 @@ namespace Dose.Core.Scenes
 
         public virtual void OnEntered()
         {
-            _active = true;
+            _eventsActive = true;
 
             foreach (var gameEvent in _gameEvents)
             {
                 gameEvent.Activate(this);
             }
+
+            SetProcess(_gameEvents.Count > 0);
         }
 
         public virtual void OnLeft()
@@ -87,16 +75,18 @@ namespace Dose.Core.Scenes
                 gameEvent.Deactivate(this);
             }
 
-            _active = false;
+            _eventsActive = false;
+            SetProcess(false);
         }
 
         protected void AddGameEvent(ILocationEvent gameEvent)
         {
             _gameEvents.Add(gameEvent);
 
-            if (_active)
+            if (_eventsActive)
             {
                 gameEvent.Activate(this);
+                SetProcess(true);
             }
         }
 
@@ -109,7 +99,7 @@ namespace Dose.Core.Scenes
                 _darkOverlay.Visible = false;
             }
 
-            foreach (var lightPoint in LightPoints)
+            foreach (var lightPoint in _lightPoints)
             {
                 lightPoint.Visible = true;
             }
@@ -119,15 +109,38 @@ namespace Dose.Core.Scenes
         {
             LightsOn = false;
 
-            if (_darkOverlay != null)
-            {
-                _darkOverlay.Visible = true;
-            }
+            EnsureDarkOverlay().Visible = true;
 
-            foreach (var lightPoint in LightPoints)
+            foreach (var lightPoint in _lightPoints)
             {
                 lightPoint.Visible = false;
             }
+        }
+
+        ColorRect EnsureDarkOverlay()
+        {
+            if (_darkOverlay != null)
+            {
+                return _darkOverlay;
+            }
+
+            var canvasLayer = new CanvasLayer
+            {
+                Name = "DarkOverlayLayer",
+                Layer = 0
+            };
+            AddChild(canvasLayer);
+
+            _darkOverlay = new ColorRect
+            {
+                Name = "DarkOverlay",
+                Color = new Color(0f, 0f, 0f, DARK_OVERLAY_OPACITY),
+                MouseFilter = Godot.Control.MouseFilterEnum.Ignore
+            };
+            canvasLayer.AddChild(_darkOverlay);
+            _darkOverlay.SetAnchorsAndOffsetsPreset(Godot.Control.LayoutPreset.FullRect);
+
+            return _darkOverlay;
         }
 
         public virtual Location InitializeNavigationRegion(string floorNodeName = "FloorMeshInstance")
