@@ -3,7 +3,6 @@ using Dose.Core.Interactions;
 using Dose.Core.Library.Actors;
 using Dose.Core.Library.Interactivity;
 using Dose.Core.Library.Locations;
-using Dose.Core.Library.Numbers;
 using Dose.Core.Library;
 using Godot;
 using System;
@@ -188,11 +187,11 @@ namespace Dose.Core.Scenes
                 case DoorState.Opening:
                     var target = OpenDirection == ClockDirection.Clockwise ? MAX_OPENING : -MAX_OPENING;
 
-                    _opening = new LinearInterpolator(
+                    _opening = Mathf.MoveToward(
                         _opening,
                         (float)target,
                         _rotateSpeed * (float)delta
-                    ).Interpolate();
+                    );
 
                     if (Mathf.IsEqualApprox(_opening, (float)target))
                     {
@@ -205,11 +204,11 @@ namespace Dose.Core.Scenes
                     break;
 
                 case DoorState.Closing:
-                    _opening = new LinearInterpolator(
+                    _opening = Mathf.MoveToward(
                         _opening,
                         0,
                         _rotateSpeed * (float)delta
-                    ).Interpolate();
+                    );
 
                     if (Mathf.IsZeroApprox(_opening))
                     {
