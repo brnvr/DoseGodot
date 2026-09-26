@@ -9,7 +9,7 @@ namespace Dose.Core.Scenes
     {
         LocationType? _type;
         
-        public IGameEvent<Location>? GameEvent;
+        public ILocationEvent? GameEvent { get; private set; }
         public Map? Map { get; private set; }
         public override LocationType? Type { get => _type; }
         public int BlockSize { get; private set; }
@@ -21,20 +21,12 @@ namespace Dose.Core.Scenes
             AddChild(node);
         }
 
-        public override void _Process(double delta)
-        {
-            if (GameEvent != null && GameEvent.ShouldTrigger(this))
-            {
-                GameEvent.OnTrigger(this);
-            }
-        }
-
         public BuildableLocation Initialize(
             IMapGenerator mapGenerator,
             int blockSize,
             ClockDirection doorClockDirection,
             LocationType type,
-            IGameEvent<Location>? gameEvent
+            ILocationEvent? gameEvent
         )
         {
             _type = type;
@@ -42,6 +34,11 @@ namespace Dose.Core.Scenes
             MapGenerator = mapGenerator;
             BlockSize = blockSize;
             DoorClockDirection = doorClockDirection;
+
+            if (GameEvent != null)
+            {
+                AddGameEvent(GameEvent);
+            }
             
             if (Map != null)
             {

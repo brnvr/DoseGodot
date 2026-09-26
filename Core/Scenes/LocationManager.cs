@@ -29,7 +29,7 @@ namespace Dose.Core.Scenes
 		readonly Vector2 _doorOffset = new(-0.11275f, .5f);
 		readonly Vector2 _stairsOffset = new(0, .5f);
 		readonly static Probability _probabilityToSetNpcEvent = new(0.25);
-		readonly static Probability _probabilityToSetLocationEvent = new (0.25);
+		readonly static Probability _probabilityToSetLocationEvent = new(0.25);
 		readonly static Texture2D _blackTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/Common/black.png");
 		readonly static Texture2D _lampFloorOverlayTexture = GD.Load<Texture2D>("res://Media/Textures/Environment/FloorOverlays/LightSpot.png");
 		readonly static Mesh _wallMesh = LoadMeshFromScene("res://Media/3DAssets/Environment/Wall.glb");
@@ -46,7 +46,7 @@ namespace Dose.Core.Scenes
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
 		IEnumerable<IGameEvent<Npc>>? _npcEvents;
-		IEnumerable<IGameEvent<Location>>? _locationEvents;
+		IEnumerable<Func<ILocationEvent>>? _locationEventFactories;
 		public event Action<ILocation?, ILocation>? CurrentLocationChanged;
 		public MapRenderQueue MapRenderQueue { get; } = new(new MapRenderer());
 
@@ -68,14 +68,14 @@ namespace Dose.Core.Scenes
 			Player player,
 			PackPool packPool,
 			IEnumerable<IGameEvent<Npc>> npcEvents,
-			IEnumerable<IGameEvent<Location>> locationEvents
+			IEnumerable<Func<ILocationEvent>> locationEventFactories
 		)
         {
 			Player = player;
 			ControlPlane = controlPlane;
 			PackPool = packPool;
 			_npcEvents = npcEvents;
-			_locationEvents = locationEvents;
+			_locationEventFactories = locationEventFactories;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
 			{
 				{ ROOM_CATEGORY, direction => CreateRoom(direction) },
@@ -295,12 +295,13 @@ namespace Dose.Core.Scenes
 
 			IMapGenerator mapGenerator = GenerateRoomMap(pack);
 
+			var locationEventFactory = PickRandom(_locationEventFactories, _probabilityToSetLocationEvent);
 			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
 				BLOCK_SIZE,
 				clockDirection,
 				Location.LocationType.Room,
-				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
+				gameEvent: locationEventFactory?.Invoke()
 			);
 
 			if (location.Map != null)
@@ -347,12 +348,13 @@ namespace Dose.Core.Scenes
 				shouldEnsureStairsDown
 			);
 
+			var locationEventFactory = PickRandom(_locationEventFactories, _probabilityToSetLocationEvent);
 			var location = _buildableLocationScene.Instantiate<BuildableLocation>().Initialize(
 				mapGenerator,
 				BLOCK_SIZE,
 				clockDirection,
 				Location.LocationType.Corridor,
-				gameEvent: PickRandom(_locationEvents, _probabilityToSetLocationEvent)
+				gameEvent: locationEventFactory?.Invoke()
 			);
 
 			if (location.Map != null)
@@ -625,6 +627,7 @@ namespace Dose.Core.Scenes
 		void SetCurrentLocation(ILocation? location)
         {
 			var previousLocation = _currentLocation;
+			previousLocation?.OnLeft();
 			SetPropInteractionCollisionsIgnored(_currentLocation, false);
 
 			if (_currentLocation is Node currentLocationNode && currentLocationNode.GetParent() == this)
@@ -635,6 +638,7 @@ namespace Dose.Core.Scenes
 			AttachLocation(location, visible: true);
 
 			_currentLocation = location;
+			_currentLocation?.OnEntered();
 			SetPropInteractionCollisionsIgnored(_currentLocation, true);
 
 			if (location != null)

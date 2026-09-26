@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.ActionPerformers;
@@ -12,7 +13,6 @@ using Dose.Core.Library.Locations;
 using Dose.Core.Library.Configuration.Locations;
 using Dose.Core.Library.GameEvents;
 using Dose.Core.Library.DataStructures;
-using System.IO;
 using Dose.Core.Library.Loaders;
 using Dose.Core.Library.Configuration.Props;
 using Dose.Core.Library.Props;
@@ -131,7 +131,10 @@ namespace Dose.Core.Scenes
 				new DisappearOnDistanceEvent<Npc>(player, 10)
 			];
 
-			List<IGameEvent<Location>> locationEvents = [];
+			List<Func<ILocationEvent>> locationEventFactories =
+			[
+				() => new FlickeringLightEvent()
+			];
 
 			var palette = new JascPalLoader("Configuration/Palettes/miri16.pal").Load();
 
@@ -215,7 +218,7 @@ namespace Dose.Core.Scenes
 
 			var propPool = new PropPool
 			(
-				configPath: "Configuration/Props",
+				configPath: "Configuration/Environment/Props",
 				propScene: GD.Load<PackedScene>("res://Configuration/Scenes/Prop.tscn"),
 				configConverter: new PropConfigConverter(),
 				builder: new PropDefinitionBuilder()
@@ -247,7 +250,7 @@ namespace Dose.Core.Scenes
 				player,
 				packPool,
 				npcEvents,
-				locationEvents
+				locationEventFactories
 			);
 			player.Initialize(controlPlane);
             player.Inventory.Add(currantSyrup);

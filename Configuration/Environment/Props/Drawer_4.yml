@@ -1,0 +1,9 @@
+TexturePath: res://Media/Textures/Environment/Props/Drawer_4.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+Scale: 0.6
+SurfaceOffset:
+  Horizontal: 0
+  Vertical: 0.33
+MaxDistanceFromWall: 0.1

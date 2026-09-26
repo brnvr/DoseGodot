@@ -1,0 +1,6 @@
+TexturePath: res://Media/Textures/Environment/Props/Chair_1.png
+Rarity: VeryCommon
+PackId: thisside
+LocationRestriction: Rooms
+Scale: 0.8
+MinDistanceFromWall: 0.2
