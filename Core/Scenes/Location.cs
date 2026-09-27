@@ -1,6 +1,7 @@
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Randomness;
 using Dose.Core.Library.GameEvents;
+using Dose.Core.Library.Interactivity;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,12 @@ using System.Linq;
 
 namespace Dose.Core.Scenes
 {
-    public abstract partial class Location : Node3D, ILocation
+    public abstract partial class Location : Node3D, ILocation, ILightsToggleable
     {
         const string LIGHT_POINTS_NODE_NAME = "LampFloorOverlayMeshInstance";
         const float DARK_OVERLAY_OPACITY = 0.5f;
 
-        readonly List<ILocationEvent> _gameEvents = [];
+        readonly List<IGameEvent<Location>> _gameEvents = [];
         bool _eventsActive;
         ColorRect? _darkOverlay;
         MeshInstance3D[] _lightPoints = [];
@@ -79,7 +80,7 @@ namespace Dose.Core.Scenes
             SetProcess(false);
         }
 
-        protected void AddGameEvent(ILocationEvent gameEvent)
+        protected void AddGameEvent(IGameEvent<Location> gameEvent)
         {
             _gameEvents.Add(gameEvent);
 

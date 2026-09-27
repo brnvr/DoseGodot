@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bn1geieeho828"]
 
-[ext_resource type="PackedScene" uid="uid://xmia3f60u8ow" path="res://Media/3DAssets/Environment/StairsUp.glb" id="1_qahmx"]
+[ext_resource type="PackedScene" uid="uid://cq0ap76bdseqd" path="res://Media/3DAssets/Environment/StairsUp.glb" id="1_qahmx"]
 [ext_resource type="Script" uid="uid://d2wa8yo6kc4c" path="res://Core/Scenes/StairsUp.cs" id="2_va2ao"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qahmx"]

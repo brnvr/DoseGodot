@@ -9,7 +9,7 @@ namespace Dose.Core.Scenes
     {
         LocationType? _type;
         
-        public ILocationEvent? GameEvent { get; private set; }
+        public IGameEvent<Location>? GameEvent { get; private set; }
         public Map? Map { get; private set; }
         public override LocationType? Type { get => _type; }
         public int BlockSize { get; private set; }
@@ -26,7 +26,7 @@ namespace Dose.Core.Scenes
             int blockSize,
             ClockDirection doorClockDirection,
             LocationType type,
-            ILocationEvent? gameEvent
+            IGameEvent<Location>? gameEvent
         )
         {
             _type = type;

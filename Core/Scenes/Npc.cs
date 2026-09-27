@@ -34,6 +34,7 @@ namespace Dose.Core.Scenes
         public override void _Ready()
         {
             _navigationAgent = GetNode<NavigationAgent3D>("NavigationAgent");
+            GameEvent?.Activate(this);
             SetProcess(GameEvent != null);
             SetPhysicsProcess(false);
         }
@@ -122,6 +123,8 @@ namespace Dose.Core.Scenes
 
         public override void _ExitTree()
         {
+            GameEvent?.Deactivate(this);
+
             if (Speaker?.IsSpeaking == true)
             {
                 Speaker?.Stop();

@@ -14,6 +14,7 @@ using Dose.Core.Library.GameEvents;
 using System.Linq;
 using Dose.Core.Library;
 using Dose.Core.Library.Packs;
+using Dose.Core.Library.Props;
 namespace Dose.Core.Scenes
 {
 
@@ -45,8 +46,8 @@ namespace Dose.Core.Scenes
 
 		ILocation? _currentLocation;
 		LocationQueue? _locationQueue;
-		IEnumerable<IGameEvent<Npc>>? _npcEvents;
-		IEnumerable<Func<ILocationEvent>>? _locationEventFactories;
+		IEnumerable<Func<IGameEvent<Npc>>>? _npcEventFactories;
+		IEnumerable<Func<IGameEvent<Location>>>? _locationEventFactories;
 		public event Action<ILocation?, ILocation>? CurrentLocationChanged;
 		public MapRenderQueue MapRenderQueue { get; } = new(new MapRenderer());
 
@@ -72,14 +73,14 @@ namespace Dose.Core.Scenes
 			IControlPlane controlPlane,
 			Player player,
 			PackPool packPool,
-			IEnumerable<IGameEvent<Npc>> npcEvents,
-			IEnumerable<Func<ILocationEvent>> locationEventFactories
+			IEnumerable<Func<IGameEvent<Npc>>> npcEventFactories,
+			IEnumerable<Func<IGameEvent<Location>>> locationEventFactories
 		)
         {
 			Player = player;
 			ControlPlane = controlPlane;
 			PackPool = packPool;
-			_npcEvents = npcEvents;
+			_npcEventFactories = npcEventFactories;
 			_locationEventFactories = locationEventFactories;
 			_locationQueue = new LocationQueue(2, new Dictionary<string, Func<ClockDirection, ILocation?>>
 			{
@@ -577,10 +578,10 @@ namespace Dose.Core.Scenes
 			);
 			var generatedProps = propPopulator
 				.Populate(populatedPositions, out populatedPositions)
-				.OfType<Prop>()
+				.OfType<IItemSurface>()
 				.ToList();
 			var props = generatedProps
-				.Concat(location.FindChildren("*", "", true, false).OfType<Prop>())
+				.Concat(location.FindChildren("*", "", true, false).OfType<IItemSurface>())
 				.Distinct()
 				.ToList();
 
@@ -598,7 +599,7 @@ namespace Dose.Core.Scenes
 				() => selectionSession.SelectNpc(new NpcArgs
 				{
 					Player = Player,
-					GameEvent = PickRandom(_npcEvents, _probabilityToSetNpcEvent)
+					GameEvent = PickRandom(_npcEventFactories, _probabilityToSetNpcEvent)?.Invoke()
 				}),
 				new Probability(0.5),
 				BLOCK_SIZE

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://b41cqpawn8l2t"]
 
-[ext_resource type="PackedScene" uid="uid://dexpnn6l4w3kp" path="res://Media/3DAssets/Environment/StairsDown.glb" id="1_rgbbu"]
+[ext_resource type="PackedScene" uid="uid://co8rdl5t6gfgb" path="res://Media/3DAssets/Environment/StairsDown.glb" id="1_rgbbu"]
 [ext_resource type="Script" uid="uid://w2nm60wastq0" path="res://Core/Scenes/StairsDown.cs" id="2_jal4a"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rgbbu"]

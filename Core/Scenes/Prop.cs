@@ -1,4 +1,5 @@
 using Godot;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.Props;
 using Dose.Core.Library.Locations;
 using Dose.Core.Library.Numbers;
@@ -7,9 +8,10 @@ using static Dose.Core.Library.GodotUtils;
 
 namespace Dose.Core.Scenes
 {
-    public partial class Prop : RigidBody3D, IWallPositioned
+    public partial class Prop : RigidBody3D, IWallPositioned, IItemSurface, IInitializable<PropDefinition>
     {
         public PropDefinition? Definition { get; private set; }
+        public bool CanPlaceItems => Definition?.SurfaceOffset != null;
         public NormalizedValue MinDistanceFromWall => Definition?.MinDistanceFromWall ?? 0f;
         public NormalizedValue MaxDistanceFromWall => Definition?.MaxDistanceFromWall ?? 1f;
         public NormalizedValue MinDistanceFromCorner => Definition?.MinDistanceFromCorner ?? 0f;
@@ -139,5 +141,7 @@ namespace Dose.Core.Scenes
 
             return this;
         }
+
+        void IInitializable<PropDefinition>.Initialize(PropDefinition definition) => Initialize(definition);
     }
 }

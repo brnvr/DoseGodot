@@ -8,6 +8,8 @@ namespace Dose.Core.Library.GameEvents
         public float Distance { get; } = distance;
         public Node3D Reference { get; } = reference;
 
+        public void Activate(TDisappearable target) { }
+        public void Deactivate(TDisappearable target) { }
         public void OnTrigger(TDisappearable target) => target.Disappear();
         public bool ShouldTrigger(TDisappearable target) => Reference.Position.DistanceTo(target.Position) <= Distance;
     }

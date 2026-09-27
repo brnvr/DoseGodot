@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using Dose.Core.Library.Numbers;
+using Dose.Core.Library.Props;
 using Dose.Core.Library.Randomness;
-using Dose.Core.Scenes;
 using Godot;
 using static Dose.Core.Library.GeoPositioning;
 
@@ -257,12 +257,12 @@ namespace Dose.Core.Library.Locations
         Func<Node3D?> targetFactory,
         Probability probabilityPopulate,
         int blockSize,
-        IEnumerable<Prop> props
+        IEnumerable<IItemSurface> props
     ) : LocationPopulator(location, probabilityPopulate, blockSize)
     {
-        readonly List<Prop> _availableSurfaceProps =
+        readonly List<IItemSurface> _availableSurfaceProps =
         [
-            .. props.Where(prop => prop.Definition?.SurfaceOffset != null)
+            .. props.Where(prop => prop.CanPlaceItems)
         ];
 
         protected override Node3D? CreateTarget() => targetFactory();
@@ -271,7 +271,7 @@ namespace Dose.Core.Library.Locations
         {
             while (_availableSurfaceProps.Count > 0)
             {
-                var prop = new RandomSelector<Prop>(_availableSurfaceProps).Pick();
+                var prop = new RandomSelector<IItemSurface>(_availableSurfaceProps).Pick();
                 _availableSurfaceProps.Remove(prop);
 
                 if (Location is not Node3D locationNode)
@@ -286,10 +286,10 @@ namespace Dose.Core.Library.Locations
 
                 AddTarget(target, surfacePosition);
 
-                if (target is PhysicsBody3D targetBody)
+                if (target is PhysicsBody3D targetBody && prop is PhysicsBody3D propBody)
                 {
-                    targetBody.AddCollisionExceptionWith(prop);
-                    prop.AddCollisionExceptionWith(targetBody);
+                    targetBody.AddCollisionExceptionWith(propBody);
+                    propBody.AddCollisionExceptionWith(targetBody);
                 }
 
                 return true;

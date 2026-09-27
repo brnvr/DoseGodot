@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://bab2upmbmmoyh"]
 
 [ext_resource type="Script" uid="uid://bhpex71d701u6" path="res://Core/Scenes/Item.cs" id="1_kl7so"]
-[ext_resource type="Texture2D" uid="uid://dinna5i27gyg8" path="res://Media/Textures/Placehoders/Item.png" id="2_kl7so"]
+[ext_resource type="Texture2D" uid="uid://cihs3mjh10x1y" path="res://Media/Textures/Placehoders/Item.png" id="2_kl7so"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
 transparency = 1

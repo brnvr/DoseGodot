@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://b38on8s8482bk"]
 
 [ext_resource type="Script" uid="uid://me0yeud2rsb2" path="res://Core/Scenes/Npc.cs" id="1_c8tqv"]
-[ext_resource type="Texture2D" uid="uid://dv7v0pr1nyo6l" path="res://Media/Textures/Placehoders/Npc.png" id="2_lyypf"]
+[ext_resource type="Texture2D" uid="uid://b4vod6yk2iaba" path="res://Media/Textures/Placehoders/Npc.png" id="2_lyypf"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_iufkg"]
 transparency = 1

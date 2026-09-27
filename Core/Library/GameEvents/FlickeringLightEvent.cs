@@ -1,46 +1,46 @@
-using Dose.Core.Scenes;
+using Dose.Core.Library.Interactivity;
 using Godot;
 using System;
 
 namespace Dose.Core.Library.GameEvents
 {
-    public class FlickeringLightEvent : ILocationEvent
+    public class FlickeringLightEvent(
+        double minLightsOnSeconds,
+        double maxLightsOnSeconds,
+        double minLightsOffSeconds,
+        double maxLightsOffSeconds
+    ) : IGameEvent<ILightsToggleable>
     {
-        const double MIN_LIGHTS_ON_SECONDS = 0.4;
-        const double MAX_LIGHTS_ON_SECONDS = 3.0;
-        const double MIN_LIGHTS_OFF_SECONDS = 0.05;
-        const double MAX_LIGHTS_OFF_SECONDS = 0.3;
-
         double _nextToggleAt;
 
-        public void Activate(Location location)
+        public void Activate(ILightsToggleable target)
         {
-            location.TurnLightsOn();
-            ScheduleNextToggle(MIN_LIGHTS_ON_SECONDS, MAX_LIGHTS_ON_SECONDS);
+            target.TurnLightsOn();
+            ScheduleNextToggle(minLightsOnSeconds, maxLightsOnSeconds);
         }
 
-        public void Deactivate(Location location)
+        public void Deactivate(ILightsToggleable target)
         {
-            location.TurnLightsOn();
+            target.TurnLightsOn();
             _nextToggleAt = 0;
         }
 
-        public bool ShouldTrigger(Location target)
+        public bool ShouldTrigger(ILightsToggleable target)
         {
             return Time.GetTicksMsec() / 1000.0 >= _nextToggleAt;
         }
 
-        public void OnTrigger(Location target)
+        public void OnTrigger(ILightsToggleable target)
         {
             if (target.LightsOn)
             {
                 target.TurnLightsOff();
-                ScheduleNextToggle(MIN_LIGHTS_OFF_SECONDS, MAX_LIGHTS_OFF_SECONDS);
+                ScheduleNextToggle(minLightsOffSeconds, maxLightsOffSeconds);
                 return;
             }
 
             target.TurnLightsOn();
-            ScheduleNextToggle(MIN_LIGHTS_ON_SECONDS, MAX_LIGHTS_ON_SECONDS);
+            ScheduleNextToggle(minLightsOnSeconds, maxLightsOnSeconds);
         }
 
         void ScheduleNextToggle(double minimumSeconds, double maximumSeconds)

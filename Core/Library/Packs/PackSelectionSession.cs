@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Dose.Core.ActorArgs;
 using Dose.Core.Library.Actors;
+using Dose.Core.Library.Common;
 using Dose.Core.Library.DataStructures;
 using Dose.Core.Library.Randomness;
 using Dose.Core.Library.Props;
-using Dose.Core.Scenes;
 using Godot;
 
 namespace Dose.Core.Library.Packs
@@ -39,7 +39,7 @@ namespace Dose.Core.Library.Packs
         public PackedScene NpcScene { get; } = npcScene;
         public PackedScene PropScene { get; } = propScene;
 
-        public Item? SelectItem(ItemArgs args)
+        public Node3D? SelectItem(ItemArgs args)
         {
             var context = SelectFinite(_items);
 
@@ -48,12 +48,10 @@ namespace Dose.Core.Library.Packs
                 return null;
             }
 
-            var item = ItemScene.Instantiate<Item>();
-            item.Initialize(context, args);
-            return item;
+            return InstantiateActor(ItemScene, context, args);
         }
 
-        public Npc? SelectNpc(NpcArgs args)
+        public Node3D? SelectNpc(NpcArgs args)
         {
             var context = SelectFinite(_npcs);
 
@@ -62,12 +60,10 @@ namespace Dose.Core.Library.Packs
                 return null;
             }
 
-            var npc = NpcScene.Instantiate<Npc>();
-            npc.Initialize(context, args);
-            return npc;
+            return InstantiateActor(NpcScene, context, args);
         }
 
-        public Prop? SelectProp()
+        public Node3D? SelectProp()
         {
             if (_props.Count == 0)
             {
@@ -75,9 +71,38 @@ namespace Dose.Core.Library.Packs
             }
 
             var definition = new RandomSelector<PropDefinition>(_props).Pick();
-            var prop = PropScene.Instantiate<Prop>();
-            prop.Initialize(definition);
+            var prop = PropScene.Instantiate<Node3D>();
+
+            if (prop is not IInitializable<PropDefinition> initializable)
+            {
+                prop.Free();
+                throw new System.InvalidOperationException(
+                    $"The root of {PropScene.ResourcePath} must implement {nameof(IInitializable<PropDefinition>)}."
+                );
+            }
+
+            initializable.Initialize(definition);
             return prop;
+        }
+
+        static Node3D InstantiateActor<TContext, TArgs>(
+            PackedScene scene,
+            TContext context,
+            TArgs args
+        ) where TContext : IActorContext
+        {
+            var actor = scene.Instantiate<Node3D>();
+
+            if (actor is not IInitializableActor<TContext, TArgs> initializable)
+            {
+                actor.Free();
+                throw new System.InvalidOperationException(
+                    $"The root of {scene.ResourcePath} must implement {nameof(IInitializableActor<TContext, TArgs>)}."
+                );
+            }
+
+            initializable.Initialize(context, args);
+            return actor;
         }
 
         TContext? SelectFinite<TContext>(List<TContext> available)

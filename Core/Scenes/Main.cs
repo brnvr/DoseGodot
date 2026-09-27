@@ -128,13 +128,19 @@ namespace Dose.Core.Scenes
                 ui.PlayRejectedItemInteractionFeedback();
             };
 
-			List<IGameEvent<Npc>> npcEvents = [
-				new DisappearOnDistanceEvent<Npc>(player, 10)
+			List<Func<IGameEvent<Npc>>> npcEventFactories =
+			[
+				() => new DisappearOnDistanceEvent<Npc>(player, 10)
 			];
 
-			List<Func<ILocationEvent>> locationEventFactories =
+			List<Func<IGameEvent<Location>>> locationEventFactories =
 			[
-				() => new FlickeringLightEvent()
+				() => new FlickeringLightEvent(
+					minLightsOnSeconds: 0.4,
+					maxLightsOnSeconds: 3.0,
+					minLightsOffSeconds: 0.05,
+					maxLightsOffSeconds: 0.3
+				)
 			];
 
 			var palette = new JascPalLoader("Configuration/Palettes/miri16.pal").Load();
@@ -250,7 +256,7 @@ namespace Dose.Core.Scenes
 				controlPlane,
 				player,
 				packPool,
-				npcEvents,
+				npcEventFactories,
 				locationEventFactories
 			);
 			player.Initialize(controlPlane);

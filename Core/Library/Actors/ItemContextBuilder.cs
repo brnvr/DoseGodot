@@ -4,7 +4,6 @@ using System.Linq;
 using Dose.Core.Library.Common;
 using Dose.Core.Library.Configuration;
 using Dose.Core.Library.Configuration.Actors;
-using Dose.Core.Scenes;
 using Godot;
 
 namespace Dose.Core.Library.Actors

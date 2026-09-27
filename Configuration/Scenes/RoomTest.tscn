@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cthsjcevp6iu5"]
 
-[ext_resource type="PackedScene" uid="uid://bg6ha4pqc7nid" path="res://Media/3DAssets/Environment/RoomTest.glb" id="1_upt4b"]
+[ext_resource type="PackedScene" uid="uid://bppqw8s7yykrc" path="res://Media/3DAssets/Environment/RoomTest.glb" id="1_upt4b"]
 [ext_resource type="Script" uid="uid://bpbo6dioi0umo" path="res://Core/Scenes/RoomTest.cs" id="2_n48sy"]
 [ext_resource type="PackedScene" uid="uid://dnho7pjdlaykl" path="res://Configuration/Scenes/Door.tscn" id="3_qhyvy"]
 
