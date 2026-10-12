@@ -14,7 +14,7 @@ namespace Dose.Core.Interactions
             {
                 if (subject is IItem item)
                 {
-                    picker.Inventory?.AddAndDestroy(item);
+                    item.BeginPickup(picker);
                 }
             }
         }

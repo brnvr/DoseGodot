@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://df15w8hvtqqwo"]
+
+[ext_resource type="Script" uid="uid://ridpx2d8yl2h" path="res://Core/Scenes/OverlayManager.cs" id="1_manager"]
+[ext_resource type="Script" uid="uid://bcj2topw8404" path="res://Core/Scenes/ScreenOverlay.cs" id="2_overlay"]
+[ext_resource type="VideoStream" uid="uid://b15ugp8w36n58" path="res://Media/Textures/Overlays/fog.ogv" id="3_fog"]
+
+[node name="Overlays" type="CanvasLayer" unique_id=1811321408]
+layer = 0
+script = ExtResource("1_manager")
+
+[node name="Fog" type="VideoStreamPlayer" parent="." unique_id=504100606]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stream = ExtResource("3_fog")
+volume_db = -80.0
+expand = true
+loop = true
+script = ExtResource("2_overlay")
+BlendMode = 1
+Opacity = 0.5
+BlackThreshold = 0.0

@@ -89,6 +89,7 @@ namespace Dose.Core.Scenes
         float _moveSpeed = 20f;
         AutoMoveParameters? _autoMoveParameters;
         Node3D? _head;
+        Marker3D? _itemPickupTarget;
         Camera3D? _view;
         Vector2 _cameraViewportSize;
         IActor<Player>? _currentTarget;
@@ -98,6 +99,9 @@ namespace Dose.Core.Scenes
 
         public DialogueRunner? DialogueRunner { get; private set; }
         public Inventory Inventory { get; } = [];
+        public Node3D PickupTarget => _itemPickupTarget is Node3D target
+            ? target
+            : this;
         public QuestBook QuestBook { get; } = [];
         public ItemContext? SelectedItem { get; private set; }
         public bool HasInteractionTarget => _currentTarget != null;
@@ -113,6 +117,7 @@ namespace Dose.Core.Scenes
             _moveState = MoveState.Free;
             Input.MouseMode = Input.MouseModeEnum.Captured;
             _head = GetNode<Node3D>("Head");
+            _itemPickupTarget = GetNode<Marker3D>("ItemPickupTarget");
             _view = GetNode<Camera3D>("Head/View");
             UpdateCameraProjection();
             _rayCast = GetNode<RayCast3D>("Head/View/RayCast3D");

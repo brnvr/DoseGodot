@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://uikj2e5802ap"]
+[gd_scene load_steps=10 format=3 uid="uid://uikj2e5802ap"]
 
 [ext_resource type="Script" uid="uid://dtici5m7he36s" path="res://Core/Scenes/Main.cs" id="1_v1gob"]
 [ext_resource type="PackedScene" uid="uid://cbqb4bugioblo" path="res://Configuration/Scenes/Player.tscn" id="2_jw32o"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://d0bi54vo2i5ak" path="res://Configuration/Scenes/FadeTransition.tscn" id="6_4e7gm"]
 [ext_resource type="PackedScene" uid="uid://dbv25pethrcnn" path="res://Configuration/Scenes/ControlPlane.tscn" id="6_4kpch"]
 [ext_resource type="PackedScene" uid="uid://cfslarur3nrih" path="res://Configuration/Scenes/PostShader.tscn" id="7_mbcki"]
+[ext_resource type="PackedScene" path="res://Configuration/Scenes/OverlayManager.tscn" id="8_overlays"]
+[ext_resource type="PackedScene" path="res://Configuration/Scenes/ScreenHls.tscn" id="9_hls"]
 
 [node name="Main" type="Node3D" unique_id=697189727]
 script = ExtResource("1_v1gob")
@@ -14,6 +16,10 @@ script = ExtResource("1_v1gob")
 [node name="Player" parent="." unique_id=1549943921 instance=ExtResource("2_jw32o")]
 
 [node name="LocationManager" parent="." unique_id=1444411191 instance=ExtResource("3_50glp")]
+
+[node name="Overlays" parent="." instance=ExtResource("8_overlays")]
+
+[node name="ScreenHls" parent="." instance=ExtResource("9_hls")]
 
 [node name="UI" parent="." unique_id=705897687 instance=ExtResource("5_bmxlf")]
 

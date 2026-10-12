@@ -9,7 +9,7 @@
 [ext_resource type="Script" path="res://Core/Scenes/MapDisplay.cs" id="7_map_display"]
 
 [node name="UI" type="CanvasLayer"]
-layer = 1
+layer = 2
 script = ExtResource("1_nxvpl")
 
 [node name="EquipedItemDisplay" type="Control" parent="."]
